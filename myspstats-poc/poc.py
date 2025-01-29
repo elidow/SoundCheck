@@ -1,6 +1,6 @@
 # Eli Dow
 # January 2025
-# MySPStats POC
+# MySPStats POC in Python
 
 import base64
 from datetime import datetime, timedelta
