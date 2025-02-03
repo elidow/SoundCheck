@@ -40,6 +40,6 @@ Spotify Web API
 
 # What is Coming Soon? (Next 4 Weeks)
 - Basic Playlist Song Data Retrieval
-- Basic Statistics Calculation Functions
+- Basic Statistics Calculation Functions (Songs Age)
 - Dashboard Structure
 - Basic UI Implementation
