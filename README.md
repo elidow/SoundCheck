@@ -1,5 +1,5 @@
 # MySPStats
-Makes API requests to the Spotify Web API to retrieve playlist information, and provide insights on playlist usage for streamlined Spotify updates
+Makes API requests to the Spotify Web API to retrieve playlist information and provide insights on playlist usage for streamlined Spotify updates
 
 # What problem are you trying to solve?
 - I really enjoy making Spotify playlists. Since 2019, I have made a lot for specific genres, decades, events, and vibes. There are some for just myself, and others for small or big groups
