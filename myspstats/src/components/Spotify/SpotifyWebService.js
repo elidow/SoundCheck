@@ -1,17 +1,22 @@
 import React, { useEffect } from 'react';
-import useSpotifyWebApi from './SpotifyWebApi';
+import {useAccessToken, useSpotifyPlaylists, useSpotifySongs} from './SpotifyWebApi';
 import PlaylistItem from './PlaylistItem';
+import SongItem from './SongItem';
 
 const SpotifyWebService = ({ onDataLoaded }) => {
-    const { accessToken, playlists, loading, error, loginUrl } = useSpotifyWebApi();
+    const { accessToken, loginUrl} = useAccessToken();
+    const { playlists, playlistLoading, playlistError} = useSpotifyPlaylists(accessToken);
+    const { songs, songLoading, songError} = useSpotifySongs(accessToken, "3DeRYfh6fsMk1wIqwkzFFu");
 
     // Notify parent component when data is loaded
     useEffect(() => {
-        if (!loading && playlists.length > 0) {
+        if (!playlistLoading && playlists.length > 0 && !songLoading/* && songs.length > 0*/) {
             console.log("Data loaded")
+            console.log(playlists)
+            console.log(songs)
             onDataLoaded();
         }
-    }, [loading, playlists, onDataLoaded]);
+    }, [playlistLoading, playlists, songLoading, songs, onDataLoaded]);
 
     if (!accessToken) {
         return (
@@ -26,14 +31,26 @@ const SpotifyWebService = ({ onDataLoaded }) => {
     return (
     <div>
         <h1>Spotify Playlists</h1>
-        {loading ? (
+        {playlistLoading ? (
             <p>Loading playlists...</p>
-        ) : error ? (
-            <p>Error: {error}</p>
+        ) : playlistError ? (
+            <p>Error: {playlistError}</p>
         ) : (
             <ul>
                 {playlists.map((playlist) => (
                     <PlaylistItem key={playlist.id} playlist={playlist} />
+                ))}
+            </ul>
+        )}
+        <h2>Spotify Songs for Keeping Rap Alive</h2>
+        {songLoading ? (
+            <p>Loading songs...</p>
+        ) : songError ? (
+            <p>Error: {songError}</p>
+        ) : (
+            <ul>
+                {songs.map((song) => (
+                    <SongItem key={song.track.id} song={song} />
                 ))}
             </ul>
         )}

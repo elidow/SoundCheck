@@ -8,23 +8,27 @@ const SPOTIFY_AUTH_URL = `https://accounts.spotify.com/authorize?client_id=${CLI
     REDIRECT_URI
   )}&scope=${encodeURIComponent(SCOPES)}`;
 
-const useSpotifyWebApi = () => {
+const useAccessToken = () => {
     const [accessToken, setAccessToken] = useState(null);
-    const [playlists, setPlaylists] = useState([]);
-    //const [songs, setSongs] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     // Extract access token from URL
     useEffect(() => {
         const hash = window.location.hash;
         if (hash.includes('access_token')) {
-            console.log("access token is there")
+            console.log("Access Token is in URL")
             const token = new URLSearchParams(hash.slice(1)).get('access_token');
             setAccessToken(token);
             window.history.replaceState(null, null, ' '); // Clean the URL
         }
     }, []);
+
+    return { accessToken, loginUrl: SPOTIFY_AUTH_URL };
+}
+
+const useSpotifyPlaylists = (accessToken) => {
+    const [playlists, setPlaylists] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // Fetch playlists
     useEffect(() => {
@@ -40,6 +44,7 @@ const useSpotifyWebApi = () => {
                 while (url) {
                     const response = await axios.get(url, {
                         headers: { Authorization: `Bearer ${accessToken}` },
+                        params: {limit: "50", offset: "0"}
                     });
 
                     allPlaylists = [...allPlaylists, ...response.data.items];
@@ -55,13 +60,54 @@ const useSpotifyWebApi = () => {
         };
 
         fetchPlaylists();
-        //fetchSongs(playlists[i].);
-        //for (let i = 0; i < playlists.length; i++) {
-        //    fetchSongs();
-        //}
     }, [accessToken]);
 
-    return { accessToken, playlists, loading, error, loginUrl: SPOTIFY_AUTH_URL };
+    return { playlists, loading, error};
 };
 
-export default useSpotifyWebApi;
+const useSpotifySongs = (accessToken, playlistId) => {
+    const [songs, setSongs] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Fetch songs
+    useEffect(() => {
+        const fetchSongs = async () => {
+            if (!accessToken) return;
+
+            setLoading(true);
+            setError(null);
+            let allSongs = [];
+            let url = 'https://api.spotify.com/v1/playlists/' + playlistId
+            console.log(url)
+            console.log(accessToken)
+
+            try {
+                while (url) {
+                    const response = await axios.get(url, {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                    });
+
+                    allSongs = [...allSongs, ...response.data.tracks.items];
+                    url = response.data.next;
+                }
+                setSongs(allSongs);
+            } catch (err) {
+                console.error('Error fetching songs:', err);
+                setError(err.response?.data?.error?.message || 'Something went wrong');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSongs();
+    }, [accessToken, playlistId]);
+
+    return { songs, loading, error};
+};
+
+export {
+    useAccessToken,
+    useSpotifyPlaylists,
+    useSpotifySongs
+}
