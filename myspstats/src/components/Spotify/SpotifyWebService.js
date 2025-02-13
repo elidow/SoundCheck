@@ -1,61 +1,65 @@
-import React, { useEffect } from 'react';
-import {useAccessToken, useSpotifyPlaylists, useSpotifySongs} from './SpotifyWebApi';
+import React, { useState, useEffect } from 'react';
+import useSpotifyWebApi from './SpotifyWebApi';
 import PlaylistItem from './PlaylistItem';
-import SongItem from './SongItem';
 
 const SpotifyWebService = ({ onDataLoaded }) => {
-    const { accessToken, loginUrl} = useAccessToken();
-    const { playlists, playlistLoading, playlistError} = useSpotifyPlaylists(accessToken);
-    const { songs, songLoading, songError} = useSpotifySongs(accessToken, "3DeRYfh6fsMk1wIqwkzFFu");
+    const { fetchPlaylists, fetchPlaylistSongs, spotifyError } = useSpotifyWebApi();
+    const [playlists, setPlaylists] = useState([]);
+    const [playlistSongs, setPlaylistSongs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Notify parent component when data is loaded
     useEffect(() => {
-        if (!playlistLoading && playlists.length > 0 && !songLoading/* && songs.length > 0*/) {
-            console.log("Data loaded")
-            console.log(playlists)
-            console.log(songs)
+        console.log("In Use Effect")
+        const loadSpotifyData = async () => {
+            console.log("Load Spotify Data")
+            const fetchedPlaylists = await fetchPlaylists()
+            if (!fetchedPlaylists) {
+                setLoading(false);
+                return;
+            }
+
+            setPlaylists(fetchedPlaylists);
+            console.log("Playlists:", playlists)
+
+            // Delay function for throttling requests
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            await Promise.all(
+                fetchedPlaylists.map(async (playlist, index) => {
+                    await delay(index * 500); // Introduces a delay of 500ms per request
+                    const songs = await fetchPlaylistSongs(playlist.id);
+                    setPlaylistSongs(prevSongs => ({
+                        ...prevSongs,
+                        [playlist.id]: songs
+                    }));
+                })
+            );
+
+            console.log("Songss:", playlistSongs)
+            setLoading(false);
             onDataLoaded();
         }
-    }, [playlistLoading, playlists, songLoading, songs, onDataLoaded]);
 
-    if (!accessToken) {
-        return (
-            <div>
-                <a href={loginUrl}>
-                    <button>Login to Spotify</button>
-                </a>
-            </div>
-        );
-    }
+        loadSpotifyData();
+
+    }, [fetchPlaylists, fetchPlaylistSongs, onDataLoaded])
+
+    if (loading) return <p>Loading playlists and songs to provide insights...</p>;
+    if (spotifyError) return <p>Error: {spotifyError}</p>;
 
     return (
-    <div>
-        <h1>Spotify Playlists</h1>
-        {playlistLoading ? (
-            <p>Loading playlists...</p>
-        ) : playlistError ? (
-            <p>Error: {playlistError}</p>
-        ) : (
-            <ul>
-                {playlists.map((playlist) => (
+        <div>
+            <h1>Spotify Playlists</h1>
+            {playlists.length === 0 ? (
+                <p>No playlists found.</p>
+            ) : (
+                playlists.map((playlist) => (
                     <PlaylistItem key={playlist.id} playlist={playlist} />
-                ))}
-            </ul>
-        )}
-        <h2>Spotify Songs for Keeping Rap Alive</h2>
-        {songLoading ? (
-            <p>Loading songs...</p>
-        ) : songError ? (
-            <p>Error: {songError}</p>
-        ) : (
-            <ul>
-                {songs.map((song) => (
-                    <SongItem key={song.track.id} song={song} />
-                ))}
-            </ul>
-        )}
-    </div>
-  );
-};
+                ))
+            )}
+        </div>
+    );
+
+}
 
 export default SpotifyWebService;
