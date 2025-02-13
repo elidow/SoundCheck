@@ -22,25 +22,31 @@ const SpotifyWebService = ({ onDataLoaded }) => {
             console.log("Playlists:", playlists)
 
             // Delay function for throttling requests
+            const songsMap = {};
             const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
             await Promise.all(
                 fetchedPlaylists.map(async (playlist, index) => {
-                    await delay(index * 500); // Introduces a delay of 500ms per request
+                    await delay(index * 100); // Introduces a delay of 250ms per request
                     const songs = await fetchPlaylistSongs(playlist.id);
-                    setPlaylistSongs(prevSongs => ({
-                        ...prevSongs,
-                        [playlist.id]: songs
-                    }));
+                    songsMap[playlist.id] = songs || [];
                 })
             );
 
-            console.log("Songss:", playlistSongs)
+            setPlaylistSongs(songsMap)
+
+            // getting first song
+            fetchedPlaylists.map((playlist) => {
+                console.log(`First song in Playlist ${playlist.name}:`,
+                    (songsMap[playlist.id].length > 0 ? songsMap[playlist.id][0].track.name : "No songs"))
+            })
+
             setLoading(false);
             onDataLoaded();
         }
 
         loadSpotifyData();
+        console.log("Songss:", playlistSongs)
 
     }, [fetchPlaylists, fetchPlaylistSongs, onDataLoaded])
 
