@@ -151,11 +151,12 @@ for playlist in playlists:
     # retrieve and print title and tracks
     title = playlist['name']
     tracks = playlist['tracks']['total']
-    # print(f"Name: {title}, Tracks: {tracks}")
+    print(f"Name: {title}, Tracks: {tracks}")
     # print(playlist["external_urls"]["spotify"])
 
     # retrieve id and get playlist data
     id = playlist["external_urls"]["spotify"][34:]
+    print(f"Id: {id}")
     playlist = getPlaylist(accessToken, id)
 
     # calcuate stats for >2 years, <6 months, and in between
