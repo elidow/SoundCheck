@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import SpotifyWebService from '../Spotify/SpotifyWebService';
+import SpotifyWebService from '../../services/Spotify/SpotifyWebService';
 import spotifyIcon from '../../images/spotifyIcon.svg';
 
-export default function Home() {
+export default function Dashboards() {
     const [showLogo, setShowLogo] = useState(true);
 
     const handleDataLoaded = () => {
@@ -10,7 +10,7 @@ export default function Home() {
     };
 
     return (
-        <div className="Home">
+        <div className="Dashboards">
             <header className="App-header">
                 <p>
                     MySPStats
