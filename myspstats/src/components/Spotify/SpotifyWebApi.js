@@ -83,10 +83,9 @@ const useSpotifyWebApi = () => {
             console.error(`Spotify Web Api failed to fetch playlists songs for ${playlistId}:`, err);
         }
 
-
     }, [accessToken]);
 
-    return {fetchPlaylists, fetchPlaylistSongs, spotifyError}
+    return { fetchPlaylists, fetchPlaylistSongs, spotifyError }
 }
 
 export default useSpotifyWebApi;

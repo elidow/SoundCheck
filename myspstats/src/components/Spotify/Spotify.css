@@ -1,0 +1,16 @@
+h1 {
+    color: green;
+}
+
+button {
+    background-color: white;
+    height: 45px;
+    width: 120px;
+    margin: 5px
+}
+
+.playlistItem {
+    margin: 20px 20px;
+    padding: 20px;
+    border: solid
+}
