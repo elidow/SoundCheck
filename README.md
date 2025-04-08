@@ -35,11 +35,16 @@ Spotify Web API
 - Python POC
 - React App Setup/Basic Structure
 - Github Setup
-- Authentication & Token Setup
+- Authentication & Token Setup (Implicit Grant, not recommended)
 - Basic Playlist Data Retrieval
+- Basic Playlist Song Data Retrieval
+- Basic Statistics Calculation Functions: 
+-   Number of songs, % of 2 years old, % of 6 months young
 
 # What is Coming Soon? (Next 4 Weeks)
-- Basic Playlist Song Data Retrieval
-- Basic Statistics Calculation Functions (Songs Age)
+- Navigation Bar for Dashboard and Table Page
+- Authentication Change for better security
 - Dashboard Structure
-- Basic UI Implementation
+- Stat: Last Song Added
+- Table Structure
+- Basic UI Improvments
