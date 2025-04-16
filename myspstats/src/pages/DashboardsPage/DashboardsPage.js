@@ -5,15 +5,15 @@ import SpotifyStat from '../../components/SpotifyStat';
 import './DashboardsPage.css'
 
 const DashboardsPage = () =>  {
-    const { playlists, songStats, loading, error } = useSpotifyPlaylistContext();
+    const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
 
-    // const sortedBy2Year = [...playlists].sort((a,b) => 
-    //     (songStats[b.id]?.twoYearPercentage ?? 0) - (songStats[a.id]?.twoYearPercentage ?? 0)
-    // );
+    const sortedBy2Year = [...playlists].sort((a,b) => 
+        (playlistStats[b.id]?.twoYearPercentage ?? 0) - (playlistStats[a.id]?.twoYearPercentage ?? 0)
+    );
 
-    // const sortedBy6Month = [...playlists].sort((a,b) => 
-    //     (songStats[b.id]?.sixMonthPercentage ?? 0) - (songStats[a.id]?.sixMonthPercentage ?? 0)
-    // );
+    const sortedBy6Month = [...playlists].sort((a,b) => 
+        (playlistStats[b.id]?.sixMonthPercentage ?? 0) - (playlistStats[a.id]?.sixMonthPercentage ?? 0)
+    );
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
     if (error) return <p>Error: {error}</p>;
@@ -27,8 +27,8 @@ const DashboardsPage = () =>  {
                 playlists.map((playlist) => (
                     <div className="Dashboard">
                         <PlaylistItem key={playlist.id} playlist={playlist} />
-                        {songStats[playlist.id] ? (
-                            <SpotifyStat stats={songStats[playlist.id]} />
+                        {playlistStats[playlist.id] ? (
+                            <SpotifyStat stats={playlistStats[playlist.id]} />
                         ) : (
                             <p>No stats available</p>
                         )}

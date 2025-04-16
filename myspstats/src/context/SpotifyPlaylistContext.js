@@ -15,7 +15,7 @@ export const SpotifyPlaylistProvider = ({ children }) => {
         console.log("Spotify Playlist Context: In Use Effect")
         const loadData = async () => {
             try {
-                const { playlists, playlistStats } = retrievePlaylistsWithStats();
+                const { playlists, playlistStats } = await retrievePlaylistsWithStats();
 
                 setPlaylists(playlists);
                 setPlaylistStats(playlistStats);

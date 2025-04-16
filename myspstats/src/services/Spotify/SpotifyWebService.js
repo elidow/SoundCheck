@@ -8,6 +8,7 @@ const SpotifyWebService = () => {
     const retrievePlaylistsWithStats = async () => {
         try {
             console.log("Retrieving Playlists with Stats");
+    
             const playlists = await fetchPlaylists();
             if (!playlists) throw new Error("Failed to fetch playlists")
             console.log("Playlists:", playlists);
