@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
 import PlaylistItem from '../../components/PlaylistItem';
 import SpotifyStat from '../../components/SpotifyStat';
