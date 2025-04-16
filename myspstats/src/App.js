@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import Navbar from "./components/Navbar.js"
+import Navbar from "./navbar/index.js"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import DashboardsPage from './pages/DashboardsPage/DashboardsPage.js'
 import TablePage from './pages/TablePage/TablePage.js'
