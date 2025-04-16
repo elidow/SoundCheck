@@ -72,7 +72,6 @@ const useSpotifyWebApi = () => {
 
         try {
             console.log("Fetch Access Token: Code Verifier", codeVerifier);
-            //const codeChallenge = await generateCodeChallenge(codeVerifier);
 
             const response = await axios.post(TOKEN_ENDPOINT, new URLSearchParams({
                 client_id: CLIENT_ID,
@@ -111,10 +110,6 @@ const useSpotifyWebApi = () => {
                 })
   .             catch((error) => console.error("Token fetch failed:", error));
         }
-        
-        // Only initiate login if there is no access token already
-        console.log("No token found, initiating login");
-        //initiateLogin();
     }, []);
 
     // Fetch playlists
