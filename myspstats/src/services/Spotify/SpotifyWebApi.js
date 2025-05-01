@@ -138,8 +138,12 @@ const useSpotifyWebApi = () => {
             return playlists
         } catch (err) {
             console.error("Spotify Web Api failed to fetch playlists:", err);
+            // if (err.response && err.response.status === 401) {
+            //     console.warn("Access token expired. Reinitiating login.");
+            //     await initiateLogin(); // PKCE flow will handle redirect
+            // }
+            return [];
         }
-
     }, [accessToken]);
 
     const fetchPlaylistSongs = useCallback(async (playlistId) => {
@@ -167,8 +171,12 @@ const useSpotifyWebApi = () => {
             return playlistSongs
         } catch (err) {
             console.error(`Spotify Web Api failed to fetch playlists songs for ${playlistId}:`, err);
+            // if (err.response && err.response.status === 401) {
+            //     console.warn("Access token expired. Reinitiating login.");
+            //     await initiateLogin(); // PKCE flow will handle redirect
+            // }
+            return [];
         }
-
     }, [accessToken]);
 
     return { fetchPlaylists, fetchPlaylistSongs }
