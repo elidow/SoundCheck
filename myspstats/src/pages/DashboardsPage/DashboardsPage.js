@@ -1,9 +1,14 @@
+/* DashboardsPage */
 import React from 'react';
 import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
 import PlaylistItem from '../../components/PlaylistItem';
 import SpotifyStat from '../../components/SpotifyStat';
 import './DashboardsPage.css'
 
+/*
+ * DashboardsPage
+ * Functional Component to render dashboard page
+ */
 const DashboardsPage = () =>  {
     const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
 
