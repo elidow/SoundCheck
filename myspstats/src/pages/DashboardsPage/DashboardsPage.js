@@ -1,8 +1,7 @@
 /* DashboardsPage */
 import React from 'react';
 import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
-import PlaylistItem from '../../components/PlaylistItem';
-import SpotifyStat from '../../components/SpotifyStat';
+import Dashboard from '../../components/Dashboard/Dashboard';
 import './DashboardsPage.css'
 
 /*
@@ -17,26 +16,24 @@ const DashboardsPage = () =>  {
 
     return (
         <div className="Dashboard-Page">
-            <header className="App-header">
+            <header className="Page-Header">
                 <p>
                     Spotify Dashboards
                 </p>
             </header>
-            <div className="dashboard">
-                {playlists.length === 0 ? (
-                    <p>No playlists found.</p>
-                ) : (
-                    playlists.map((playlist) => (
-                        <div className="dashboard-item">
-                            <PlaylistItem key={playlist.id} playlist={playlist} />
-                            {playlistStats[playlist.id] ? (
-                                <SpotifyStat stats={playlistStats[playlist.id]} />
-                            ) : (
-                                <p>No stats available</p>
-                            )}
-                        </div>
-                    ))
-                )}
+            <div className="Page-Body">
+                <div className="dashboard-page-header">
+                    <div>Owner: {playlists[0]["owner"]["display_name"]}</div>
+                    <div>Number of Playlists: {playlists.length}</div>
+                </div>
+                <Dashboard name="Most Songs" type="number" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most 2 Year Old Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most 6 Month New Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most Recent Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most Frequent Artist By Count" type="artist" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most Frequent Artist By Percentage" type="artist" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Newest Average Song Release Date" type="date-time" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Newest Average Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
             </div>
         </div>
     )
