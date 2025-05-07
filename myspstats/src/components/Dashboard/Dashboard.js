@@ -14,19 +14,31 @@ const titleToKeyMap = {
  */
 const Dashboard = ({ name, type, playlists, playlistStats }) => {
 
-    const [indexView, setIndexView] = useState(10);  // state for controlling number of displayed items
-    const [expandButtonIcon, setExpandButtonIcon] = useState("➕");
-    const [isAscending, setIsAscending] = useState(false); // false = descending by default
+    const [indexView, setIndexView] = useState(10);  // state for controlling number of displayed items in a dashboard
+    const [expandButtonIcon, setExpandButtonIcon] = useState("➕"); // state for controlling expand icon
+    const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
 
-    const expand = () => {
+    /*
+     * toggleExpandView
+     * Toggles icon and index view count based on current
+     */
+    const toggleExpandView = () => {
         setExpandButtonIcon(prev => (prev === "➕" ? "➖" : "➕"))
         setIndexView(prev => (prev === 10 ? 100 : 10));
     };
 
+    /*
+     * toggleSortOrder
+     * Toggles sort order based on current
+     */
     const toggleSortOrder = () => {
         setIsAscending(prev => !prev);
     };
 
+    /*
+     * getSortedPlaylists
+     * Sorts playlist based on stat, stat type, and sort order
+     */
     const getSortedPlaylists = () => {
         const statKey = titleToKeyMap[name];
 
@@ -55,7 +67,7 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
                 <div className="dashboard-header-left-items">{name}</div>
                 <button className="dashboard-header-right-items">⭐</button>
                 <button className="dashboard-header-right-items" onClick={toggleSortOrder}>🔄</button>
-                <button className="dashboard-header-right-items" onClick={expand}>{expandButtonIcon}</button>
+                <button className="dashboard-header-right-items" onClick={toggleExpandView}>{expandButtonIcon}</button>
                 <button className="dashboard-header-right-items">✏️</button>
             </div>
             <div className="dashboard-items">
