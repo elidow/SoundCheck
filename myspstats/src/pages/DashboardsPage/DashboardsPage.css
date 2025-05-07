@@ -1,13 +1,3 @@
-h1 {
-    color: green;
-}
-
-.playlistItem {
-    margin: 20px 20px;
-    padding: 20px;
-    border: solid
-}
-
 .Dashboard-Page {
     display: 'flex';
     flex-direction: column;
@@ -18,12 +8,17 @@ h1 {
     color: green;
 }
 
+.dashboard-page-header {
+    text-align: center;
+    margin-top: 10px;
+}
+
 .dashboard {
     display: 'flex';
     flex-direction: column;
     align-items: 'center';
     justify-content: 'center';
-    margin: 50px 20% 50px 20%;
+    margin: 50px 14% 50px 14%;
 
     background-color: white;
     color: black;
@@ -32,16 +27,57 @@ h1 {
     border-width: 2px;
 }
 
-.dashboard-item {
-    display: 'flex';
-    flex-direction: column;
+.dashboard-header {
+    display: 'in-line';
+    overflow: 'hidden';
+    flex-direction: 'column';
+    justify-content: 'space-between';
     align-items: 'center';
-    justify-content: 'center';
-    margin: 10px 10px 50px 10px;
-
+    padding: 10px 10px 15px 10px;
     font-size: 20px;
-    text-align: center;
+}
+
+.dashboard-header-left-items {
+    color: black;
+    float: left;
+}
+
+.dashboard-header-right-items {
+    color: blue;
+    float: right;
+}
+
+.dashboard-items {
+    margin-top: 20px;
+}
+
+.dashboard-item {
+    display: flex;
+    margin: 10px;
+    white-space: nowrap;
+
+    font-size: 15px;
+    text-align: left;
 
     background-color: white;
     color: black;
+}
+
+.dashboard-item-index {
+    width: 3ch; /* 3 characters */
+    padding-right: 1ch;
+    text-align: center;
+}
+
+.dashboard-item-playlist-name {
+    width: 35ch; /* 35 characters */
+    padding-right: 2ch;
+    text-align: left;
+    overflow: hidden;
+}
+
+.dashboard-item-stat-data {
+    width: 6ch; /* 6 characters */
+    padding-right: 1ch;
+    text-align: left;
 }
