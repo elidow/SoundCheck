@@ -79,5 +79,5 @@
 .dashboard-item-stat-data {
     width: 6ch; /* 6 characters */
     padding-right: 1ch;
-    text-align: center;
+    text-align: left;
 }

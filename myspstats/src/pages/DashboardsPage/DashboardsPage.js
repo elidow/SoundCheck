@@ -26,9 +26,14 @@ const DashboardsPage = () =>  {
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
+                <Dashboard name="Most Songs" type="number" playlists={playlists} playlistStats={playlistStats} />
                 <Dashboard name="Most 2 Year Old Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
                 <Dashboard name="Most 6 Month New Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
                 <Dashboard name="Most Recent Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most Frequent Artist By Count" type="artist" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most Frequent Artist By Percentage" type="artist" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Newest Average Song Release Date" type="date-time" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Newest Average Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
             </div>
         </div>
     )

@@ -9,7 +9,7 @@ import useCalculatePlaylistStatsService from './CalculatePlaylistStatsService';
  */
 const SpotifyWebService = () => {
     const { fetchPlaylists, fetchPlaylistSongs } = useSpotifyWebApi();
-    const { calculateSongTimeRangePercentage } = useCalculatePlaylistStatsService();
+    const { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate, calculateAverageDateAdded } = useCalculatePlaylistStatsService();
 
     /*
      * getPlaylists
@@ -49,18 +49,19 @@ const SpotifyWebService = () => {
     const getDates = () => {
         // Initialize dates
         const today = new Date();
-        const twoYearsAgo = new Date(today.getFullYear() - 2, today.getMonth(), today.getDate());
-        const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
         const zeroDaysAgo = today;
+        const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
+        const twoYearsAgo = new Date(today.getFullYear() - 2, today.getMonth(), today.getDate());
 
         // Format and return dates
         const formatDate = (date) =>
             date.toLocaleDateString("fr-CA", { year: "numeric", month: "2-digit", day: "2-digit" });
 
         return {
-            twoYearsAgo: formatDate(twoYearsAgo),
-            sixMonthsAgo: formatDate(sixMonthsAgo),
             zeroDaysAgo: formatDate(zeroDaysAgo),
+            sixMonthsAgo: formatDate(sixMonthsAgo),
+            twoYearsAgo: formatDate(twoYearsAgo),
+            twoThousandNewYears: "2000-01-01",
         };
     };
 
@@ -68,15 +69,20 @@ const SpotifyWebService = () => {
      * calculatePlaylistStats
      * Calculates all necessary playlist stats
      */
-    const computePlaylistStats = (playlists, playlistSongs, dateRanges) => {
+    const computePlaylistStats = (playlists, playlistSongs, dates) => {
         const stats = {};
 
         playlists.forEach((playlist) => {
             const songs = playlistSongs[playlist.id] || [];
             stats[playlist.id] = {
-                twoYearPercentage: calculateSongTimeRangePercentage(songs, "2000-01-01", dateRanges.twoYearsAgo),
-                sixMonthPercentage: calculateSongTimeRangePercentage(songs, dateRanges.sixMonthsAgo, dateRanges.zeroDaysAgo),
-                lastSongAdded: songs.length > 0 ? songs[songs.length - 1].added_at : "No songs"
+                songCount: songs.length,
+                sixMonthPercentage: calculateSongTimeRangePercentage(songs, dates.sixMonthsAgo, dates.zeroDaysAgo),
+                twoYearPercentage: calculateSongTimeRangePercentage(songs, dates.twoThousandNewYears, dates.twoYearsAgo),
+                lastSongAdded: songs.length > 0 ? songs[songs.length - 1].added_at : "No songs",
+                mostFrequentArtistByCount: songs.length > 0 ? calculateMostFrequentArtist(songs, true) : "No songs",
+                mostFrequentArtistByPercentage: songs.length > 0 ? calculateMostFrequentArtist(songs, false) : "No songs",
+                newestAvgSongReleaseDate: songs.length > 0 ? calculateAverageReleaseDate(songs) : "No songs",
+                newestAvgSongAdded: songs.length > 0 ? calculateAverageDateAdded(songs) : "No songs"
             };
         });
 

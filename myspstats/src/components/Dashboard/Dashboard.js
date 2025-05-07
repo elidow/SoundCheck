@@ -3,9 +3,14 @@
 import React, { useState } from 'react';
 
 const titleToKeyMap = {
+    "Most Songs": "songCount",
     "Most 2 Year Old Songs": "twoYearPercentage",
     "Most 6 Month New Songs": "sixMonthPercentage",
-    "Most Recent Song Added": "lastSongAdded"
+    "Most Recent Song Added": "lastSongAdded",
+    "Most Frequent Artist By Count": "mostFrequentArtistByCount",
+    "Most Frequent Artist By Percentage": "mostFrequentArtistByPercentage",
+    "Newest Average Song Release Date": "newestAvgSongReleaseDate",
+    "Newest Average Song Added": "newestAvgSongAdded"
 };
 
 /*
@@ -48,6 +53,9 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
             if (type === 'date-time') {
                 aVal = playlistStats[a.id]?.[statKey] ? Date.parse(playlistStats[a.id][statKey]) : -Infinity;
                 bVal = playlistStats[b.id]?.[statKey] ? Date.parse(playlistStats[b.id][statKey]) : -Infinity;
+            } else if (type === 'artist') {
+                aVal = playlistStats[a.id]?.[statKey]?.["artistCount"] ?? -Infinity;
+                bVal = playlistStats[b.id]?.[statKey]?.["artistCount"] ?? -Infinity;
             } else {
                 aVal = playlistStats[a.id]?.[statKey] ?? -Infinity;
                 bVal = playlistStats[b.id]?.[statKey] ?? -Infinity;
@@ -84,10 +92,14 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
-                                    {name === "Most Recent Song Added" ? (
+                                    {type === "date-time" ? (
                                         <div>{playlistStats[playlist.id][titleToKeyMap[name]]?.substring(0,10)}</div>
+                                    ) : type === "artist" ? (
+                                         <div>{playlistStats[playlist.id][titleToKeyMap[name]]["artistName"]}: {playlistStats[playlist.id][titleToKeyMap[name]]["artistCount"]}</div>
+                                    ) : type === "number" ? (
+                                        <div>{playlistStats[playlist.id][titleToKeyMap[name]]}</div>
                                     ) : (
-                                         <div>{playlistStats[playlist.id][titleToKeyMap[name]]}%</div>
+                                        <div>{playlistStats[playlist.id][titleToKeyMap[name]]}%</div>
                                     )}
                                 </div>
                             ) : (
