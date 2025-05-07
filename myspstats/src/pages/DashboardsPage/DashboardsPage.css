@@ -8,12 +8,17 @@
     color: green;
 }
 
+.dashboard-page-header {
+    text-align: center;
+    margin-top: 10px;
+}
+
 .dashboard {
     display: 'flex';
     flex-direction: column;
     align-items: 'center';
     justify-content: 'center';
-    margin: 50px 15% 50px 15%;
+    margin: 50px 14% 50px 14%;
 
     background-color: white;
     color: black;
@@ -28,7 +33,7 @@
     flex-direction: 'column';
     justify-content: 'space-between';
     align-items: 'center';
-    padding: 10px;
+    padding: 10px 10px 15px 10px;
     font-size: 20px;
 }
 
@@ -49,6 +54,7 @@
 .dashboard-item {
     display: flex;
     margin: 10px;
+    white-space: nowrap;
 
     font-size: 15px;
     text-align: left;
@@ -57,10 +63,21 @@
     color: black;
 }
 
-.dashboard-playlist-data {
-
+.dashboard-item-index {
+    width: 3ch; /* 3 characters */
+    padding-right: 1ch;
+    text-align: center;
 }
 
-.dashboard-stat-data {
-    margin-left: 10px;
+.dashboard-item-playlist-name {
+    width: 35ch; /* 35 characters */
+    padding-right: 2ch;
+    text-align: left;
+    overflow: hidden;
+}
+
+.dashboard-item-stat-data {
+    width: 6ch; /* 6 characters */
+    padding-right: 1ch;
+    text-align: center;
 }

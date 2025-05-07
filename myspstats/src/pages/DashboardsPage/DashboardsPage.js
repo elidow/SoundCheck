@@ -22,12 +22,13 @@ const DashboardsPage = () =>  {
                 </p>
             </header>
             <div className="Page-Body">
-                <div>
+                <div className="dashboard-page-header">
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
-                <Dashboard name="Most 2 Year Old Songs" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Most 6 Month New Songs" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most 2 Year Old Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most 6 Month New Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Most Recent Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
             </div>
         </div>
     )

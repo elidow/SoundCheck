@@ -6,7 +6,7 @@ import axios from 'axios';
 const AUTH_URL = new URL("https://accounts.spotify.com/authorize");
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = process.env.REACT_APP_SPOTIFY_REDIRECT_URI;
-const SCOPES = "user-read-private user-read-email";
+const SCOPES = "user-read-private user-read-email playlist-read-private";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
 const LOCAL_STORAGE_KEYS = {
@@ -199,7 +199,8 @@ const useSpotifyWebApi = () => {
                 });
 
                 playlists = [...playlists, // spread operator (...) expands an array into individual elements and makes shallow copies
-                    ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" && !item.name.includes("Cape Cod"))]
+                    ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" &&
+                         !item.name.includes("On Repeat 🎧") && !item.name.includes("Top 50") && !item.name.includes("Cape Cod"))]
                 nextUrl = response.data.next
             }
             console.log("SpotifyWebApi: Playlists: ", playlists)

@@ -33,7 +33,7 @@ const SpotifyWebService = () => {
         const playlistSongs = {};
         await Promise.all(
             playlists.map(async (playlist, index) => {
-                await delay(index * 100); // Introduces a delay of 100ms per request
+                await delay(index * 50); // Introduces a delay of 100ms per request
                 const songs = await fetchPlaylistSongs(playlist.id);
                 playlistSongs[playlist.id] = songs || [];
             })
