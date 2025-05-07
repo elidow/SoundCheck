@@ -119,7 +119,7 @@ const useSpotifyWebApi = () => {
             localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN_TIMESTAMP, Date.now().toString());
 
             // Redirect to app
-            window.history.replaceState({}, document.title, "/");
+            window.history.replaceState({}, document.title, "/dashboard");
         } catch (err) {
             console.error("Failed to request user authentication:", err.response ? err.response.data : err.message);
         }

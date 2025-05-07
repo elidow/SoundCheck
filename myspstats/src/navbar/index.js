@@ -10,10 +10,10 @@ const Navbar = () => {
         <>
             <Nav>
                 <NavMenu>
-                    <NavLink to="/" >
+                    <NavLink to="/dashboard" >
                         Dashboard
                     </NavLink>
-                    <NavLink to="/table" activeStyle>
+                    <NavLink to="/table" activestyle="true">
                         Table
                     </NavLink>
                 </NavMenu>
