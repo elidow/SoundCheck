@@ -10,93 +10,104 @@ import './TablePage.css'
 const TablePage = () =>  {
     const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
     const [sortBy, setSortBy] = useState('name');
-    const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
+    const [isAscending, setIsAscending] = useState(true); // state for controlling order of list, Default: false = descending
 
     // Get all stat columns
     const statColumns = Object.entries(statMap);
 
     const getSortedPlaylists = () => {
-        const statKey = sortBy;
-        const type = statMap[statKey]["type"] ? statMap[statKey]["type"] : 'name';
-
         const sorted = [...playlists].sort((a, b) => {
             let aVal, bVal;
 
-            if (type === 'dateTime') {
-                aVal = playlistStats[a.id]?.[statKey] ? Date.parse(playlistStats[a.id][statKey]) : -Infinity;
-                bVal = playlistStats[b.id]?.[statKey] ? Date.parse(playlistStats[b.id][statKey]) : -Infinity;
-            } else if (type.includes('artist')) {
-                aVal = playlistStats[a.id]?.[statKey]?.["artistCount"] ?? -Infinity;
-                bVal = playlistStats[b.id]?.[statKey]?.["artistCount"] ?? -Infinity;
+            if (sortBy === 'name') {
+                aVal = a.name.toLowerCase();
+                bVal = b.name.toLowerCase();
             } else {
-                aVal = playlistStats[a.id]?.[statKey] ?? -Infinity;
-                bVal = playlistStats[b.id]?.[statKey] ?? -Infinity;
+                const statKey = statMap[sortBy]?.statKey;
+                const type = statMap[sortBy]?.type ?? 'number';
+
+                if (type === 'dateTime') {
+                    aVal = Date.parse(playlistStats[a.id]?.[statKey]) || -Infinity;
+                    bVal = Date.parse(playlistStats[b.id]?.[statKey]) || -Infinity;
+                } else if (type.includes('artist')) {
+                    aVal = Number(playlistStats[a.id]?.[statKey]?.["artistCount"]) ?? -Infinity;
+                    bVal = Number(playlistStats[b.id]?.[statKey]?.["artistCount"]) ?? -Infinity;
+                } else {
+                    aVal = playlistStats[a.id]?.[statKey] ?? -Infinity;
+                    bVal = playlistStats[b.id]?.[statKey] ?? -Infinity;
+                }
             }
 
-            return isAscending ? aVal - bVal : bVal - aVal;
+            if (aVal < bVal) return isAscending ? -1 : 1;
+            if (aVal > bVal) return isAscending ? 1 : -1;
+            return 0;
         });
 
         return sorted;
     };
 
-    //const sortedPlaylists = getSortedPlaylists();
-
 
     const handleSort = (columnTitle) => {
-        setSortBy((prev) => {
-            if (prev === columnTitle) {
-                setIsAscending(prev => !prev);
-                return prev;
-            } else {
-                setIsAscending(true);
-                return columnTitle;
-            }
-        });
+        if (sortBy === columnTitle) {
+            setIsAscending(prev => !prev); // toggle sort direction
+        } else {
+            setSortBy(columnTitle);        // new column
+            setIsAscending(false);          // default: ascending on new column
+        }
     };
+
+    const sortedPlaylists = getSortedPlaylists();
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
     if (error) return <p>Error: {error}</p>;
 
     return (
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th onClick={() => handleSort('name')}>
-                            Playlist Name {sortBy === 'name' ? (isAscending === true ? '↑' : '↓') : ''}
-                        </th>
-                        {statColumns.map(([title, key]) => (
-                        <th key={title} onClick={() => handleSort(title)}>
-                            {title} {sortBy === title ? (isAscending === true ? '↑' : '↓') : ''}
-                        </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {playlists.map((playlist) => (
-                    <tr key={playlist.id}>
-                        <td>{playlist.name}</td>
-                        {statColumns.map(([title, key]) => {
-                            const val = playlistStats[playlist.id]?.[key["statKey"]];
-                            const type = key["type"];
-                            return (
-                                <td key={title}>
-                                    {type === "dateTime" && val ? (
-                                        val.substring(0, 10)
-                                    ) : type.includes("artist") && type.includes("number") ? (
-                                        val["artistName"], val["artistCount"]
-                                    ) : type.includes("artist") && type.includes("percentage") ? (
-                                        val["artistCount"], val["artistName"]
-                                    ) : (
-                                        val
-                                    )}
-                                </td>
-                            );
-                        })}
+        <div className="Table-Page">
+            <header className="Page-Header">
+                <p>
+                    Spotify Playlist Table
+                </p>
+            </header>
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th onClick={() => handleSort('name')}>
+                                Playlist Name {sortBy === 'name' ? (isAscending === true ? '↑' : '↓') : ''}
+                            </th>
+                            {statColumns.map(([key, value]) => (
+                            <th key={key} onClick={() => handleSort(key)}>
+                                {key} {sortBy === key ? (isAscending === true ? '↑' : '↓') : ''}
+                            </th>
+                            ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {sortedPlaylists.map((playlist) => (
+                        <tr key={playlist.id}>
+                            <td>{playlist.name}</td>
+                            {statColumns.map(([key, value]) => {
+                                const val = playlistStats[playlist.id]?.[value["statKey"]];
+                                const type = value["type"];
+                                return (
+                                    <td key={key}>
+                                        {type === "dateTime" && val ? (
+                                            val.substring(0, 10)
+                                        ) : type.includes("artist") && type.includes("number") ? (
+                                            `${val?.artistName ?? '-'}, ${val?.artistCount ?? '-'}`
+                                        ) : type.includes("artist") && type.includes("percentage") ? (
+                                            `${val?.artistName ?? '-'}, ${val?.artistCount ?? '-'}%`
+                                        ) : (
+                                            val ?? '-'
+                                        )}
+                                    </td>
+                                );
+                            })}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     )
 }

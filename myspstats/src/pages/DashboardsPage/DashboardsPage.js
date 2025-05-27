@@ -19,7 +19,7 @@ const DashboardsPage = () =>  {
         <div className="Dashboard-Page">
             <header className="Page-Header">
                 <p>
-                    Spotify Dashboards
+                    Spotify Playlist Dashboards
                 </p>
             </header>
             <div className="Page-Body">
