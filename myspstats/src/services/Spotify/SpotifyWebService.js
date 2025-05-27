@@ -35,7 +35,7 @@ const SpotifyWebService = () => {
         const playlistSongs = {};
         await Promise.all(
             playlists.map(async (playlist, index) => {
-                await delay(index * index * 5); // Introduces a delay of 100ms per request
+                await delay(index * 100); // Introduces a delay of 100ms per request
                 const songs = await fetchPlaylistSongs(playlist.id);
                 playlistSongs[playlist.id] = songs || [];
             })
@@ -104,7 +104,7 @@ const SpotifyWebService = () => {
             const dates = getDates();
             const playlistStats = computePlaylistStats(playlists, playlistSongs, dates);
 
-            return { playlists, playlistStats }
+            return { playlists, playlistSongs, playlistStats }
         } catch (error) {
             console.error("Error in service")
             throw error;
