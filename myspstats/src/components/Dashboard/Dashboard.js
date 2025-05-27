@@ -1,27 +1,23 @@
 /* Dashboard */
 
 import React, { useState } from 'react';
-
-const titleToKeyMap = {
-    "Most Songs": "songCount",
-    "Most 2 Year Old Songs": "twoYearPercentage",
-    "Most 6 Month New Songs": "sixMonthPercentage",
-    "Most Recent Song Added": "lastSongAdded",
-    "Most Frequent Artist By Count": "mostFrequentArtistByCount",
-    "Most Frequent Artist By Percentage": "mostFrequentArtistByPercentage",
-    "Newest Average Song Release Date": "newestAvgSongReleaseDate",
-    "Newest Average Song Added": "newestAvgSongAdded"
-};
+import { BarChart, Bar, ResponsiveContainer } from 'recharts';
 
 /*
  * Dashboard
  * Component representation for a dashboard
  */
-const Dashboard = ({ name, type, playlists, playlistStats }) => {
+const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
 
     const [indexView, setIndexView] = useState(10);  // state for controlling number of displayed items in a dashboard
     const [expandButtonIcon, setExpandButtonIcon] = useState("➕"); // state for controlling expand icon
     const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
+
+    const data = [
+        {
+            stat: 2
+        }
+    ]
 
     /*
      * toggleExpandView
@@ -45,15 +41,16 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
      * Sorts playlist based on stat, stat type, and sort order
      */
     const getSortedPlaylists = () => {
-        const statKey = titleToKeyMap[name];
+        const type = statDetails["type"]
+        const statKey = statDetails["statKey"];
 
         const sorted = [...playlists].sort((a, b) => {
             let aVal, bVal;
 
-            if (type === 'date-time') {
+            if (type === "dateTime") {
                 aVal = playlistStats[a.id]?.[statKey] ? Date.parse(playlistStats[a.id][statKey]) : -Infinity;
                 bVal = playlistStats[b.id]?.[statKey] ? Date.parse(playlistStats[b.id][statKey]) : -Infinity;
-            } else if (type === 'artist') {
+            } else if (type.includes("artist")) {
                 aVal = playlistStats[a.id]?.[statKey]?.["artistCount"] ?? -Infinity;
                 bVal = playlistStats[b.id]?.[statKey]?.["artistCount"] ?? -Infinity;
             } else {
@@ -68,6 +65,16 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
     };
 
     const sortedPlaylists = getSortedPlaylists();
+
+    const fillGraphWithStat = (dp) => {
+        if (dp < 60) {
+            return "red"
+        } else if (dp < 80) {
+            return "yellow"
+        }
+
+        return "green";
+    }
 
     return (
         <div className="dashboard">
@@ -92,15 +99,26 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
-                                    {type === "date-time" ? (
-                                        <div>{playlistStats[playlist.id][titleToKeyMap[name]]?.substring(0,10)}</div>
-                                    ) : type === "artist" ? (
-                                         <div>{playlistStats[playlist.id][titleToKeyMap[name]]["artistName"]}: {playlistStats[playlist.id][titleToKeyMap[name]]["artistCount"]}</div>
-                                    ) : type === "number" ? (
-                                        <div>{playlistStats[playlist.id][titleToKeyMap[name]]}</div>
+                                    {statDetails["type"] === "dateTime" ? (
+                                        <div>{playlistStats[playlist.id][statDetails["statKey"]]?.substring(0,10)}</div>
+                                    ) : statDetails["type"].includes("artist") && statDetails["type"].includes("number") ? (
+                                         <div>{playlistStats[playlist.id][statDetails["statKey"]]["artistName"]}: {playlistStats[playlist.id][statDetails["statKey"]]["artistCount"]}</div>
+                                    ) : statDetails["type"].includes("artist") && statDetails["type"].includes("percentage") ? (
+                                         <div>{playlistStats[playlist.id][statDetails["statKey"]]["artistName"]}: {playlistStats[playlist.id][statDetails["statKey"]]["artistCount"]}%</div>
+                                    ) : statDetails["type"] === "number" ? (
+                                        <div>{playlistStats[playlist.id][statDetails["statKey"]]}</div>
                                     ) : (
-                                        <div>{playlistStats[playlist.id][titleToKeyMap[name]]}%</div>
+                                        <div>{playlistStats[playlist.id][statDetails["statKey"]]}%</div>
                                     )}
+                                </div>
+                            ) : (
+                                <p>No stats available</p>
+                            )}
+                            {playlistStats[playlist.id] ? (
+                                <div className="dashboard-item-graph-data">
+                                    <BarChart isHorizontal={true} width={200} height={20} data={data}>
+                                        <Bar dataKey="stat" fill={fillGraphWithStat(81)} />
+                                    </BarChart>
                                 </div>
                             ) : (
                                 <p>No stats available</p>
@@ -110,7 +128,7 @@ const Dashboard = ({ name, type, playlists, playlistStats }) => {
                 )}
             </div>
         </div>
-    )
+    );
 };
 
 export default Dashboard;

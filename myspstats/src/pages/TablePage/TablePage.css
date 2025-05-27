@@ -45,3 +45,13 @@ h1 {
     background-color: white;
     color: black;
 }
+
+tbody {
+    text-align: center
+}
+
+td {
+    margin: 0px;
+    border: dotted;
+    border-width: 0.5px
+}

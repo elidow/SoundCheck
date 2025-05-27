@@ -9,7 +9,9 @@ import useCalculatePlaylistStatsService from './CalculatePlaylistStatsService';
  */
 const SpotifyWebService = () => {
     const { fetchPlaylists, fetchPlaylistSongs } = useSpotifyWebApi();
-    const { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate, calculateAverageDateAdded } = useCalculatePlaylistStatsService();
+    const { calculateSongTimeRangePercentage, calculateMostFrequentArtist,
+            calculateAverageReleaseDate, calculateAverageDateAdded,
+            calculateAverageSongDuration, calculateAverageSongPopularityScore } = useCalculatePlaylistStatsService();
 
     /*
      * getPlaylists
@@ -33,7 +35,7 @@ const SpotifyWebService = () => {
         const playlistSongs = {};
         await Promise.all(
             playlists.map(async (playlist, index) => {
-                await delay(index * 50); // Introduces a delay of 100ms per request
+                await delay(index * index * 5); // Introduces a delay of 100ms per request
                 const songs = await fetchPlaylistSongs(playlist.id);
                 playlistSongs[playlist.id] = songs || [];
             })
@@ -76,13 +78,15 @@ const SpotifyWebService = () => {
             const songs = playlistSongs[playlist.id] || [];
             stats[playlist.id] = {
                 songCount: songs.length,
-                sixMonthPercentage: calculateSongTimeRangePercentage(songs, dates.sixMonthsAgo, dates.zeroDaysAgo),
-                twoYearPercentage: calculateSongTimeRangePercentage(songs, dates.twoThousandNewYears, dates.twoYearsAgo),
-                lastSongAdded: songs.length > 0 ? songs[songs.length - 1].added_at : "No songs",
+                twoYearOldPercentage: songs.length > 0 ? calculateSongTimeRangePercentage(songs, dates.twoThousandNewYears, dates.twoYearsAgo) : "No songs",
+                sixMonthNewPercentage: songs.length > 0 ? calculateSongTimeRangePercentage(songs, dates.sixMonthsAgo, dates.zeroDaysAgo) : "No songs",
+                lastSongAddedDate: songs.length > 0 ? songs[songs.length - 1].added_at : "No songs",
+                avgSongAddedDate: songs.length > 0 ? calculateAverageDateAdded(songs) : "No songs",
+                avgSongReleaseDate: songs.length > 0 ? calculateAverageReleaseDate(songs) : "No songs",
                 mostFrequentArtistByCount: songs.length > 0 ? calculateMostFrequentArtist(songs, true) : "No songs",
                 mostFrequentArtistByPercentage: songs.length > 0 ? calculateMostFrequentArtist(songs, false) : "No songs",
-                newestAvgSongReleaseDate: songs.length > 0 ? calculateAverageReleaseDate(songs) : "No songs",
-                newestAvgSongAdded: songs.length > 0 ? calculateAverageDateAdded(songs) : "No songs"
+                avgSongDuration: songs.length > 0 ? calculateAverageSongDuration(songs) : "No songs",
+                avgSongPopularityScore: songs.length > 0 ? calculateAverageSongPopularityScore(songs): "No songs"
             };
         });
 
