@@ -60,7 +60,24 @@ const useCalculatePlaylistStatsService = () => {
         return avgDate.toISOString();
     }, []);
 
-    return { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate, calculateAverageDateAdded };
+    const calculateAverageSongDuration = useCallback((playlistSongs) => {
+
+        const songDurations = playlistSongs.map(playlistSong => playlistSong.track.duration_ms);
+        const avgSongDuration = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+        
+        return ((avgSongDuration / 1000) / 60).toFixed(2);
+    }, []);
+
+    const calculateAverageSongPopularityScore = useCallback((playlistSongs) => {
+
+        const songPopularityScores = playlistSongs.map(playlistSong => playlistSong.track.popularity);
+        const avgSongPopularityScore = songPopularityScores.reduce((sum, sps) => sum + sps, 0) / songPopularityScores.length;
+        
+        return (avgSongPopularityScore).toFixed(2);
+    }, []);
+
+    return { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate,
+            calculateAverageDateAdded, calculateAverageSongDuration, calculateAverageSongPopularityScore };
 }
 
 export default useCalculatePlaylistStatsService;
