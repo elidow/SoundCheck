@@ -43,22 +43,24 @@ Spotify Web API
 - Navigation Bar for Dashboard and Table Page
 - Context Provider Architecture for only one API call
 - Authentication & Token Setup (Authorization with PKCE)
+- Graphics for each dashboard row
+- Basic Table View with dynamic table of all data
 
 # What is Coming Soon? (Next 4 Weeks)
 - Dashboard Components Structure
--> POC w/ Basic UI
 -> Customizable
--> Graphics (Bars, Pie Charts)
+-> Graphics Colors (Colors)
 -> Advanced Design
-- Table Component Strucutre
--> POC w/ Basic UI
--> Customizable
+- Table Page
 -> Advanced Design
+- Playlist Page
+-> Can see playlists and songs
+-> Can see where it needs the most updates
 - More Statistics
--> Time from last added a song
 -> Time from last added the last 10 songs
--> Most common artist
 -> Artist distribution
+-> % of most played songs in last 4 weeks/6 months/1 year
+-> Grouping of Stats on Dashboard Page
 - Hosting
 -> Security
 -> Login
