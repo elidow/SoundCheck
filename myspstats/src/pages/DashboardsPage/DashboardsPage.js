@@ -2,6 +2,7 @@
 import React from 'react';
 import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
 import Dashboard from '../../components/Dashboard/Dashboard';
+import { statMap } from '../../util/Maps'
 import './DashboardsPage.css'
 
 /*
@@ -18,7 +19,7 @@ const DashboardsPage = () =>  {
         <div className="Dashboard-Page">
             <header className="Page-Header">
                 <p>
-                    Spotify Dashboards
+                    Spotify Playlist Dashboards
                 </p>
             </header>
             <div className="Page-Body">
@@ -26,14 +27,16 @@ const DashboardsPage = () =>  {
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
-                <Dashboard name="Most Songs" type="number" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Most 2 Year Old Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Most 6 Month New Songs" type="percentage" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Most Recent Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Most Frequent Artist By Count" type="artist" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Most Frequent Artist By Percentage" type="artist" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Newest Average Song Release Date" type="date-time" playlists={playlists} playlistStats={playlistStats} />
-                <Dashboard name="Newest Average Song Added" type="date-time" playlists={playlists} playlistStats={playlistStats} />
+                <Dashboard name="Song Count" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Song Count"]} />
+                <Dashboard name="% Songs >2 Years Old" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["% Songs >2 Years Old"]} />
+                <Dashboard name="% Songs <6 Months Old" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["% Songs <6 Months Old"]} />
+                <Dashboard name="Last Song Added Date" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Last Song Added Date"]} />
+                <Dashboard name="Average Song Added Date" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Average Song Added Date"]} />
+                <Dashboard name="Average Song Release Date" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Average Song Release Date"]} />
+                <Dashboard name="Most Frequent Artist By Count" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Most Frequent Artist By Count"]}/>
+                <Dashboard name="Most Frequent Artist By Percentage" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Most Frequent Artist By Percentage"]}/>
+                <Dashboard name="Average Song Duration" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Average Song Duration"]}/>
+                <Dashboard name="Average Song Popularity Score" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Average Song Popularity Score"]}/>
             </div>
         </div>
     )
