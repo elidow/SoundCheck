@@ -6,7 +6,7 @@ import axios from 'axios';
 const AUTH_URL = new URL("https://accounts.spotify.com/authorize");
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = process.env.REACT_APP_SPOTIFY_REDIRECT_URI;
-const SCOPES = "user-read-private user-read-email playlist-read-private";
+const SCOPES = "user-read-private user-read-email playlist-read-private user-top-read user-library-read";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
 const LOCAL_STORAGE_KEYS = {
@@ -105,7 +105,7 @@ const useSpotifyWebApi = () => {
             // Fetch access token
             const response = await axios.post(TOKEN_ENDPOINT, new URLSearchParams({
                 client_id: CLIENT_ID,
-                grant_type: "authorization_code",
+                grant_type: "authorization_code", // authorization_code pre top tracks. client_credentials post
                 code: code,
                 redirect_uri: REDIRECT_URI,
                 code_verifier: codeVerifier
@@ -252,7 +252,89 @@ const useSpotifyWebApi = () => {
         }
     }, [accessToken, refreshAccessToken]);
 
-    return { fetchPlaylists, fetchPlaylistSongs }
+    /*
+     * fetchSavedSongs
+     * Given an access token, fetch the user's saved songs (Liked)
+     * Currently 1000
+     */
+    const fetchSavedSongs = useCallback(async () => {
+        // Validate access token
+        if (!accessToken) {
+            console.log(`No access token found for call to get saved songs`);
+            return [];
+        }
+
+        try {
+            // Fetch playlist songs with pagination
+            let savedSongs = []
+            let nextUrl = `https://api.spotify.com/v1/me/tracks`;
+            let i = 0
+
+            while (nextUrl && i < 20) {
+                const response = await axios.get(nextUrl, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: {market: "ES", limit: "50", offset: "0"}
+                });
+
+                savedSongs = [...savedSongs, ...response.data.items]
+                nextUrl = response.data.next
+                i += 1
+            }
+
+            console.log(`SpotifyWebApi: Saved Songs:`, savedSongs)
+            return savedSongs
+        } catch (err) {
+            console.error(`Spotify Web Api failed to fetch saved songs:`, err);
+            if (err.response && err.response.status === 401) {
+                console.warn("Access token expired. Refreshing access token");
+                await refreshAccessToken();
+            }
+            return [];
+        }
+    }, [accessToken, refreshAccessToken]);
+
+    /*
+     * fetchTopSongs
+     * Given an access token and a time range variable, fetch the top songs for a user account within that time range
+     * Currently 50
+     */
+    const fetchTopSongs = useCallback(async (timeRange) => {
+        // Validate access token
+        if (!accessToken) {
+            console.log(`No access token found for call to get ${timeRange} tracks`);
+            return [];
+        }
+
+        try {
+            // Fetch playlist songs with pagination
+            let topSongs = []
+            let nextUrl = `https://api.spotify.com/v1/me/top/tracks`;
+            let i = 0
+
+            while (nextUrl && i < 1) {
+                const response = await axios.get(nextUrl, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: {time_range: timeRange, limit: "50", offset: "0"}
+                });
+
+                topSongs = [...topSongs, ...response.data.items]
+                nextUrl = response.data.next
+                i += 1
+            }
+
+            console.log(`SpotifyWebApi: Top Songs for ${timeRange} tracks:`, topSongs)
+            return topSongs
+        } catch (err) {
+            console.error(`Spotify Web Api failed to fetch playlists songs for ${timeRange} tracks:`, err);
+            if (err.response && err.response.status === 401) {
+                console.warn("Access token expired. Refreshing access token");
+                await refreshAccessToken();
+            }
+            return [];
+        }
+    }, [accessToken, refreshAccessToken]);
+
+    return { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs }
 }
 
 export default useSpotifyWebApi;

@@ -8,10 +8,11 @@ import useCalculatePlaylistStatsService from './CalculatePlaylistStatsService';
  * Custom react hook used to interact with API layer and calculate playlist statistics
  */
 const SpotifyWebService = () => {
-    const { fetchPlaylists, fetchPlaylistSongs } = useSpotifyWebApi();
+    const { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs } = useSpotifyWebApi();
     const { calculateSongTimeRangePercentage, calculateMostFrequentArtist,
             calculateAverageReleaseDate, calculateAverageDateAdded,
-            calculateAverageSongDuration, calculateAverageSongPopularityScore } = useCalculatePlaylistStatsService();
+            calculateAverageSongDuration, calculateAverageSongPopularityScore,
+            calculateMostTopSongsByTimeRange, calculateArtistDiversityScore } = useCalculatePlaylistStatsService();
 
     /*
      * getPlaylists
@@ -35,7 +36,7 @@ const SpotifyWebService = () => {
         const playlistSongs = {};
         await Promise.all(
             playlists.map(async (playlist, index) => {
-                await delay(index * 100); // Introduces a delay of 100ms per request
+                await delay(index * index * 7); // Introduces a delay of 100ms per request
                 const songs = await fetchPlaylistSongs(playlist.id);
                 playlistSongs[playlist.id] = songs || [];
             })
@@ -43,6 +44,30 @@ const SpotifyWebService = () => {
         
         return playlistSongs;
     }
+
+    /*
+     * getSavedSongs
+     * Fetches all saved songs from API
+     */
+    const getSavedSongs = async() => {
+        const savedSongs = await fetchSavedSongs();
+        return savedSongs;
+    }
+
+    /*
+     * getTopSongs
+     * Fetches all top played songs from API
+     */
+    const getTopsSongs = async() => {
+        const topSongs = {};
+
+        topSongs["short_term"] = await fetchTopSongs("short_term");
+        topSongs["medium_term"] = await fetchTopSongs("medium_term");
+        topSongs["long_term"] = await fetchTopSongs("long_term");
+        
+        return topSongs;
+    }
+
 
     /*
      * getDates
@@ -71,7 +96,7 @@ const SpotifyWebService = () => {
      * calculatePlaylistStats
      * Calculates all necessary playlist stats
      */
-    const computePlaylistStats = (playlists, playlistSongs, dates) => {
+    const computePlaylistStats = (playlists, playlistSongs, savedSongs, topSongs, dates) => {
         const stats = {};
 
         playlists.forEach((playlist) => {
@@ -86,7 +111,10 @@ const SpotifyWebService = () => {
                 mostFrequentArtistByCount: songs.length > 0 ? calculateMostFrequentArtist(songs, true) : "No songs",
                 mostFrequentArtistByPercentage: songs.length > 0 ? calculateMostFrequentArtist(songs, false) : "No songs",
                 avgSongDuration: songs.length > 0 ? calculateAverageSongDuration(songs) : "No songs",
-                avgSongPopularityScore: songs.length > 0 ? calculateAverageSongPopularityScore(songs): "No songs"
+                avgSongPopularityScore: songs.length > 0 ? calculateAverageSongPopularityScore(songs): "No songs",
+                mostShortTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["short_term"]): "No songs",
+                mostMediumTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["medium_term"]): "No songs",
+                artistDiversityScore: songs.length > 0 ? calculateArtistDiversityScore(songs): "No songs"
             };
         });
 
@@ -101,8 +129,10 @@ const SpotifyWebService = () => {
         try {
             const playlists = await getPlaylists();
             const playlistSongs = await getPlaylistSongs(playlists);
+            const savedSongs = await getSavedSongs();
+            const topSongs = await getTopsSongs();
             const dates = getDates();
-            const playlistStats = computePlaylistStats(playlists, playlistSongs, dates);
+            const playlistStats = computePlaylistStats(playlists, playlistSongs, savedSongs, topSongs, dates);
 
             return { playlists, playlistSongs, playlistStats }
         } catch (error) {

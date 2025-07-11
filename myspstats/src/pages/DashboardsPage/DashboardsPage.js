@@ -37,6 +37,9 @@ const DashboardsPage = () =>  {
                 <Dashboard name="Most Frequent Artist By Percentage" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Most Frequent Artist By Percentage"]}/>
                 <Dashboard name="Average Song Duration" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Average Song Duration"]}/>
                 <Dashboard name="Average Song Popularity Score" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Average Song Popularity Score"]}/>
+                <Dashboard name="% Songs in Top Short Term Songs" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["% Songs in Top Short Term Songs"]}/>
+                <Dashboard name="% Songs in Top Medium Term Songs" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["% Songs in Top Medium Term Songs"]}/>
+                <Dashboard name="Artist Diversity Score" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Artist Diversity Score"]}/>
             </div>
         </div>
     )
