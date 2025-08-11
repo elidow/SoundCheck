@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const AUTH_URL = new URL("https://accounts.spotify.com/authorize");
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = process.env.REACT_APP_SPOTIFY_REDIRECT_URI;
 const SCOPES = "user-read-private user-read-email playlist-read-private user-top-read user-library-read";
@@ -76,17 +75,18 @@ const useSpotifyWebApi = () => {
         localStorage.setItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
         const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-        // Generate authroization url
-        AUTH_URL.searchParams.append("client_id", CLIENT_ID);
-        AUTH_URL.searchParams.append("response_type", "code");
-        AUTH_URL.searchParams.append("redirect_uri", REDIRECT_URI);
-        AUTH_URL.searchParams.append("scope", SCOPES);
-        AUTH_URL.searchParams.append("code_challenge_method", "S256");
-        AUTH_URL.searchParams.append("code_challenge", codeChallenge);
+        // Create a new URL object for authorization (do NOT reuse AUTH_URL globally)
+        const authUrl = new URL("https://accounts.spotify.com/authorize");
 
-        // Redirect to authroization url
-        console.log("Redirecting url to request user authorization")
-        window.location.href = AUTH_URL.toString();
+        authUrl.searchParams.append("client_id", CLIENT_ID);
+        authUrl.searchParams.append("response_type", "code");
+        authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
+        authUrl.searchParams.append("scope", SCOPES);
+        authUrl.searchParams.append("code_challenge_method", "S256");
+        authUrl.searchParams.append("code_challenge", codeChallenge);
+
+        console.log("Redirecting to Spotify for authorization:", authUrl.toString());
+        window.location.href = authUrl.toString();
     };
 
     /*
@@ -97,7 +97,7 @@ const useSpotifyWebApi = () => {
         // Retrieve and confirm code verifier
         const codeVerifier = localStorage.getItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
         if (!codeVerifier) {
-            console.warn("No code verifier found");
+            console.warn("No code verifier found in localStorage");
             return;
         }
 
@@ -117,6 +117,9 @@ const useSpotifyWebApi = () => {
             localStorage.setItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN, access_token);
             localStorage.setItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN, refresh_token);
             localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN_TIMESTAMP, Date.now().toString());
+
+            // Remove code verifier now that it's used
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
 
             // Redirect to app
             window.history.replaceState({}, document.title, "/dashboard");
@@ -155,6 +158,12 @@ const useSpotifyWebApi = () => {
             initiateUserAuthorization();
         }
     }, []);
+
+    // const forceReauth = useCallback(() => {
+    //     console.log("Forcing Spotify reauthorization – clearing stored tokens...");
+    //     Object.values(LOCAL_STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+    //     initiateUserAuthorization();
+    // }, []);
 
     /*
      * useEffect
