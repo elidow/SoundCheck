@@ -105,7 +105,7 @@ const useSpotifyWebApi = () => {
             // Fetch access token
             const response = await axios.post(TOKEN_ENDPOINT, new URLSearchParams({
                 client_id: CLIENT_ID,
-                grant_type: "authorization_code", // authorization_code pre top tracks. client_credentials post
+                grant_type: "authorization_code",
                 code: code,
                 redirect_uri: REDIRECT_URI,
                 code_verifier: codeVerifier
