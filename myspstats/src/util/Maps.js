@@ -40,6 +40,9 @@ export const statMap = {
     "% Songs in Top Medium Term Songs": {
         "statKey": "mostMediumTermTopSongs", "type": percentage, "group": "advancedStats"
     },
+    "% Songs in Top Long Term Songs": {
+        "statKey": "mostLongTermTopSongs", "type": percentage, "group": "advancedStats"
+    },
     "Artist Diversity Score": {
         "statKey": "artistDiversityScore", "type": number, "group": "advancedStats"
     }

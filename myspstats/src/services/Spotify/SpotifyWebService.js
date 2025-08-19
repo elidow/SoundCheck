@@ -2,6 +2,7 @@
 
 import useSpotifyWebApi from './SpotifyWebApi';
 import useCalculatePlaylistStatsService from './CalculatePlaylistStatsService';
+import pLimit from 'p-limit';
 
 /*
  * useSpotifyWebService
@@ -14,12 +15,46 @@ const SpotifyWebService = () => {
             calculateAverageSongDuration, calculateAverageSongPopularityScore,
             calculateMostTopSongsByTimeRange, calculateArtistDiversityScore } = useCalculatePlaylistStatsService();
 
+    // Delay function for throttling requests
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Allow 5 concurrent requests max
+    const limit = pLimit(6);
+
+    // Limit fetchWithRetry to limit
+    const runLimited = (fn, args) => limit(() => fetchWithRetry(fn, args));
+
+    /*
+     * getPlaylistSongsWithRetry
+     * Fetches all playlist songs from API with retry
+     */
+    const fetchWithRetry = async(fn, args = [], maxRetries=3, initialDelay=1000) => {
+        let attempt = 0;
+
+        while (attempt < maxRetries) {
+            try {
+                if (attempt > 0) {
+                    const currentDelay = initialDelay * Math.pow(2, attempt -1);
+                    await delay(currentDelay); 
+                }
+
+                return await fn(...args);
+            } catch (error) {
+                console.error(`Error in fetchWithRetry (attempt ${attempt + 1}/${maxRetries}) for function ${fn.name}:`, error);
+                attempt++;
+                if (attempt >= maxRetries) {
+                    return [];
+                }
+            }
+        }
+    }
+
     /*
      * getPlaylists
      * Fetches all playlists from API
      */
     const getPlaylists = async() => {
-        const playlists = await fetchPlaylists();
+        const playlists = await runLimited(fetchPlaylists);
         if (!playlists) throw new Error("Failed to fetch playlists");
         return playlists;
     }
@@ -29,29 +64,18 @@ const SpotifyWebService = () => {
      * Fetches all playlist songs from API with throttling
      */
     const getPlaylistSongs = async(playlists) => {
-        // Delay function for throttling requests
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         // Fetch songs for each playlists
         const playlistSongs = {};
         await Promise.all(
-            playlists.map(async (playlist, index) => {
-                await delay(index * index * 7); // Introduces a delay of 100ms per request
-                const songs = await fetchPlaylistSongs(playlist.id);
+            playlists.map(async (playlist) => {
+                //await delay(index * index * 6); // Introduces a delay (this is 28 seconds)
+                const songs = await runLimited(fetchPlaylistSongs, [playlist.id]);
                 playlistSongs[playlist.id] = songs || [];
             })
         );    
         
         return playlistSongs;
-    }
-
-    /*
-     * getSavedSongs
-     * Fetches all saved songs from API
-     */
-    const getSavedSongs = async() => {
-        const savedSongs = await fetchSavedSongs();
-        return savedSongs;
     }
 
     /*
@@ -61,13 +85,21 @@ const SpotifyWebService = () => {
     const getTopsSongs = async() => {
         const topSongs = {};
 
-        topSongs["short_term"] = await fetchTopSongs("short_term");
-        topSongs["medium_term"] = await fetchTopSongs("medium_term");
-        topSongs["long_term"] = await fetchTopSongs("long_term");
+        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 2]);
+        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 5]);
+        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 10]);
         
         return topSongs;
     }
 
+    /*
+     * getSavedSongs
+     * Fetches all saved songs from API
+     */
+    const getSavedSongs = async() => {
+        const savedSongs = await runLimited(fetchSavedSongs);
+        return savedSongs;
+    }
 
     /*
      * getDates
@@ -96,7 +128,7 @@ const SpotifyWebService = () => {
      * calculatePlaylistStats
      * Calculates all necessary playlist stats
      */
-    const computePlaylistStats = (playlists, playlistSongs, savedSongs, topSongs, dates) => {
+    const computePlaylistStats = (playlists, playlistSongs, topSongs, savedSongs, dates) => {
         const stats = {};
 
         playlists.forEach((playlist) => {
@@ -114,6 +146,7 @@ const SpotifyWebService = () => {
                 avgSongPopularityScore: songs.length > 0 ? calculateAverageSongPopularityScore(songs): "No songs",
                 mostShortTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["short_term"]): "No songs",
                 mostMediumTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["medium_term"]): "No songs",
+                mostLongTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["long_term"]): "No songs",
                 artistDiversityScore: songs.length > 0 ? calculateArtistDiversityScore(songs): "No songs"
             };
         });
@@ -127,12 +160,19 @@ const SpotifyWebService = () => {
      */
     const retrievePlaylistsWithStats = async () => {
         try {
+            let start = Date.now();
+
             const playlists = await getPlaylists();
             const playlistSongs = await getPlaylistSongs(playlists);
-            const savedSongs = await getSavedSongs();
             const topSongs = await getTopsSongs();
+            const savedSongs = await getSavedSongs();
+
+            let end = Date.now() - start;
+            console.log("End: " + end)
+
+
             const dates = getDates();
-            const playlistStats = computePlaylistStats(playlists, playlistSongs, savedSongs, topSongs, dates);
+            const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, dates);
 
             return { playlists, playlistSongs, playlistStats }
         } catch (error) {

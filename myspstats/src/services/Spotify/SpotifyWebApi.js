@@ -256,6 +256,9 @@ const useSpotifyWebApi = () => {
             if (err.response && err.response.status === 401) {
                 console.warn("Access token expired. Refreshing access token");
                 await refreshAccessToken();
+            } else if (err.response && err.response.status === 429) {
+                console.warn("Client request limit exceeded")
+                throw err;
             }
             return [];
         }
@@ -307,7 +310,7 @@ const useSpotifyWebApi = () => {
      * Given an access token and a time range variable, fetch the top songs for a user account within that time range
      * Currently 50
      */
-    const fetchTopSongs = useCallback(async (timeRange) => {
+    const fetchTopSongs = useCallback(async (timeRange, pages=1) => {
         // Validate access token
         if (!accessToken) {
             console.log(`No access token found for call to get ${timeRange} tracks`);
@@ -320,7 +323,7 @@ const useSpotifyWebApi = () => {
             let nextUrl = `https://api.spotify.com/v1/me/top/tracks`;
             let i = 0
 
-            while (nextUrl && i < 1) {
+            while (nextUrl && i < pages) {
                 const response = await axios.get(nextUrl, {
                     headers: { Authorization: `Bearer ${accessToken}` },
                     params: {time_range: timeRange, limit: "50", offset: "0"}
