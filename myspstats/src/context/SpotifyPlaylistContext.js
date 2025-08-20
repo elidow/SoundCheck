@@ -7,6 +7,7 @@ export const SpotifyPlaylistProvider = ({ children }) => {
     const { retrievePlaylistsWithStats } = SpotifyWebService();
 
     const [playlists, setPlaylists] = useState([]);
+    const [playlistSongs, setPlaylistSongs] = useState([]);
     const [playlistStats, setPlaylistStats] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -15,9 +16,10 @@ export const SpotifyPlaylistProvider = ({ children }) => {
         console.log("Spotify Playlist Context: In Use Effect")
         const loadData = async () => {
             try {
-                const { playlists, playlistStats } = await retrievePlaylistsWithStats();
+                const { playlists, playlistSongs, playlistStats } = await retrievePlaylistsWithStats();
 
                 setPlaylists(playlists);
+                setPlaylistSongs(playlistSongs)
                 setPlaylistStats(playlistStats);
             } catch (err) {
                 setLoading(false);
@@ -31,7 +33,7 @@ export const SpotifyPlaylistProvider = ({ children }) => {
     }, []);
 
     return (
-        <SpotifyPlaylistContext.Provider value={{ playlists, playlistStats, loading, error }}>
+        <SpotifyPlaylistContext.Provider value={{ playlists, playlistSongs, playlistStats, loading, error }}>
             {children}
         </SpotifyPlaylistContext.Provider>
     );

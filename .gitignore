@@ -9,5 +9,11 @@ node_modules
 .env.production
 .env.test
 
+# Ignore personal files
+notTopSavedSongs.txt
+savedSongs.txt
+topSavedSongs.txt
+topSongs.txt
+
 # other
 .DS_Store
