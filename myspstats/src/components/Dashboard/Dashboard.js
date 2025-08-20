@@ -1,7 +1,7 @@
 /* Dashboard */
 
-import React, { useState } from 'react';
-import { BarChart, Bar, ResponsiveContainer } from 'recharts';
+import { useState } from 'react';
+import { BarChart, Bar } from 'recharts';
 
 /*
  * Dashboard
