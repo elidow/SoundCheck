@@ -7,7 +7,7 @@ import './DashboardsPage.css'
 
 /*
  * DashboardsPage
- * Functional Component to render dashboard page
+ * Functional Component to render dashboards page
  */
 const DashboardsPage = () =>  {
     const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
@@ -16,14 +16,14 @@ const DashboardsPage = () =>  {
     if (error) return <p>Error: {error}</p>;
 
     return (
-        <div className="Dashboard-Page">
+        <div className="Dashboards-Page">
             <header className="Page-Header">
                 <p>
                     Spotify Playlist Dashboards
                 </p>
             </header>
             <div className="Page-Body">
-                <div className="dashboard-page-header">
+                <div className="dashboards-page-header">
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
