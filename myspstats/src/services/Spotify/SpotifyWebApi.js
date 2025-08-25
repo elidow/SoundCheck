@@ -209,7 +209,7 @@ const useSpotifyWebApi = () => {
 
                 playlists = [...playlists, // spread operator (...) expands an array into individual elements and makes shallow copies
                     ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" &&
-                         !item.name.includes("On Repeat 🎧") && !item.name.includes("Top 50") && !item.name.includes("Cape Cod"))]
+                        !item.name.includes("On Repeat 🎧") && !item.name.includes("Top 50") && !item.name.includes("Cape Cod"))]
                 nextUrl = response.data.next
             }
             console.log("SpotifyWebApi: Playlists: ", playlists)
@@ -265,47 +265,6 @@ const useSpotifyWebApi = () => {
     }, [accessToken, refreshAccessToken]);
 
     /*
-     * fetchSavedSongs
-     * Given an access token, fetch the user's saved songs (Liked)
-     * Currently 1000
-     */
-    const fetchSavedSongs = useCallback(async () => {
-        // Validate access token
-        if (!accessToken) {
-            console.log(`No access token found for call to get saved songs`);
-            return [];
-        }
-
-        try {
-            // Fetch playlist songs with pagination
-            let savedSongs = []
-            let nextUrl = `https://api.spotify.com/v1/me/tracks`;
-            let i = 0
-
-            while (nextUrl && i < 20) {
-                const response = await axios.get(nextUrl, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    params: {market: "ES", limit: "50", offset: "0"}
-                });
-
-                savedSongs = [...savedSongs, ...response.data.items]
-                nextUrl = response.data.next
-                i += 1
-            }
-
-            console.log(`SpotifyWebApi: Saved Songs:`, savedSongs)
-            return savedSongs
-        } catch (err) {
-            console.error(`Spotify Web Api failed to fetch saved songs:`, err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
-            }
-            return [];
-        }
-    }, [accessToken, refreshAccessToken]);
-
-    /*
      * fetchTopSongs
      * Given an access token and a time range variable, fetch the top songs for a user account within that time range
      * Currently 50
@@ -338,6 +297,47 @@ const useSpotifyWebApi = () => {
             return topSongs
         } catch (err) {
             console.error(`Spotify Web Api failed to fetch playlists songs for ${timeRange} tracks:`, err);
+            if (err.response && err.response.status === 401) {
+                console.warn("Access token expired. Refreshing access token");
+                await refreshAccessToken();
+            }
+            return [];
+        }
+    }, [accessToken, refreshAccessToken]);
+
+    /*
+     * fetchSavedSongs
+     * Given an access token, fetch the user's saved songs (Liked)
+     * Currently 1000
+     */
+    const fetchSavedSongs = useCallback(async (maxPages=60) => {
+        // Validate access token
+        if (!accessToken) {
+            console.log(`No access token found for call to get saved songs`);
+            return [];
+        }
+
+        try {
+            // Fetch playlist songs with pagination
+            let savedSongs = []
+            let nextUrl = `https://api.spotify.com/v1/me/tracks`;
+            let i = 0
+
+            while (nextUrl && i < maxPages) {
+                const response = await axios.get(nextUrl, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: {market: "ES", limit: "50", offset: "0"}
+                });
+
+                savedSongs = [...savedSongs, ...response.data.items]
+                nextUrl = response.data.next
+                i += 1
+            }
+
+            console.log(`SpotifyWebApi: Saved Songs:`, savedSongs)
+            return savedSongs
+        } catch (err) {
+            console.error(`Spotify Web Api failed to fetch saved songs:`, err);
             if (err.response && err.response.status === 401) {
                 console.warn("Access token expired. Refreshing access token");
                 await refreshAccessToken();

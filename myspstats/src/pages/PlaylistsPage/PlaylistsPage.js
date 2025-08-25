@@ -1,7 +1,7 @@
 /* PlaylistsPage */
 import React from 'react';
 import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
-import { statMap } from '../../util/Maps'
+//import { statMap } from '../../util/Maps'
 import './PlaylistsPage.css'
 
 /*
@@ -9,7 +9,7 @@ import './PlaylistsPage.css'
  * Functional Component to render playlists page
  */
 const PlaylistsPage = () =>  {
-    const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
+    const { playlists, playlistMetaStats, loading, error } = useSpotifyPlaylistContext();
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
     if (error) return <p>Error: {error}</p>;
@@ -36,19 +36,31 @@ const PlaylistsPage = () =>  {
                             </tr>
                         </thead>
                         <tbody>
-                            {playlists.map((playlist, index) => (
-                                <tr>
-                                    <td>
-                                        <img 
-                                            src={playlist.images[0]?.url} 
-                                            alt={playlist.name} 
-                                            style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
-                                        />
-                                    </td>
-                                    <td>{playlist.name}</td>
-                                    <td>{playlist.tracks.total}</td>
-                                </tr>
-                    ))}
+                        {playlists
+                            .slice() // make a shallow copy so you don’t mutate context state
+                            .sort((a, b) => {
+                            const scoreA = playlistMetaStats[a.id]?.playlistScore ?? 0;
+                            const scoreB = playlistMetaStats[b.id]?.playlistScore ?? 0;
+                            return scoreB - scoreA; // descending order (highest first)
+                            })
+                            .map((playlist) => (
+                            <tr key={playlist.id}>
+                                <td>
+                                <img 
+                                    src={playlist.images[0]?.url} 
+                                    alt={playlist.name} 
+                                    style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
+                                />
+                                </td>
+                                <td>
+                                <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">
+                                    {playlist.name}
+                                </a>
+                                </td>
+                                <td>{playlist.tracks.total}</td>
+                                <td>{playlistMetaStats[playlist.id]?.playlistScore ?? "N/A"}</td>
+                            </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

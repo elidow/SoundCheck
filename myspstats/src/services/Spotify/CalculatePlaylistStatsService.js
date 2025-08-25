@@ -91,6 +91,19 @@ const useCalculatePlaylistStatsService = () => {
         return ((topSongCount / playlistSongs.length) * 100).toFixed(1)
     }, []);
 
+    const calculateSavedSongPercentage = useCallback((playlistSongs, savedSongs) => {
+       let savedSongCount = 0;
+       let savedSongIds = savedSongs.map(song => song.track.id);
+
+        for (const key in playlistSongs) {
+            if (savedSongIds.includes(playlistSongs[key].track.id)) {
+                savedSongCount += 1;
+            }
+        }
+        
+        return ((savedSongCount / playlistSongs.length) * 100).toFixed(1)
+    }, []);
+
     // need to confirm accuracy
     const calculateArtistDiversityScore = useCallback((playlistSongs) => {
         let artistFrequency = {};
@@ -122,7 +135,7 @@ const useCalculatePlaylistStatsService = () => {
 
     return { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate,
             calculateAverageDateAdded, calculateAverageSongDuration, calculateAverageSongPopularityScore,
-            calculateMostTopSongsByTimeRange, calculateArtistDiversityScore };
+            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage, calculateArtistDiversityScore };
 }
 
 export default useCalculatePlaylistStatsService;

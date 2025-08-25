@@ -33,8 +33,8 @@ const TablePage = () =>  {
                     aVal = Number(playlistStats[a.id]?.[statKey]?.["artistCount"]) ?? -Infinity;
                     bVal = Number(playlistStats[b.id]?.[statKey]?.["artistCount"]) ?? -Infinity;
                 } else {
-                    aVal = playlistStats[a.id]?.[statKey] ?? -Infinity;
-                    bVal = playlistStats[b.id]?.[statKey] ?? -Infinity;
+                    aVal = Number(playlistStats[a.id]?.[statKey]) ?? -Infinity;
+                    bVal = Number(playlistStats[b.id]?.[statKey]) ?? -Infinity;
                 }
             }
 
@@ -69,7 +69,7 @@ const TablePage = () =>  {
                 </p>
             </header>
             <div>
-                <table>
+                <table className="big-table">
                     <thead>
                         <tr>
                             <th onClick={() => handleSort('name')}>
@@ -84,8 +84,12 @@ const TablePage = () =>  {
                     </thead>
                     <tbody>
                         {sortedPlaylists.map((playlist) => (
-                        <tr key={playlist.id}>
-                            <td>{playlist.name}</td>
+                        <tr className="big-table-row" key={playlist.id}>
+                            <td>
+                                <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">
+                                    {playlist.name}
+                                </a>
+                            </td>
                             {statColumns.map(([key, value]) => {
                                 const val = playlistStats[playlist.id]?.[value["statKey"]];
                                 const type = value["type"];

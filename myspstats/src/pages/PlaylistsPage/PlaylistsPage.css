@@ -1,15 +1,10 @@
-/* .Playlists-Page {
+.Playlists-Page {
     display: 'flex';
     flex-direction: column;
     align-items: 'center';
     justify-content: 'center';
 
     background-color: white;
-}
-
-.Page-Body {
-    margin: 10px 30% 10px 30%;
-    text-align: center;
 }
 
 .playlists-page-header {
@@ -17,23 +12,12 @@
     margin-top: 10px;
 }
 
-.table {
-    display: 'flex';
-    flex-direction: column;
-    align-items: 'center';
-    justify-content: 'center';
-    margin: 50px 20% 50px 20%;
-
-    background-color: white;
-    color: black;
-}
-
 .playlist-items {
     display: 'flex';
     flex-direction: column;
     align-items: 'center';
     justify-content: 'center';
-    margin: 10px 10px 50px 10px;
+    margin: 50px 34% 50px 34%;
 
     font-size: 20px;
     text-align: center;
@@ -42,19 +26,29 @@
     color: black;
 }
 
+.table {
+    display: 'flex';
+    flex-direction: column;
+    align-items: 'center';
+    justify-content: 'center';
 
-tbody {
+    background-color: white;
+    color: black;
+}
+
+/* tbody {
     text-align: center
 }
 
 tr {
     border-style: solid;
-    border-width: 2px;
+    border-width: 10px;
+    color: black;
 }
 
 td {
     margin: 0px;
     padding: 10px;
-    border: dotted;
+    border: solid;
     border-width: 0.5px
 } */

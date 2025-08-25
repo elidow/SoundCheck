@@ -34,14 +34,17 @@ export const statMap = {
     "Average Song Popularity Score": {
         "statKey": "avgSongPopularityScore", "type": number, "group": "advancedStats"
     },
-    "% Songs in Top Short Term Songs": {
-        "statKey": "mostShortTermTopSongs", "type": percentage, "group": "advancedStats"
+    "% Songs in Top Short Term": {
+        "statKey": "shortTermPercentage", "type": percentage, "group": "advancedStats"
     },
-    "% Songs in Top Medium Term Songs": {
-        "statKey": "mostMediumTermTopSongs", "type": percentage, "group": "advancedStats"
+    "% Songs in Top Medium Term": {
+        "statKey": "mediumTermPercentage", "type": percentage, "group": "advancedStats"
     },
-    "% Songs in Top Long Term Songs": {
-        "statKey": "mostLongTermTopSongs", "type": percentage, "group": "advancedStats"
+    "% Songs in Top Long Term": {
+        "statKey": "longTermPercentage", "type": percentage, "group": "advancedStats"
+    },
+     "% Songs in Saved Songs": {
+        "statKey": "savedSongPercentage", "type": percentage, "group": "advancedStats"
     },
     "Artist Diversity Score": {
         "statKey": "artistDiversityScore", "type": number, "group": "advancedStats"

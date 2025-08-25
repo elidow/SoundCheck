@@ -2,6 +2,7 @@
 
 import useSpotifyWebApi from './SpotifyWebApi';
 import useCalculatePlaylistStatsService from './CalculatePlaylistStatsService';
+import useCalculatePlaylistMetaStatsService from './CalculatePlaylistMetaStatsService';
 import pLimit from 'p-limit';
 
 /*
@@ -13,7 +14,9 @@ const SpotifyWebService = () => {
     const { calculateSongTimeRangePercentage, calculateMostFrequentArtist,
             calculateAverageReleaseDate, calculateAverageDateAdded,
             calculateAverageSongDuration, calculateAverageSongPopularityScore,
-            calculateMostTopSongsByTimeRange, calculateArtistDiversityScore } = useCalculatePlaylistStatsService();
+            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage,
+            calculateArtistDiversityScore } = useCalculatePlaylistStatsService();
+    const { calculateFinalMetaStat } = useCalculatePlaylistMetaStatsService();
 
     // Delay function for throttling requests
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -144,14 +147,31 @@ const SpotifyWebService = () => {
                 mostFrequentArtistByPercentage: songs.length > 0 ? calculateMostFrequentArtist(songs, false) : "No songs",
                 avgSongDuration: songs.length > 0 ? calculateAverageSongDuration(songs) : "No songs",
                 avgSongPopularityScore: songs.length > 0 ? calculateAverageSongPopularityScore(songs): "No songs",
-                mostShortTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["short_term"]): "No songs",
-                mostMediumTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["medium_term"]): "No songs",
-                mostLongTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["long_term"]): "No songs",
+                shortTermPercentage: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["short_term"]): "No songs",
+                mediumTermPercentage: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["medium_term"]): "No songs",
+                longTermPercentage: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["long_term"]): "No songs",
+                savedSongPercentage: songs.length > 0 ? calculateSavedSongPercentage(songs, savedSongs): "No songs",
                 artistDiversityScore: songs.length > 0 ? calculateArtistDiversityScore(songs): "No songs"
             };
         });
 
         return stats;
+    };
+
+    /*
+     * calculatePlaylistStats
+     * Calculates all necessary playlist stats
+     */
+    const computePlaylistMetaStats = (playlists, playlistStats) => {
+        const metaStats = {};
+
+        playlists.forEach((playlist) => {
+            metaStats[playlist.id] = {
+                playlistScore: calculateFinalMetaStat(playlistStats[playlist.id])
+            };
+        });
+
+        return metaStats;
     };
 
     /*
@@ -173,8 +193,9 @@ const SpotifyWebService = () => {
 
             const dates = getDates();
             const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, dates);
+            const playlistMetaStats = computePlaylistMetaStats(playlists, playlistStats);
 
-            return { playlists, playlistSongs, playlistStats }
+            return { playlists, playlistSongs, playlistStats, playlistMetaStats }
         } catch (error) {
             console.error("Error in service")
             throw error;
