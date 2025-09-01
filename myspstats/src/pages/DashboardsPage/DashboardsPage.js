@@ -42,6 +42,7 @@ const DashboardsPage = () =>  {
                 <Dashboard name="% Songs in Top Long Term" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["% Songs in Top Long Term"]}/>
                 <Dashboard name="% Songs in Saved Songs" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["% Songs in Saved Songs"]}/>
                 <Dashboard name="Artist Diversity Score" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Artist Diversity Score"]}/>
+                <Dashboard name="Times Recently Played" playlists={playlists} playlistStats={playlistStats} statDetails={statMap["Times Recently Played"]}/>
             </div>
         </div>
     )

@@ -48,5 +48,8 @@ export const statMap = {
     },
     "Artist Diversity Score": {
         "statKey": "artistDiversityScore", "type": number, "group": "advancedStats"
+    },
+    "Times Recently Played": {
+        "statKey": "timesRecentlyPlayed", "type": number, "group": "advancedStats"
     }
 };

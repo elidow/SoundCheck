@@ -133,9 +133,34 @@ const useCalculatePlaylistStatsService = () => {
         return (richnessScore * (1 - evennessScore) * 100).toFixed(1)
     }, []);
 
+    // need to confirm accuracy
+    const calculateRecentlyPlayed = useCallback((playlistSongs, recentlyPlayedSongs) => {
+        let playlistSongIds = playlistSongs.map(song => song.track.id);
+        let count = 0;
+        let streak = 0;
+        let inPlay = false;
+
+        for (let i = 0; i < recentlyPlayedSongs.length; i++) {
+            if (playlistSongIds.includes(recentlyPlayedSongs[i].track.id)) {
+                streak++;
+                if (streak >= 4 && !inPlay) {
+                    count++;
+                    inPlay = true; // already counted this play
+                }
+            } else {
+                streak = 0; // reset streak
+                inPlay = false; // ready to detect next play
+            }
+        }
+
+        return count;
+    }, []);
+
+
     return { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate,
             calculateAverageDateAdded, calculateAverageSongDuration, calculateAverageSongPopularityScore,
-            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage, calculateArtistDiversityScore };
+            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage, calculateArtistDiversityScore,
+            calculateRecentlyPlayed };
 }
 
 export default useCalculatePlaylistStatsService;
