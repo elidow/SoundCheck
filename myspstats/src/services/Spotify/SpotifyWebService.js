@@ -46,6 +46,7 @@ const SpotifyWebService = () => {
                 console.error(`Error in fetchWithRetry (attempt ${attempt + 1}/${maxRetries}) for function ${fn.name}:`, error);
                 attempt++;
                 if (attempt >= maxRetries) {
+                console.error(`Hit max retries for function ${fn.name}:`, error);
                     return [];
                 }
             }

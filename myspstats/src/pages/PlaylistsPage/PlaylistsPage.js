@@ -1,7 +1,7 @@
 /* PlaylistsPage */
-import React from 'react';
+import { React, useState } from 'react';
 import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
-//import { statMap } from '../../util/Maps'
+import PlaylistSongs from '../../components/PlaylistSongs/PlaylistSongs'
 import './PlaylistsPage.css'
 
 /*
@@ -9,10 +9,16 @@ import './PlaylistsPage.css'
  * Functional Component to render playlists page
  */
 const PlaylistsPage = () =>  {
-    const { playlists, playlistMetaStats, loading, error } = useSpotifyPlaylistContext();
+    const { playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error } = useSpotifyPlaylistContext();
+    const [ selectedPlaylist, setSelectedPlaylist ] = useState(null);
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
     if (error) return <p>Error: {error}</p>;
+    if (selectedPlaylist) {
+        const playlistId = selectedPlaylist.id;
+        return <PlaylistSongs playlist={selectedPlaylist} playlistSongs={playlistSongs[playlistId]} playlistStats={playlistStats[playlistId]}
+        playlistMetaStats={playlistId} onBack={() => setSelectedPlaylist(null)} />
+    }
 
     return (
         <div className="Playlists-Page">
@@ -46,16 +52,16 @@ const PlaylistsPage = () =>  {
                             .map((playlist) => (
                             <tr key={playlist.id}>
                                 <td>
-                                <img 
-                                    src={playlist.images[0]?.url} 
-                                    alt={playlist.name} 
-                                    style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
-                                />
+                                    <img 
+                                        src={playlist.images[0]?.url} 
+                                        alt={playlist.name} 
+                                        style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
+                                    />
                                 </td>
                                 <td>
-                                <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">
-                                    {playlist.name}
-                                </a>
+                                    <button onClick={() => setSelectedPlaylist(playlist)}>
+                                        {playlist.name}
+                                    </button>
                                 </td>
                                 <td>{playlist.tracks.total}</td>
                                 <td>{playlistMetaStats[playlist.id]?.playlistScore ?? "N/A"}</td>
