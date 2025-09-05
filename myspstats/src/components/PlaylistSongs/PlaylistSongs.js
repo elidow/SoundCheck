@@ -10,7 +10,7 @@ const PlaylistSongs = ({playlist, playlistSongs, playlistStats, playlistMetaStat
 
     useEffect(() => {
     // scroll to top when detail view loads
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0,0);
     }, [playlist]);
 
     return (
