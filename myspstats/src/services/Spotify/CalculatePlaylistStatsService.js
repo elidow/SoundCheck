@@ -91,6 +91,19 @@ const useCalculatePlaylistStatsService = () => {
         return ((topSongCount / playlistSongs.length) * 100).toFixed(1)
     }, []);
 
+    const calculateSavedSongPercentage = useCallback((playlistSongs, savedSongs) => {
+       let savedSongCount = 0;
+       let savedSongIds = savedSongs.map(song => song.track.id);
+
+        for (const key in playlistSongs) {
+            if (savedSongIds.includes(playlistSongs[key].track.id)) {
+                savedSongCount += 1;
+            }
+        }
+        
+        return ((savedSongCount / playlistSongs.length) * 100).toFixed(1)
+    }, []);
+
     // need to confirm accuracy
     const calculateArtistDiversityScore = useCallback((playlistSongs) => {
         let artistFrequency = {};
@@ -120,9 +133,34 @@ const useCalculatePlaylistStatsService = () => {
         return (richnessScore * (1 - evennessScore) * 100).toFixed(1)
     }, []);
 
+    // need to confirm accuracy
+    const calculateRecentlyPlayed = useCallback((playlistSongs, recentlyPlayedSongs) => {
+        let playlistSongIds = playlistSongs.map(song => song.track.id);
+        let count = 0;
+        let streak = 0;
+        let inPlay = false;
+
+        for (let i = 0; i < recentlyPlayedSongs.length; i++) {
+            if (playlistSongIds.includes(recentlyPlayedSongs[i].track.id)) {
+                streak++;
+                if (streak >= 4 && !inPlay) {
+                    count++;
+                    inPlay = true; // already counted this play
+                }
+            } else {
+                streak = 0; // reset streak
+                inPlay = false; // ready to detect next play
+            }
+        }
+
+        return count;
+    }, []);
+
+
     return { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate,
             calculateAverageDateAdded, calculateAverageSongDuration, calculateAverageSongPopularityScore,
-            calculateMostTopSongsByTimeRange, calculateArtistDiversityScore };
+            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage, calculateArtistDiversityScore,
+            calculateRecentlyPlayed };
 }
 
 export default useCalculatePlaylistStatsService;

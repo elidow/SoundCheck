@@ -1,0 +1,54 @@
+.Playlists-Page {
+    display: 'flex';
+    flex-direction: column;
+    align-items: 'center';
+    justify-content: 'center';
+
+    background-color: white;
+}
+
+.playlists-page-header {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.playlist-items {
+    display: 'flex';
+    flex-direction: column;
+    align-items: 'center';
+    justify-content: 'center';
+    margin: 50px 34% 50px 34%;
+
+    font-size: 20px;
+    text-align: center;
+
+    background-color: white;
+    color: black;
+}
+
+.table {
+    display: 'flex';
+    flex-direction: column;
+    align-items: 'center';
+    justify-content: 'center';
+
+    background-color: white;
+    color: black;
+}
+
+/* tbody {
+    text-align: center
+}
+
+tr {
+    border-style: solid;
+    border-width: 10px;
+    color: black;
+}
+
+td {
+    margin: 0px;
+    padding: 10px;
+    border: solid;
+    border-width: 0.5px
+} */

@@ -17,40 +17,32 @@ h1 {
     background-color: white;
 }
 
-.table {
+.big-table {
     display: 'flex';
     flex-direction: column;
     align-items: 'center';
     justify-content: 'center';
-    margin: 50px 20% 50px 20%;
+    margin: 30px 2% 30px 2%;
 
     background-color: white;
     color: black;
 
     border-style: solid;
-    border-width: 2px;
+    border-width: 3px;
+    border-color: black;
+    border-collapse: collapse;
 }
 
-.table-item {
-    display: 'flex';
-    flex-direction: column;
-    align-items: 'center';
-    justify-content: 'center';
-    margin: 10px 10px 50px 10px;
+.big-table tr {
+    border-bottom: 2px solid black;
+}
 
-    font-size: 20px;
+.big-table td {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 20ch;
+
     text-align: center;
 
-    background-color: white;
-    color: black;
-}
-
-tbody {
-    text-align: center
-}
-
-td {
-    margin: 0px;
-    border: dotted;
-    border-width: 0.5px
+    height: 25px;
 }

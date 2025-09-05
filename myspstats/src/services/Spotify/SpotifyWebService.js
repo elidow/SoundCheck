@@ -2,6 +2,7 @@
 
 import useSpotifyWebApi from './SpotifyWebApi';
 import useCalculatePlaylistStatsService from './CalculatePlaylistStatsService';
+import useCalculatePlaylistMetaStatsService from './CalculatePlaylistMetaStatsService';
 import pLimit from 'p-limit';
 
 /*
@@ -9,11 +10,13 @@ import pLimit from 'p-limit';
  * Custom react hook used to interact with API layer and calculate playlist statistics
  */
 const SpotifyWebService = () => {
-    const { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs } = useSpotifyWebApi();
+    const { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs, fetchRecentlyPlayedSongs } = useSpotifyWebApi();
     const { calculateSongTimeRangePercentage, calculateMostFrequentArtist,
             calculateAverageReleaseDate, calculateAverageDateAdded,
             calculateAverageSongDuration, calculateAverageSongPopularityScore,
-            calculateMostTopSongsByTimeRange, calculateArtistDiversityScore } = useCalculatePlaylistStatsService();
+            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage,
+            calculateArtistDiversityScore, calculateRecentlyPlayed } = useCalculatePlaylistStatsService();
+    const { calculateFinalMetaStat } = useCalculatePlaylistMetaStatsService();
 
     // Delay function for throttling requests
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -43,6 +46,7 @@ const SpotifyWebService = () => {
                 console.error(`Error in fetchWithRetry (attempt ${attempt + 1}/${maxRetries}) for function ${fn.name}:`, error);
                 attempt++;
                 if (attempt >= maxRetries) {
+                console.error(`Hit max retries for function ${fn.name}:`, error);
                     return [];
                 }
             }
@@ -86,8 +90,8 @@ const SpotifyWebService = () => {
         const topSongs = {};
 
         topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 2]);
-        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 5]);
-        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 10]);
+        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 4]);
+        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 6]);
         
         return topSongs;
     }
@@ -99,6 +103,15 @@ const SpotifyWebService = () => {
     const getSavedSongs = async() => {
         const savedSongs = await runLimited(fetchSavedSongs);
         return savedSongs;
+    }
+
+    /*
+     * getRecentlyPlayedSongs
+     * Fetches all recently played songs from API
+     */
+    const getRecentlyPlayedSongs = async() => {
+        const recentlyPlayedSongs = await runLimited(fetchRecentlyPlayedSongs);
+        return recentlyPlayedSongs;
     }
 
     /*
@@ -128,7 +141,7 @@ const SpotifyWebService = () => {
      * calculatePlaylistStats
      * Calculates all necessary playlist stats
      */
-    const computePlaylistStats = (playlists, playlistSongs, topSongs, savedSongs, dates) => {
+    const computePlaylistStats = (playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates) => {
         const stats = {};
 
         playlists.forEach((playlist) => {
@@ -144,14 +157,32 @@ const SpotifyWebService = () => {
                 mostFrequentArtistByPercentage: songs.length > 0 ? calculateMostFrequentArtist(songs, false) : "No songs",
                 avgSongDuration: songs.length > 0 ? calculateAverageSongDuration(songs) : "No songs",
                 avgSongPopularityScore: songs.length > 0 ? calculateAverageSongPopularityScore(songs): "No songs",
-                mostShortTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["short_term"]): "No songs",
-                mostMediumTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["medium_term"]): "No songs",
-                mostLongTermTopSongs: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["long_term"]): "No songs",
-                artistDiversityScore: songs.length > 0 ? calculateArtistDiversityScore(songs): "No songs"
+                shortTermPercentage: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["short_term"]): "No songs",
+                mediumTermPercentage: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["medium_term"]): "No songs",
+                longTermPercentage: songs.length > 0 ? calculateMostTopSongsByTimeRange(songs, topSongs["long_term"]): "No songs",
+                savedSongPercentage: songs.length > 0 ? calculateSavedSongPercentage(songs, savedSongs): "No songs",
+                artistDiversityScore: songs.length > 0 ? calculateArtistDiversityScore(songs): "No songs",
+                timesRecentlyPlayed: songs.length > 0 ? calculateRecentlyPlayed(songs, recentlyPlayedSongs): "No songs"
             };
         });
 
         return stats;
+    };
+
+    /*
+     * calculatePlaylistStats
+     * Calculates all necessary playlist stats
+     */
+    const computePlaylistMetaStats = (playlists, playlistStats) => {
+        const metaStats = {};
+
+        playlists.forEach((playlist) => {
+            metaStats[playlist.id] = {
+                playlistScore: calculateFinalMetaStat(playlistStats[playlist.id])
+            };
+        });
+
+        return metaStats;
     };
 
     /*
@@ -166,15 +197,17 @@ const SpotifyWebService = () => {
             const playlistSongs = await getPlaylistSongs(playlists);
             const topSongs = await getTopsSongs();
             const savedSongs = await getSavedSongs();
+            const recentlyPlayedSongs = await getRecentlyPlayedSongs();
 
             let end = Date.now() - start;
             console.log("End: " + end)
 
 
             const dates = getDates();
-            const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, dates);
+            const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates);
+            const playlistMetaStats = computePlaylistMetaStats(playlists, playlistStats);
 
-            return { playlists, playlistSongs, playlistStats }
+            return { playlists, playlistSongs, playlistStats, playlistMetaStats }
         } catch (error) {
             console.error("Error in service")
             throw error;

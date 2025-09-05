@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
 const REDIRECT_URI = process.env.REACT_APP_SPOTIFY_REDIRECT_URI;
-const SCOPES = "user-read-private user-read-email playlist-read-private user-top-read user-library-read";
+const SCOPES = "user-read-private user-read-email playlist-read-private user-top-read user-library-read user-read-recently-played";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
 const LOCAL_STORAGE_KEYS = {
@@ -209,11 +209,11 @@ const useSpotifyWebApi = () => {
 
                 playlists = [...playlists, // spread operator (...) expands an array into individual elements and makes shallow copies
                     ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" &&
-                         !item.name.includes("On Repeat 🎧") && !item.name.includes("Top 50") && !item.name.includes("Cape Cod"))]
-                nextUrl = response.data.next
+                        !item.name.includes("On Repeat 🎧") && !item.name.includes("Top 50") && !item.name.includes("Cape Cod"))];
+                nextUrl = response.data.next;
             }
-            console.log("SpotifyWebApi: Playlists: ", playlists)
-            return playlists
+            console.log("SpotifyWebApi: Playlists: ", playlists);
+            return playlists;
         } catch (err) {
             console.error("Spotify Web Api failed to fetch playlists:", err);
             if (err.response && err.response.status === 401) {
@@ -245,8 +245,8 @@ const useSpotifyWebApi = () => {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
-                playlistSongs = [...playlistSongs, ...response.data.items]
-                nextUrl = response.data.next
+                playlistSongs = [...playlistSongs, ...response.data.items];
+                nextUrl = response.data.next;
             }
 
             console.log(`SpotifyWebApi: Playlist Songs for ${playlistId}:`, playlistSongs)
@@ -257,49 +257,8 @@ const useSpotifyWebApi = () => {
                 console.warn("Access token expired. Refreshing access token");
                 await refreshAccessToken();
             } else if (err.response && err.response.status === 429) {
-                console.warn("Client request limit exceeded")
+                console.warn("Client request limit exceeded");
                 throw err;
-            }
-            return [];
-        }
-    }, [accessToken, refreshAccessToken]);
-
-    /*
-     * fetchSavedSongs
-     * Given an access token, fetch the user's saved songs (Liked)
-     * Currently 1000
-     */
-    const fetchSavedSongs = useCallback(async () => {
-        // Validate access token
-        if (!accessToken) {
-            console.log(`No access token found for call to get saved songs`);
-            return [];
-        }
-
-        try {
-            // Fetch playlist songs with pagination
-            let savedSongs = []
-            let nextUrl = `https://api.spotify.com/v1/me/tracks`;
-            let i = 0
-
-            while (nextUrl && i < 20) {
-                const response = await axios.get(nextUrl, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    params: {market: "ES", limit: "50", offset: "0"}
-                });
-
-                savedSongs = [...savedSongs, ...response.data.items]
-                nextUrl = response.data.next
-                i += 1
-            }
-
-            console.log(`SpotifyWebApi: Saved Songs:`, savedSongs)
-            return savedSongs
-        } catch (err) {
-            console.error(`Spotify Web Api failed to fetch saved songs:`, err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
             }
             return [];
         }
@@ -308,7 +267,7 @@ const useSpotifyWebApi = () => {
     /*
      * fetchTopSongs
      * Given an access token and a time range variable, fetch the top songs for a user account within that time range
-     * Currently 50
+     * Default 1 page
      */
     const fetchTopSongs = useCallback(async (timeRange, pages=1) => {
         // Validate access token
@@ -329,9 +288,9 @@ const useSpotifyWebApi = () => {
                     params: {time_range: timeRange, limit: "50", offset: "0"}
                 });
 
-                topSongs = [...topSongs, ...response.data.items]
-                nextUrl = response.data.next
-                i += 1
+                topSongs = [...topSongs, ...response.data.items];
+                nextUrl = response.data.next;
+                i += 1;
             }
 
             console.log(`SpotifyWebApi: Top Songs for ${timeRange} tracks:`, topSongs)
@@ -346,7 +305,83 @@ const useSpotifyWebApi = () => {
         }
     }, [accessToken, refreshAccessToken]);
 
-    return { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs }
+    /*
+     * fetchSavedSongs
+     * Given an access token, fetch the user's saved songs (Liked)
+     * Default 20 pages
+     */
+    const fetchSavedSongs = useCallback(async (maxPages=20) => {
+        // Validate access token
+        if (!accessToken) {
+            console.log(`No access token found for call to get saved songs`);
+            return [];
+        }
+
+        try {
+            // Fetch saved songs with pagination
+            let savedSongs = []
+            let nextUrl = `https://api.spotify.com/v1/me/tracks`;
+            let i = 0
+
+            while (nextUrl && i < maxPages) {
+                const response = await axios.get(nextUrl, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: {market: "ES", limit: "50", offset: "0"}
+                });
+
+                savedSongs = [...savedSongs, ...response.data.items];
+                nextUrl = response.data.next;
+                i += 1;
+            }
+
+            console.log(`SpotifyWebApi: Saved Songs:`, savedSongs)
+            return savedSongs
+        } catch (err) {
+            console.error(`Spotify Web Api failed to fetch saved songs:`, err);
+            if (err.response && err.response.status === 401) {
+                console.warn("Access token expired. Refreshing access token");
+                await refreshAccessToken();
+            }
+            return [];
+        }
+    }, [accessToken, refreshAccessToken]);
+
+    /*
+     * fetchRecentlyPlayedSongs
+     * Given an access token, fetch the user's recently played songs
+     */
+    const fetchRecentlyPlayedSongs = useCallback(async () => {
+        // Validate access token
+        if (!accessToken) {
+            console.log(`No access token found for call to get recently played songs`);
+            return [];
+        }
+
+        try {
+            // Fetch recently played songs with pagination
+            let recentlyPlayedSongs = []
+            let url = `https://api.spotify.com/v1/me/player/recently-played`;
+
+            const response = await axios.get(url, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                params: {limit: "50"}
+            });
+    
+            recentlyPlayedSongs = [...recentlyPlayedSongs, ...response.data.items];
+            
+            console.log(`SpotifyWebApi: Recently Played Songs:`, recentlyPlayedSongs)
+            return recentlyPlayedSongs
+        } catch (err) {
+            console.error(`Spotify Web Api failed to fetch recently played songs:`, err);
+            if (err.response && err.response.status === 401) {
+                console.warn("Access token expired. Refreshing access token");
+                await refreshAccessToken();
+            }
+            return [];
+        }
+    }, [accessToken, refreshAccessToken]);
+
+    return { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs, fetchRecentlyPlayedSongs }
 }
 
 export default useSpotifyWebApi;
