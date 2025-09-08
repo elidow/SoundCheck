@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import SpotifyWebService from '../services/Spotify/SpotifyWebService';
+import MySPStatsService from '../services/MySPStats/MySPStatsService';
 
-const SpotifyPlaylistContext = createContext();
+const MySPStatsContext = createContext();
 
-export const SpotifyPlaylistProvider = ({ children }) => {
-    const { retrievePlaylistsWithStats } = SpotifyWebService();
+export const MySPStatsProvider = ({ children }) => {
+    const { retrieveAllData } = MySPStatsService();
 
     const [playlists, setPlaylists] = useState([]);
     const [playlistSongs, setPlaylistSongs] = useState([]);
@@ -17,7 +17,7 @@ export const SpotifyPlaylistProvider = ({ children }) => {
         console.log("Spotify Playlist Context: In Use Effect")
         const loadData = async () => {
             try {
-                const { playlists, playlistSongs, playlistStats, playlistMetaStats } = await retrievePlaylistsWithStats();
+                const { playlists, playlistSongs, playlistStats, playlistMetaStats } = await retrieveAllData();
 
                 setPlaylists(playlists);
                 setPlaylistSongs(playlistSongs);
@@ -35,12 +35,12 @@ export const SpotifyPlaylistProvider = ({ children }) => {
     }, []);
 
     return (
-        <SpotifyPlaylistContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error }}>
+        <MySPStatsContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error }}>
             {children}
-        </SpotifyPlaylistContext.Provider>
+        </MySPStatsContext.Provider>
     );
 }
 
-export const useSpotifyPlaylistContext = () => {
-    return useContext(SpotifyPlaylistContext);
+export const useMySPStatsContext = () => {
+    return useContext(MySPStatsContext);
 };

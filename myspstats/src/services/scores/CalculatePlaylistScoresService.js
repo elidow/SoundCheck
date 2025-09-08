@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-const useCalculatePlaylistMetaStatsService = () => {
+const useCalculatePlaylistScoresService = () => {
 
     const calculateFinalMetaStat = useCallback((playlistStats) => {
         let twoYearsScore = 0
@@ -75,4 +75,4 @@ const useCalculatePlaylistMetaStatsService = () => {
     return { calculateFinalMetaStat };
 }
 
-export default useCalculatePlaylistMetaStatsService;
+export default useCalculatePlaylistScoresService;

@@ -1,6 +1,6 @@
 /* DashboardsPage */
 import React from 'react';
-import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
+import { useMySPStatsContext } from '../../context/MySPStatsContext';
 import Dashboard from '../../components/Dashboard/Dashboard';
 import { statMap } from '../../util/Maps'
 import './DashboardsPage.css'
@@ -10,7 +10,7 @@ import './DashboardsPage.css'
  * Functional Component to render dashboards page
  */
 const DashboardsPage = () =>  {
-    const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
+    const { playlists, playlistStats, loading, error } = useMySPStatsContext();
 
     const statObjects = Object.entries(statMap);
 

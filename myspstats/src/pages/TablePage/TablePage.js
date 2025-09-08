@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
+import { useMySPStatsContext } from '../../context/MySPStatsContext';
 import { statMap } from '../../util/Maps'
 import './TablePage.css'
 
@@ -8,7 +8,7 @@ import './TablePage.css'
  * Functional Component to render table page
  */
 const TablePage = () =>  {
-    const { playlists, playlistStats, loading, error } = useSpotifyPlaylistContext();
+    const { playlists, playlistStats, loading, error } = useMySPStatsContext();
     const [sortBy, setSortBy] = useState('name');
     const [isAscending, setIsAscending] = useState(true); // state for controlling order of list, Default: false = descending
 

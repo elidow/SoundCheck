@@ -1,6 +1,6 @@
 /* PlaylistsPage */
 import { React, useState } from 'react';
-import { useSpotifyPlaylistContext } from '../../context/SpotifyPlaylistContext';
+import { useMySPStatsContext } from '../../context/MySPStatsContext';
 import PlaylistSongs from '../../components/PlaylistSongs/PlaylistSongs'
 import './PlaylistsPage.css'
 
@@ -9,7 +9,7 @@ import './PlaylistsPage.css'
  * Functional Component to render playlists page
  */
 const PlaylistsPage = () =>  {
-    const { playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error } = useSpotifyPlaylistContext();
+    const { playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error } = useMySPStatsContext();
     const [ selectedPlaylist, setSelectedPlaylist ] = useState(null);
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
