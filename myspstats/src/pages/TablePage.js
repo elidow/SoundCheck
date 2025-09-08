@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useMySPStatsContext } from '../../context/MySPStatsContext';
-import { statMap } from '../../util/Maps'
+import { useMySPStatsContext } from '../context/MySPStatsContext';
+import { statMap } from '../util/Maps'
 import './TablePage.css'
 
 /*

@@ -1,6 +1,6 @@
 /* MySPStatsService */
 
-import SpotifyWebService from '../Spotify/SpotifyWebService';
+import SpotifyWebService from '../spotify/SpotifyWebService';
 import useCalculatePlaylistStatsService from '../stats/CalculatePlaylistStatsService';
 import useCalculatePlaylistScoresService from '../scores/CalculatePlaylistScoresService';
 

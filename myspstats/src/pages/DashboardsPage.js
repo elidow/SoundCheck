@@ -1,8 +1,8 @@
 /* DashboardsPage */
 import React from 'react';
-import { useMySPStatsContext } from '../../context/MySPStatsContext';
-import Dashboard from '../../components/Dashboard/Dashboard';
-import { statMap } from '../../util/Maps'
+import { useMySPStatsContext } from '../context/MySPStatsContext';
+import Dashboard from '../components/dashboard/Dashboard';
+import { statMap } from '../util/Maps'
 import './DashboardsPage.css'
 
 /*

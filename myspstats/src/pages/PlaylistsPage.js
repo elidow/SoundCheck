@@ -1,7 +1,7 @@
 /* PlaylistsPage */
 import { React, useState } from 'react';
-import { useMySPStatsContext } from '../../context/MySPStatsContext';
-import PlaylistSongs from '../../components/PlaylistSongs/PlaylistSongs'
+import { useMySPStatsContext } from '../context/MySPStatsContext';
+import PlaylistSongs from '../components/playlistSongs/PlaylistSongs'
 import './PlaylistsPage.css'
 
 /*

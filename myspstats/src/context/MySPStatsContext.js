@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import MySPStatsService from '../services/MySPStats/MySPStatsService';
+import MySPStatsService from '../services/playlistDataManager/PlaylistDataManagerService';
 
 const MySPStatsContext = createContext();
 
