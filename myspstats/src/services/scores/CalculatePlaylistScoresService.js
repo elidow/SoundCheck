@@ -26,7 +26,7 @@ const useCalculatePlaylistScoresService = () => {
         }
 
         return 100 - (2 * Math.abs(count - 70))
-    });
+    }, []);
 
     /*
      * calculateTwoYearOldPercentageScore
@@ -35,7 +35,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateTwoYearOldPercentageScore = useCallback((percentage) => {
         return 100 - Number(percentage)
-    });
+    }, []);
 
     /*
      * calculateAvgSongAddedDateScore
@@ -62,7 +62,7 @@ const useCalculatePlaylistScoresService = () => {
         const score = 100 / (1 + Math.exp(k * (x - midpoint)));
 
         return Math.round(score);
-    });
+    }, []);
 
     /*
      * calculateLastSongAddedDateScore
@@ -89,7 +89,7 @@ const useCalculatePlaylistScoresService = () => {
         const score = 100 / (1 + Math.exp(k * (x - midpoint)));
 
         return Math.round(score);
-    });
+    }, []);
 
     /*
      * calculateTotalMaintenanceScore
@@ -102,8 +102,8 @@ const useCalculatePlaylistScoresService = () => {
             + (avgSongAddedDateScore * (10/35)) 
             + (lastSongAddedDateScore * (5/35));
         
-        return temp.toFixed(1);
-    });
+        return Number(temp).toFixed(1);
+    }, []);
 
     // --- User Relevance ---
 
@@ -118,7 +118,7 @@ const useCalculatePlaylistScoresService = () => {
         }
         
         return 2 * Number(percent);
-    });
+    }, []);
 
     /*
      * calculateMediumTermMostPlayedPercentageScore
@@ -131,7 +131,7 @@ const useCalculatePlaylistScoresService = () => {
         }
         
         return 1.5 * Number(percent);
-    });
+    }, []);
 
     /*
      * calculateLongTermMostPlayedPercentageScore
@@ -140,7 +140,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateLongTermMostPlayedPercentageScore = useCallback((percent) => {
         return Number(percent);
-    });
+    }, []);
 
     /*
      * calculateSavedSongPercentageScore
@@ -149,7 +149,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateSavedSongPercentageScore = useCallback((percent) => {
         return Number(percent);
-    });
+    }, []);
 
     /*
      * calculateTimesRecentlyPlayedScore
@@ -162,7 +162,7 @@ const useCalculatePlaylistScoresService = () => {
         }
 
         return 0;
-    });
+    }, []);
 
     /*
      * calculateTotalUserRelevanceScore
@@ -176,8 +176,8 @@ const useCalculatePlaylistScoresService = () => {
             + (savedSongPercentageScore * (5/35)) 
             + (timesRecentlyPlayedScore * (5/35));
         
-        return temp.toFixed(1);
-    });
+        return Number(temp).toFixed(1);
+    }, []);
 
     // --- General Relevance ---
 
@@ -196,7 +196,6 @@ const useCalculatePlaylistScoresService = () => {
         const thirtyYearsAgo = formatDate(new Date(today.getFullYear() - 30, today.getMonth(), today.getDate()));
         const fortyYearsAgo = formatDate(new Date(today.getFullYear() - 40, today.getMonth(), today.getDate()));
         const fiftyYearsAgo = formatDate(new Date(today.getFullYear() - 50, today.getMonth(), today.getDate()));
-        const sixtyYearsAgo = formatDate(new Date(today.getFullYear() - 60, today.getMonth(), today.getDate()));
         
         if (date >= tenYearsAgo) {
             return 100
@@ -211,7 +210,7 @@ const useCalculatePlaylistScoresService = () => {
         } else {
             return 0
         }
-    });
+    }, []);
 
     /*
      * calculateAvgSongPopularityScore
@@ -219,7 +218,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateAvgSongPopularityScore = useCallback((popularity) => {
         return Number(popularity);
-    });
+    }, []);
 
     /*
      * calculateTotalGeneralRelevanceScore
@@ -229,8 +228,8 @@ const useCalculatePlaylistScoresService = () => {
         const temp = (avgSongReleaseDateScore * (1/2)) 
             + (avgSongPopularityScore * (1/2))
         
-        return temp.toFixed(1);
-    });
+        return Number(temp).toFixed(1);
+    }, []);
 
     // --- Artist Diversity ---
 
@@ -240,7 +239,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateArtistDiversityScore = useCallback((diversity) =>  {
         return Number(diversity);
-    });
+    }, []);
 
     /*
      * calculateTotalArtistDiversityScore
@@ -248,95 +247,47 @@ const useCalculatePlaylistScoresService = () => {
      * May add more but just artist diversity for now
      */
     const calculateTotalArtistDiversityScore = useCallback((artistDiversityScore) => {        
-        return artistDiversityScore.toFixed(1);
-    });
+        return Number(artistDiversityScore).toFixed(1);
+    }, []);
 
     /*
-     * calculateArtistDiversityScore
+     * calculateSongDurationVarianceScore
      * Calculates score 0-100 on the variance of the song length
      * closer to 0 is better
      */
     const calculateSongDurationVarianceScore = useCallback((variance) =>  {
         return 100 - Number(variance) * 100;
-    });
+    }, []);
+
+    /*
+     * calculateSongReleaseDateVarianceScore
+     * Calculates score 0-100 on the variance of the song release date
+     * closer to 0 is better
+     */
+    const calculateSongReleaseDateVarianceScore = useCallback((variance) =>  {
+        return 100 - Number(variance) * 100;
+    }, []);
 
     /*
      * calculateTotalSongLikenessScore
      * Calculates score 0-100 on how simiar the songs are
      * May add more but just song duration variance for now
      */
-    const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore) => {        
-        return songDurationVarianceScore.toFixed(1);
-    });
+    const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore, songReleaseDateVariance) => {        
+        const temp = (songDurationVarianceScore * (1/2)) 
+            + (songReleaseDateVariance * (1/2))
+        
+        return Number(temp).toFixed(1);
+    }, []);
 
-    const calculateFinalMetaStat = useCallback((playlistStats) => {
-        let twoYearsScore = 0
-        let sixMonthsScore = 0
-        let lastAddedDateScore = 0
-        let avgAddedDateScore = 0
-        let shortTermPercentageScore = 0
-        let mediumTermPercentageScore = 0
-        let longTermPercentageScore = 0
-        let savedSongPercentageScore = 0
-        let songCountScore = 0
-        let artistDiversityScore = 0
-
-        // Initialize and format dates
-        const formatDate = (date) =>
-            date.toLocaleDateString("fr-CA", { year: "numeric", month: "2-digit", day: "2-digit" });
-        const today = new Date();
-        const oneMonthAgo = formatDate(new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()));
-        const threeMonthsAgo = formatDate(new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()));
-        const sixMonthsAgo = formatDate(new Date(today.getFullYear(), today.getMonth() - 6, today.getDate()));
-        const oneYearAgo = formatDate(new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()));
-
-        // Maintenance scores
-        twoYearsScore = 100 - Number(playlistStats["twoYearOldPercentage"])
-        sixMonthsScore = Number(playlistStats["sixMonthNewPercentage"])
-
-        if (playlistStats["lastSongAddedDate"] >= oneMonthAgo) {
-            lastAddedDateScore = 100
-        } else if (playlistStats["lastSongAddedDate"] >= threeMonthsAgo) {
-            lastAddedDateScore = 75
-        } else if (playlistStats["lastSongAddedDate"] >= oneYearAgo) {
-            lastAddedDateScore = 50
-        } else {
-            lastAddedDateScore = 25
-        }
-
-        if (playlistStats["avgSongAddedDate"] >= threeMonthsAgo) {
-            avgAddedDateScore = 100
-        } else if (playlistStats["avgSongAddedDate"] >= sixMonthsAgo) {
-            avgAddedDateScore = 75
-        } else if (playlistStats["avgSongAddedDate"] >= oneYearAgo) {
-            avgAddedDateScore = 50
-        } else {
-            avgAddedDateScore = 25
-        }
-
-        // Relevance scores
-        shortTermPercentageScore = Number(playlistStats["shortTermPercentage"])
-        mediumTermPercentageScore = Number(playlistStats["mediumTermPercentage"])
-        longTermPercentageScore = Number(playlistStats["longTermPercentage"])
-        savedSongPercentageScore = Number(playlistStats["savedSongPercentage"])
-
-        // Size scores
-        if (playlistStats["songCount"] >= 60 && playlistStats["songCount"] <= 79) {
-            songCountScore = 100
-        } else if(playlistStats["songCount"] >= 80 && playlistStats["songCount"] <= 99) {
-            songCountScore = 75
-        } else if(playlistStats["songCount"] >= 40 && playlistStats["songCount"] <= 59) {
-            songCountScore = 50
-        } else {
-            songCountScore = 25
-        }
-
-        // Diversity scores
-        artistDiversityScore = Number(playlistStats["artistDiversityScore"]);
-
-        return ((twoYearsScore + sixMonthsScore + lastAddedDateScore + avgAddedDateScore +
-            shortTermPercentageScore + mediumTermPercentageScore + longTermPercentageScore + savedSongPercentageScore +
-            songCountScore + artistDiversityScore) / 10).toFixed(1);
+    const calculateTotalScore = useCallback((totalMaintenanceScore, totalUserRelevanceScore, totalGeneralRelevanceScore, totalArtistDiversityScore, totalSongLikenessScore) => {
+        const temp = (totalMaintenanceScore * (35/100)) 
+            + (totalUserRelevanceScore * (35/100)) 
+            + (totalGeneralRelevanceScore * (10/100)) 
+            + (totalArtistDiversityScore * (10/100))
+            + (totalSongLikenessScore * (10/100));
+        
+        return Number(temp).toFixed(1);
     }, []);
 
     return {
@@ -351,9 +302,9 @@ const useCalculatePlaylistScoresService = () => {
         // Artist Diversity
         calculateArtistDiversityScore, calculateTotalArtistDiversityScore,
         // Song Likeness
-        calculateSongDurationVarianceScore, calculateTotalSongLikenessScore,
-        // Final Meta
-        calculateFinalMetaStat };
+        calculateSongDurationVarianceScore, calculateSongReleaseDateVarianceScore, calculateTotalSongLikenessScore,
+        // Total Score
+        calculateTotalScore };
 }
 
 export default useCalculatePlaylistScoresService;

@@ -24,10 +24,10 @@ const useCalculatePlaylistStatsService = () => {
     }, []);
 
     /*
-     * calculateAverageDateAdded
+     * calculateAverageSongDateAdded
      * Given a playlist's songs, calculates the average added date of the songs
      */
-    const calculateAverageDateAdded = useCallback((playlistSongs) => {
+    const calculateAverageSongDateAdded = useCallback((playlistSongs) => {
 
         const timestamps = playlistSongs.map(playlistSong => Date.parse(playlistSong.added_at));
         const avgTimestamp = timestamps.reduce((sum, ts) => sum + ts, 0) / timestamps.length;
@@ -102,10 +102,10 @@ const useCalculatePlaylistStatsService = () => {
     }, []);
 
     /*
-     * calculateAverageReleaseDate
+     * calculateAverageSongReleaseDate
      * Given a playlist's songs, calculates the average release date of the songs
      */
-    const calculateAverageReleaseDate = useCallback((playlistSongs) => {
+    const calculateAverageSongReleaseDate = useCallback((playlistSongs) => {
 
         const timestamps = playlistSongs.map(playlistSong => Date.parse(playlistSong.track.album.release_date));
         const avgTimestamp = timestamps.reduce((sum, ts) => sum + ts, 0) / timestamps.length;
@@ -211,27 +211,60 @@ const useCalculatePlaylistStatsService = () => {
      */
     const calculateSongDurationVariance = useCallback((playlistSongs) => {
 
-        if (playlistSongs.length === 0) {
-            return 0;
-        }
+        // if (playlistSongs.length === 0) {
+        //     return 0;
+        // }
 
-        const songDurations = playlistSongs.map(playlistSong => Number(((playlistSong.track.duration_ms / 1000) / 60).toFixed(2)));
-        const mean = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+        // const songDurations = playlistSongs.map(playlistSong => Number(((playlistSong.track.duration_ms / 1000) / 60).toFixed(2)));
+        // const mean = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
 
-        const squaredDifferences = songDurations.map(duration => Math.pow(duration - mean, 2));
-        const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
+        // const squaredDifferences = songDurations.map(duration => Math.pow(duration - mean, 2));
+        // const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
 
-        // return population variance
-        return sumOfSquaredDifferences / playlistSongs.length;
+        // // return population variance
+        // return sumOfSquaredDifferences / playlistSongs.length;
+        return 0;
+    }, []);
+
+    /*
+    * calculateReleaseDateVariance
+    * Given a playlist's songs, calculates the release date variance in days
+    */
+    const calculateSongReleaseDateVariance = useCallback((playlistSongs) => {
+        // if (playlistSongs.length === 0) {
+        //     return 0;
+        // }
+
+        // // Convert YYYY-MM-DD → timestamp in days
+        // const releaseDates = playlistSongs
+        //     .map(song => song.track.album.release_date)
+        //     .filter(Boolean) // in case of missing release_date
+        //     .map(dateStr => {
+        //         const date = new Date(dateStr);
+        //         return Math.floor(date.getTime() / (1000 * 60 * 60 * 24)); // convert to days
+        //     });
+
+        // if (releaseDates.length === 0) {
+        //     return 0;
+        // }
+
+        // const mean = releaseDates.reduce((sum, d) => sum + d, 0) / releaseDates.length;
+
+        // const squaredDifferences = releaseDates.map(d => Math.pow(d - mean, 2));
+        // const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
+
+        // // return population variance (in days²)
+        // return sumOfSquaredDifferences / releaseDates.length;
+        return 0;
     }, []);
 
 
-    return { calculateSongTimeRangePercentage, calculateAverageDateAdded,
+    return { calculateSongTimeRangePercentage, calculateAverageSongDateAdded,
             calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
-            calculateAverageReleaseDate, calculateAverageSongPopularity,
+            calculateAverageSongReleaseDate, calculateAverageSongPopularity,
             calculateMostFrequentArtist, calculateArtistDiversity,
             calculateAverageSongDuration,
-            calculateSongDurationVariance
+            calculateSongDurationVariance, calculateSongReleaseDateVariance
         };
 }
 

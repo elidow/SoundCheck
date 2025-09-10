@@ -10,12 +10,12 @@ import useCalculatePlaylistScoresService from '../scores/CalculatePlaylistScores
  */
 const MySPStatsService = () => {
     const { retrievePlaylistsAndSongs } = SpotifyWebService();
-    const { calculateSongTimeRangePercentage, calculateAverageDateAdded,
+    const { calculateSongTimeRangePercentage, calculateAverageSongDateAdded,
             calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
-            calculateAverageReleaseDate, calculateAverageSongPopularity,
+            calculateAverageSongReleaseDate, calculateAverageSongPopularity,
             calculateMostFrequentArtist, calculateArtistDiversity,
             calculateAverageSongDuration,
-            calculateSongDurationVariance } = useCalculatePlaylistStatsService();
+            calculateSongDurationVariance, calculateSongReleaseDateVariance } = useCalculatePlaylistStatsService();
     const {
         // Maintenance
         calculateSongCountScore, calculateTwoYearOldPercentageScore, calculateAvgSongAddedDateScore,
@@ -28,9 +28,9 @@ const MySPStatsService = () => {
         // Artist Diversity
         calculateArtistDiversityScore, calculateTotalArtistDiversityScore,
         // Song Likeness
-        calculateSongDurationVarianceScore, calculateTotalSongLikenessScore,
-        // Final Meta
-        calculateFinalMetaStat } = useCalculatePlaylistScoresService();
+        calculateSongDurationVarianceScore, calculateSongReleaseDateVarianceScore, calculateTotalSongLikenessScore,
+        // Total Score
+        calculateTotalScore } = useCalculatePlaylistScoresService();
 
 
     /*
@@ -78,7 +78,7 @@ const MySPStatsService = () => {
                     songCount: songs.length,
                     twoYearOldPercentage: withSongs(songs, (s) => calculateSongTimeRangePercentage(s, dates.twoThousandNewYears, dates.twoYearsAgo)),
                     sixMonthNewPercentage: withSongs(songs, (s) => calculateSongTimeRangePercentage(s, dates.sixMonthsAgo, dates.zeroDaysAgo)),
-                    avgSongAddedDate: withSongs(songs, calculateAverageDateAdded),
+                    avgSongAddedDate: withSongs(songs, calculateAverageSongDateAdded),
                     lastSongAddedDate: withSongs(songs, (s) => s[s.length - 1].added_at),
                 },
                 userRelevance: {
@@ -89,7 +89,7 @@ const MySPStatsService = () => {
                     timesRecentlyPlayed: withSongs(songs, (s) => calculateTimesRecentlyPlayed(s, recentlyPlayedSongs)),
                 },
                 generalRelevance: {
-                    avgSongReleaseDate: withSongs(songs, calculateAverageReleaseDate),
+                    avgSongReleaseDate: withSongs(songs, calculateAverageSongReleaseDate),
                     avgSongPopularity: withSongs(songs, calculateAverageSongPopularity),
                 },
                 artistStats: {
@@ -102,6 +102,7 @@ const MySPStatsService = () => {
                 },
                 advancedSongStats: {
                     songDurationVariance: withSongs(songs, calculateSongDurationVariance),
+                    songReleaseDateVariance: withSongs(songs, calculateSongReleaseDateVariance)
                 },
             };
         });
@@ -133,6 +134,10 @@ const MySPStatsService = () => {
                 playlistStats[playlistId]["maintenance"]["lastSongAddedDate"]
             );
 
+            const totalMaintenanceScore = calculateTotalMaintenanceScore(
+                songCountScore, twoYearOldPercentageScore, avgSongAddedDateScore, lastSongAddedDateScore
+            );
+
             // --- User Relevance Scores ---
             const shortTermMostPlayedPercentageScore = calculateShortTermMostPlayedPercentageScore(
                 playlistStats[playlistId]["userRelevance"]["shortTermMostPlayedPercentage"]
@@ -150,6 +155,11 @@ const MySPStatsService = () => {
                 playlistStats[playlistId]["userRelevance"]["timesRecentlyPlayed"]
             );
 
+            const totalUserRelevanceScore = calculateTotalUserRelevanceScore(
+                shortTermMostPlayedPercentageScore, mediumTermMostPlayedPercentageScore, longTermMostPlayedPercentageScore,
+                savedSongPercentageScore, timesRecentlyPlayedScore
+            );
+
             // --- General Relevance Scores ---
             const avgSongReleaseDateScore = calculateAvgSongReleaseDateScore(
                 playlistStats[playlistId]["generalRelevance"]["avgSongReleaseDate"]
@@ -158,14 +168,30 @@ const MySPStatsService = () => {
                 playlistStats[playlistId]["generalRelevance"]["avgSongPopularity"]
             );
 
+            const totalGeneralRelevanceScore = calculateTotalGeneralRelevanceScore(
+                avgSongReleaseDateScore, avgSongPopularityScore
+            );
+
             // --- Artist Diversity Scores ---
             const artistDiversityScore = calculateArtistDiversityScore(
                 playlistStats[playlistId]["artistStats"]["artistDiversity"]
             );
 
+            const totalArtistDiversityScore = calculateTotalArtistDiversityScore(
+                artistDiversityScore
+            );
+
             // --- Song Likeness Scores ---
             const songDurationVarianceScore = calculateSongDurationVarianceScore(
                 playlistStats[playlistId]["advancedSongStats"]["songDurationVariance"]
+            );
+
+            const songReleaseDateVarianceScore = calculateSongReleaseDateVarianceScore(
+                playlistStats[playlistId]["advancedSongStats"]["songReleaseDateVariance"]
+            );
+
+            const totalSongLikenessScore = calculateTotalSongLikenessScore(
+                songDurationVarianceScore, songReleaseDateVarianceScore
             );
 
             // --- Assign Scores Object ---
@@ -175,12 +201,7 @@ const MySPStatsService = () => {
                     twoYearOldPercentageScore,
                     avgSongAddedDateScore,
                     lastSongAddedDateScore,
-                    totalMaintenanceScore: calculateTotalMaintenanceScore(
-                        songCountScore,
-                        twoYearOldPercentageScore,
-                        avgSongAddedDateScore,
-                        lastSongAddedDateScore
-                    )
+                    totalMaintenanceScore
                 },
                 userRelevanceScores: {
                     shortTermMostPlayedPercentageScore,
@@ -188,35 +209,29 @@ const MySPStatsService = () => {
                     longTermMostPlayedPercentageScore,
                     savedSongPercentageScore,
                     timesRecentlyPlayedScore,
-                    totalUserRelevanceScore: calculateTotalUserRelevanceScore(
-                        shortTermMostPlayedPercentageScore,
-                        mediumTermMostPlayedPercentageScore,
-                        longTermMostPlayedPercentageScore,
-                        savedSongPercentageScore,
-                        timesRecentlyPlayedScore
-                    )
+                    totalUserRelevanceScore
                 },
                 generalRelevanceScores: {
                     avgSongReleaseDateScore,
                     avgSongPopularityScore,
-                    totalGeneralRelevanceScore: calculateTotalGeneralRelevanceScore(
-                        avgSongReleaseDateScore,
-                        avgSongPopularityScore
-                    )
+                    totalGeneralRelevanceScore
                 },
                 artistDiversityScores: {
                     artistDiversityScore,
-                    totalArtistDiversityScore: calculateTotalArtistDiversityScore(
-                        artistDiversityScore
-                    )
+                    totalArtistDiversityScore
                 },
                 songLikenessScores: {
                     songDurationVarianceScore,
-                    totalSongLikenessScore: calculateTotalSongLikenessScore(
-                        songDurationVarianceScore
-                    )
+                    songReleaseDateVarianceScore,
+                    totalSongLikenessScore
                 },
-                totalScore: calculateFinalMetaStat(playlistStats[playlistId])
+                totalScore: calculateTotalScore(
+                    totalMaintenanceScore,
+                    totalUserRelevanceScore,
+                    totalGeneralRelevanceScore,
+                    totalArtistDiversityScore,
+                    totalSongLikenessScore
+                )
             };
         });
 
