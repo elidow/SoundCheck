@@ -6,7 +6,7 @@ import './PlaylistSongs.css'
  * PlaylistSongs
  * Component representation of playlist songs
  */
-const PlaylistSongs = ({playlist, playlistSongs, playlistStats, playlistMetaStats, onBack}) =>  {
+const PlaylistSongs = ({playlist, playlistSongs, playlistStats, playlistScores, onBack}) =>  {
 
     useEffect(() => {
     // scroll to top when detail view loads
@@ -26,7 +26,7 @@ const PlaylistSongs = ({playlist, playlistSongs, playlistStats, playlistMetaStat
                 </button>
             </div>
             {/* <div>
-                {playlistMetaStats}
+                {playlistScores}
             </div>
             <div>
                 {playlistStats}

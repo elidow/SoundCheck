@@ -9,7 +9,7 @@ export const MySPStatsProvider = ({ children }) => {
     const [playlists, setPlaylists] = useState([]);
     const [playlistSongs, setPlaylistSongs] = useState([]);
     const [playlistStats, setPlaylistStats] = useState([]);
-    const [playlistMetaStats, setPlaylistMetaStats] = useState([]);
+    const [playlistScores, setPlaylistScores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -17,12 +17,12 @@ export const MySPStatsProvider = ({ children }) => {
         console.log("Spotify Playlist Context: In Use Effect")
         const loadData = async () => {
             try {
-                const { playlists, playlistSongs, playlistStats, playlistMetaStats } = await retrieveAllData();
+                const { playlists, playlistSongs, playlistStats, playlistScores } = await retrieveAllData();
 
                 setPlaylists(playlists);
                 setPlaylistSongs(playlistSongs);
                 setPlaylistStats(playlistStats);
-                setPlaylistMetaStats(playlistMetaStats);
+                setPlaylistScores(playlistScores);
             } catch (err) {
                 setLoading(false);
                 setError(err.message);
@@ -35,7 +35,7 @@ export const MySPStatsProvider = ({ children }) => {
     }, []);
 
     return (
-        <MySPStatsContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error }}>
+        <MySPStatsContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistScores, loading, error }}>
             {children}
         </MySPStatsContext.Provider>
     );

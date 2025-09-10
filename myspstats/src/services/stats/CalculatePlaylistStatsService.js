@@ -1,8 +1,16 @@
 import { useCallback } from 'react';
 import gini from 'gini';
 
+/*
+ * MySPStatsService
+ * Custom hook to handle all stat calculations
+ */
 const useCalculatePlaylistStatsService = () => {
 
+    /*
+     * calculateSongTimeRangePercentage
+     * Given a playlist's songs, calculates the percentage of songs that were added within the time range
+     */
     const calculateSongTimeRangePercentage = useCallback((playlistSongs, startDate, endDate) => {
         let outdated = 0;
 
@@ -15,6 +23,115 @@ const useCalculatePlaylistStatsService = () => {
         return ((outdated / playlistSongs.length) * 100).toFixed(1)
     }, []);
 
+    /*
+     * calculateAverageDateAdded
+     * Given a playlist's songs, calculates the average added date of the songs
+     */
+    const calculateAverageDateAdded = useCallback((playlistSongs) => {
+
+        const timestamps = playlistSongs.map(playlistSong => Date.parse(playlistSong.added_at));
+        const avgTimestamp = timestamps.reduce((sum, ts) => sum + ts, 0) / timestamps.length;
+        const avgDate = new Date(avgTimestamp);
+        
+        return avgDate.toISOString();
+    }, []);
+
+    /*
+     * calculateMostPlayedByTimeRangePercentage
+     * Given a playlist's songs and user's top songs in a time range,
+     * Calculates the percentage of songs that appear in the top songs
+     */
+    const calculateMostPlayedByTimeRangePercentage = useCallback((playlistSongs, topSongs) => {
+       let topSongCount = 0;
+       let topSongIds = topSongs.map(song => song.id);
+
+        for (const key in playlistSongs) {
+            if (topSongIds.includes(playlistSongs[key].track.id)) {
+                topSongCount += 1;
+            }
+        }
+        
+        return ((topSongCount / playlistSongs.length) * 100).toFixed(1)
+    }, []);
+
+    /*
+     * calculateSavedSongPercentage
+     * Given a playlist's songs and user's saved songs,
+     * Calculates the percentage of songs that appear in the saved songs
+     */
+    const calculateSavedSongPercentage = useCallback((playlistSongs, savedSongs) => {
+       let savedSongCount = 0;
+       let savedSongIds = savedSongs.map(song => song.track.id);
+
+        for (const key in playlistSongs) {
+            if (savedSongIds.includes(playlistSongs[key].track.id)) {
+                savedSongCount += 1;
+            }
+        }
+        
+        return ((savedSongCount / playlistSongs.length) * 100).toFixed(1)
+    }, []);
+
+    // TODO: need to confirm accurracy
+    /*
+     * calculateTimesRecentlyPlayed
+     * Given a playlist's songs and user's recently played songs,
+     * Calculates the times a playlist has been recently played
+     * A play of a playlist is considered 4 songs from it in any order
+     */
+    const calculateTimesRecentlyPlayed = useCallback((playlistSongs, recentlyPlayedSongs) => {
+        let playlistSongIds = playlistSongs.map(song => song.track.id);
+        let count = 0;
+        let streak = 0;
+        let inPlay = false;
+
+        for (let i = 0; i < recentlyPlayedSongs.length; i++) {
+            if (playlistSongIds.includes(recentlyPlayedSongs[i].track.id)) {
+                streak++;
+                if (streak >= 4 && !inPlay) {
+                    count++;
+                    inPlay = true; // already counted this play
+                }
+            } else {
+                streak = 0; // reset streak
+                inPlay = false; // ready to detect next play
+            }
+        }
+
+        return count;
+    }, []);
+
+    /*
+     * calculateAverageReleaseDate
+     * Given a playlist's songs, calculates the average release date of the songs
+     */
+    const calculateAverageReleaseDate = useCallback((playlistSongs) => {
+
+        const timestamps = playlistSongs.map(playlistSong => Date.parse(playlistSong.track.album.release_date));
+        const avgTimestamp = timestamps.reduce((sum, ts) => sum + ts, 0) / timestamps.length;
+        const avgDate = new Date(avgTimestamp);
+        
+        return avgDate.toISOString();
+    }, []);
+
+    /*
+     * calculateAverageSongPopularity
+     * Given a playlist's songs, calculates the average song popularity 
+     * This is a number 0 to 100 where 100 is the most popular based on overall and current popularity
+     */
+    const calculateAverageSongPopularity = useCallback((playlistSongs) => {
+
+        const songPopularityScores = playlistSongs.map(playlistSong => playlistSong.track.popularity);
+        const avgSongPopularityScore = songPopularityScores.reduce((sum, sps) => sum + sps, 0) / songPopularityScores.length;
+        
+        return (avgSongPopularityScore).toFixed(2);
+    }, []);
+
+    /*
+     * calculateMostFrequentArtist
+     * Given a playlist's songs and counting method, calculates the most frequent artist
+     * True means by count, false means by percentage
+     */
     const calculateMostFrequentArtist = useCallback((playlistSongs, byCount) => {
         let artistFrequency = {};
         let mostFrequentArtistByCount = {
@@ -43,69 +160,12 @@ const useCalculatePlaylistStatsService = () => {
         return mostFrequentArtistByCount
     }, []);
 
-    const calculateAverageReleaseDate = useCallback((playlistSongs) => {
-
-        const timestamps = playlistSongs.map(playlistSong => Date.parse(playlistSong.track.album.release_date));
-        const avgTimestamp = timestamps.reduce((sum, ts) => sum + ts, 0) / timestamps.length;
-        const avgDate = new Date(avgTimestamp);
-        
-        return avgDate.toISOString();
-    }, []);
-
-    const calculateAverageDateAdded = useCallback((playlistSongs) => {
-
-        const timestamps = playlistSongs.map(playlistSong => Date.parse(playlistSong.added_at));
-        const avgTimestamp = timestamps.reduce((sum, ts) => sum + ts, 0) / timestamps.length;
-        const avgDate = new Date(avgTimestamp);
-        
-        return avgDate.toISOString();
-    }, []);
-
-    const calculateAverageSongDuration = useCallback((playlistSongs) => {
-
-        const songDurations = playlistSongs.map(playlistSong => playlistSong.track.duration_ms);
-        const avgSongDuration = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
-        
-        return ((avgSongDuration / 1000) / 60).toFixed(2);
-    }, []);
-
-    const calculateAverageSongPopularityScore = useCallback((playlistSongs) => {
-
-        const songPopularityScores = playlistSongs.map(playlistSong => playlistSong.track.popularity);
-        const avgSongPopularityScore = songPopularityScores.reduce((sum, sps) => sum + sps, 0) / songPopularityScores.length;
-        
-        return (avgSongPopularityScore).toFixed(2);
-    }, []);
-
-
-    const calculateMostTopSongsByTimeRange = useCallback((playlistSongs, topSongs) => {
-       let topSongCount = 0;
-       let topSongIds = topSongs.map(song => song.id);
-
-        for (const key in playlistSongs) {
-            if (topSongIds.includes(playlistSongs[key].track.id)) {
-                topSongCount += 1;
-            }
-        }
-        
-        return ((topSongCount / playlistSongs.length) * 100).toFixed(1)
-    }, []);
-
-    const calculateSavedSongPercentage = useCallback((playlistSongs, savedSongs) => {
-       let savedSongCount = 0;
-       let savedSongIds = savedSongs.map(song => song.track.id);
-
-        for (const key in playlistSongs) {
-            if (savedSongIds.includes(playlistSongs[key].track.id)) {
-                savedSongCount += 1;
-            }
-        }
-        
-        return ((savedSongCount / playlistSongs.length) * 100).toFixed(1)
-    }, []);
-
-    // need to confirm accuracy
-    const calculateArtistDiversityScore = useCallback((playlistSongs) => {
+    // TODO: need to confirm accurracy
+    /*
+     * calculateArtistDiversity
+     * Given a playlist's songs, calculates the artist diversity using the gini coefficient
+     */
+    const calculateArtistDiversity = useCallback((playlistSongs) => {
         let artistFrequency = {};
         let artistCount = 0;
         let richnessScore = 0;
@@ -133,34 +193,46 @@ const useCalculatePlaylistStatsService = () => {
         return (richnessScore * (1 - evennessScore) * 100).toFixed(1)
     }, []);
 
-    // need to confirm accuracy
-    const calculateRecentlyPlayed = useCallback((playlistSongs, recentlyPlayedSongs) => {
-        let playlistSongIds = playlistSongs.map(song => song.track.id);
-        let count = 0;
-        let streak = 0;
-        let inPlay = false;
+    /*
+     * calculateAverageSongDuration
+     * Given a playlist's songs, calculates the average song duration in minutes
+     */
+    const calculateAverageSongDuration = useCallback((playlistSongs) => {
 
-        for (let i = 0; i < recentlyPlayedSongs.length; i++) {
-            if (playlistSongIds.includes(recentlyPlayedSongs[i].track.id)) {
-                streak++;
-                if (streak >= 4 && !inPlay) {
-                    count++;
-                    inPlay = true; // already counted this play
-                }
-            } else {
-                streak = 0; // reset streak
-                inPlay = false; // ready to detect next play
-            }
+        const songDurations = playlistSongs.map(playlistSong => playlistSong.track.duration_ms);
+        const avgSongDuration = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+        
+        return ((avgSongDuration / 1000) / 60).toFixed(2);
+    }, []);
+
+    /*
+     * calculateSongDurationVariance
+     * Given a playlist's songs, calculates the song duration variance in minutes
+     */
+    const calculateSongDurationVariance = useCallback((playlistSongs) => {
+
+        if (playlistSongs.length === 0) {
+            return 0;
         }
 
-        return count;
+        const songDurations = playlistSongs.map(playlistSong => Number(((playlistSong.track.duration_ms / 1000) / 60).toFixed(2)));
+        const mean = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+
+        const squaredDifferences = songDurations.map(duration => Math.pow(duration - mean, 2));
+        const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
+
+        // return population variance
+        return sumOfSquaredDifferences / playlistSongs.length;
     }, []);
 
 
-    return { calculateSongTimeRangePercentage, calculateMostFrequentArtist, calculateAverageReleaseDate,
-            calculateAverageDateAdded, calculateAverageSongDuration, calculateAverageSongPopularityScore,
-            calculateMostTopSongsByTimeRange, calculateSavedSongPercentage, calculateArtistDiversityScore,
-            calculateRecentlyPlayed };
+    return { calculateSongTimeRangePercentage, calculateAverageDateAdded,
+            calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
+            calculateAverageReleaseDate, calculateAverageSongPopularity,
+            calculateMostFrequentArtist, calculateArtistDiversity,
+            calculateAverageSongDuration,
+            calculateSongDurationVariance
+        };
 }
 
 export default useCalculatePlaylistStatsService;

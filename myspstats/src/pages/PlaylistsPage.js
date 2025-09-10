@@ -9,7 +9,7 @@ import './PlaylistsPage.css'
  * Functional Component to render playlists page
  */
 const PlaylistsPage = () =>  {
-    const { playlists, playlistSongs, playlistStats, playlistMetaStats, loading, error } = useMySPStatsContext();
+    const { playlists, playlistSongs, playlistStats, playlistScores, loading, error } = useMySPStatsContext();
     const [ selectedPlaylist, setSelectedPlaylist ] = useState(null);
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
@@ -17,7 +17,7 @@ const PlaylistsPage = () =>  {
     if (selectedPlaylist) {
         const playlistId = selectedPlaylist.id;
         return <PlaylistSongs playlist={selectedPlaylist} playlistSongs={playlistSongs[playlistId]} playlistStats={playlistStats[playlistId]}
-        playlistMetaStats={playlistId} onBack={() => setSelectedPlaylist(null)} />
+        playlistScores={playlistId} onBack={() => setSelectedPlaylist(null)} />
     }
 
     return (
@@ -45,8 +45,8 @@ const PlaylistsPage = () =>  {
                         {playlists
                             .slice() // make a shallow copy so you don’t mutate context state
                             .sort((a, b) => {
-                            const scoreA = playlistMetaStats[a.id]?.playlistScore ?? 0;
-                            const scoreB = playlistMetaStats[b.id]?.playlistScore ?? 0;
+                            const scoreA = playlistScores[a.id]?.playlistScore ?? 0;
+                            const scoreB = playlistScores[b.id]?.playlistScore ?? 0;
                             return scoreB - scoreA; // descending order (highest first)
                             })
                             .map((playlist) => (
@@ -64,7 +64,7 @@ const PlaylistsPage = () =>  {
                                     </button>
                                 </td>
                                 <td>{playlist.tracks.total}</td>
-                                <td>{playlistMetaStats[playlist.id]?.playlistScore ?? "N/A"}</td>
+                                <td>{playlistScores[playlist.id]?.playlistScore ?? "N/A"}</td>
                             </tr>
                             ))}
                         </tbody>

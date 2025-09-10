@@ -2,7 +2,7 @@
 import React from 'react';
 import { useMySPStatsContext } from '../context/MySPStatsContext';
 import Dashboard from '../components/dashboard/Dashboard';
-import { statMap } from '../util/Maps'
+import { statMap } from '../util/StatMaps'
 import './DashboardsPage.css'
 
 /*
