@@ -14,18 +14,24 @@ const PlaylistsPage = () =>  {
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
     if (error) return <p>Error: {error}</p>;
+    
     if (selectedPlaylist) {
         const playlistId = selectedPlaylist.id;
-        return <PlaylistSongs playlist={selectedPlaylist} playlistSongs={playlistSongs[playlistId]} playlistStats={playlistStats[playlistId]}
-        playlistScores={playlistId} onBack={() => setSelectedPlaylist(null)} />
+        return (
+            <PlaylistSongs 
+                playlist={selectedPlaylist} 
+                playlistSongs={playlistSongs[playlistId]} 
+                playlistStats={playlistStats[playlistId]}
+                playlistScores={playlistScores[playlistId]} 
+                onBack={() => setSelectedPlaylist(null)} 
+            />
+        )
     }
 
     return (
         <div className="Playlists-Page">
             <header className="Page-Header">
-                <p>
-                    Spotify Playlists
-                </p>
+                <p>Spotify Playlists</p>
             </header>
             <div className="Page-Body">
                 <div className="playlists-page-header">
@@ -39,33 +45,44 @@ const PlaylistsPage = () =>  {
                                 <th> Cover </th>
                                 <th> Playlist Name </th>
                                 <th> Songs </th>
+                                <th> Maintenance Score </th>
+                                <th> User Relevance Score </th>
+                                <th> General Relevance Score </th>
+                                <th> Artist Diversity Score </th>
+                                <th> Song Likeness Score </th>
+                                <th> Total Score </th>
                             </tr>
                         </thead>
                         <tbody>
                         {playlists
-                            .slice() // make a shallow copy so you don’t mutate context state
+                            .slice() // shallow copy
                             .sort((a, b) => {
-                            const scoreA = playlistScores[a.id]?.playlistScore ?? 0;
-                            const scoreB = playlistScores[b.id]?.playlistScore ?? 0;
-                            return scoreB - scoreA; // descending order (highest first)
+                                const scoreA = playlistScores[a.id]?.totalScore ?? 0;
+                                const scoreB = playlistScores[b.id]?.totalScore ?? 0;
+                                return scoreB - scoreA; // descending (highest first)
                             })
                             .map((playlist) => (
-                            <tr key={playlist.id}>
-                                <td>
-                                    <img 
-                                        src={playlist.images[0]?.url} 
-                                        alt={playlist.name} 
-                                        style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
-                                    />
-                                </td>
-                                <td>
-                                    <button onClick={() => setSelectedPlaylist(playlist)}>
-                                        {playlist.name}
-                                    </button>
-                                </td>
-                                <td>{playlist.tracks.total}</td>
-                                <td>{playlistScores[playlist.id]?.playlistScore ?? "N/A"}</td>
-                            </tr>
+                                <tr key={playlist.id}>
+                                    <td>
+                                        <img 
+                                            src={playlist.images[0]?.url} 
+                                            alt={playlist.name} 
+                                            style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
+                                        />
+                                    </td>
+                                    <td>
+                                        <button onClick={() => setSelectedPlaylist(playlist)}>
+                                            {playlist.name}
+                                        </button>
+                                    </td>
+                                    <td>{playlist.tracks.total}</td>
+                                    <td>{playlistScores[playlist.id]?.maintenanceScores.totalMaintenanceScore ?? "N/A"}</td>
+                                    <td>{playlistScores[playlist.id]?.userRelevanceScores.totalUserRelevanceScore ?? "N/A"}</td>
+                                    <td>{playlistScores[playlist.id]?.generalRelevanceScores.totalGeneralRelevanceScore ?? "N/A"}</td>
+                                    <td>{playlistScores[playlist.id]?.artistDiversityScores.totalArtistDiversityScore ?? "N/A"}</td>
+                                    <td>{playlistScores[playlist.id]?.songLikenessScores.totalSongLikenessScore ?? "N/A"}</td>
+                                    <td>{playlistScores[playlist.id]?.totalScore ?? "N/A"}</td>
+                                </tr>
                             ))}
                         </tbody>
                     </table>
