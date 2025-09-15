@@ -113,11 +113,11 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateShortTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 50) {
+        if (Number(percent) > 25) {
             return 100;
         }
         
-        return 2 * Number(percent);
+        return 4 * Number(percent);
     }, []);
 
     /*
@@ -126,11 +126,11 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateMediumTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 66.66) {
+        if (Number(percent) > 50) {
             return 100;
         }
         
-        return 1.5 * Number(percent);
+        return 2 * Number(percent);
     }, []);
 
     /*

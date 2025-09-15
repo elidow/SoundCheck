@@ -1,87 +1,92 @@
-const number = "number"
-const percentage = "percentage"
-const dateTime = "dateTime"
-const artist = "artist"
+const number = "number";
+const percentage = "percentage";
+const dateTime = "dateTime";
+const artist = "artist";
 
 export const statMap = {
     "Song Count": {
-        "statKey": "songCount",
-        "type": number,
-        "group": "basicStats"
+        category: "maintenance",
+        statKey: "songCount",
+        type: number,
     },
     "% Songs >2 Years Old": {
-        "statKey": "twoYearOldPercentage",
-        "type": percentage,
-        "group": "maintenanceStats"
+        category: "maintenance",
+        statKey: "twoYearOldPercentage",
+        type: percentage,
     },
     "% Songs <6 Months Old": {
-        "statKey": "sixMonthNewPercentage",
-        "type": percentage,
-        "group": "maintenanceStats"
+        category: "maintenance",
+        statKey: "sixMonthNewPercentage",
+        type: percentage,
     },
-    "Last Song Added Date":  {
-        "statKey": "lastSongAddedDate",
-        "type": dateTime,
-        "group": "maintenanceStats"
+    "Average Song Added Date": {
+        category: "maintenance",
+        statKey: "avgSongAddedDate",
+        type: dateTime,
     },
-    "Average Song Added Date":  {
-        "statKey": "avgSongAddedDate",
-        "type": dateTime,
-        "group": "maintenanceStats"
+    "Last Song Added Date": {
+        category: "maintenance",
+        statKey: "lastSongAddedDate",
+        type: dateTime,
     },
-    "Average Song Release Date":  {
-        "statKey": "avgSongReleaseDate", 
-        "type": dateTime,
-        "group": "maintenanceStats"
+    "% Songs in Most Played Short Term": {
+        category: "userRelevance",
+        statKey: "shortTermMostPlayedPercentage",
+        type: percentage,
     },
-    "Most Frequent Artist By Count": {
-        "statKey": "mostFrequentArtistByCount",
-        "type": artist + ", " + number,
-        "group": "artistStats"
+    "% Songs in Most Played Medium Term": {
+        category: "userRelevance",
+        statKey: "mediumTermMostPlayedPercentage",
+        type: percentage,
     },
-    "Most Frequent Artist By Percentage": {
-        "statKey": "mostFrequentArtistByPercentage",
-        "type": artist + ", " + percentage,
-        "group": "artistStats"
+    "% Songs in Most Played Long Term": {
+        category: "userRelevance",
+        statKey: "longTermMostPlayedPercentage",
+        type: percentage,
     },
-    "Average Song Duration":  {
-        "statKey": "avgSongDuration", 
-        "type": number,
-        "group": "advancedStats"
-    },
-    "Average Song Popularity Score": {
-        "statKey": "avgSongPopularityScore",
-        "type": number,
-        "group": "advancedStats"
-    },
-    "% Songs in Top Short Term": {
-        "statKey": "shortTermPercentage",
-        "type": percentage,
-        "group": "advancedStats"
-    },
-    "% Songs in Top Medium Term": {
-        "statKey": "mediumTermPercentage",
-        "type": percentage,
-        "group": "advancedStats"
-    },
-    "% Songs in Top Long Term": {
-        "statKey": "longTermPercentage",
-        "type": percentage,
-        "group": "advancedStats"
-    },
-     "% Songs in Saved Songs": {
-        "statKey": "savedSongPercentage",
-        "type": percentage,
-        "group": "advancedStats"
-    },
-    "Artist Diversity Score": {
-        "statKey": "artistDiversityScore",
-        "type": number,
-        "group": "advancedStats"
+    "% Songs in Saved Songs": {
+        category: "userRelevance",
+        statKey: "savedSongPercentage",
+        type: percentage,
     },
     "Times Recently Played": {
-        "statKey": "timesRecentlyPlayed",
-        "type": number,
-        "group": "advancedStats"
-    }
+        category: "userRelevance",
+        statKey: "timesRecentlyPlayed",
+        type: number,
+    },
+    "Average Song Release Date": {
+        category: "generalRelevance",
+        statKey: "avgSongReleaseDate",
+        type: dateTime,
+    },
+    "Average Song Popularity": {
+        category: "generalRelevance",
+        statKey: "avgSongPopularity",
+        type: number,
+    },
+    "Artist Diversity": {
+        category: "artistStats",
+        statKey: "artistDiversity",
+        type: number,
+    },
+    "Most Frequent Artist By Percentage": {
+        category: "artistStats",
+        statKey: "mostFrequentArtistByPercentage",
+        type: artist + ", " + percentage,
+    },
+    "Average Song Duration": {
+        category: "songStats",
+        statKey: "avgSongDuration",
+        type: number,
+    },
+    "Song Duration Variance": {
+        category: "advancedSongStats",
+        statKey: "songDurationVariance",
+        type: number,
+    },
+    "Song Release Date Variance": {
+        category: "advancedSongStats",
+        statKey: "songReleaseDateVariance",
+        type: number,
+    },
 };

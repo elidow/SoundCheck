@@ -1,7 +1,7 @@
 /* PlaylistsPage */
 import { React, useState } from 'react';
 import { useMySPStatsContext } from '../context/MySPStatsContext';
-import PlaylistSongs from '../components/playlistSongs/PlaylistSongs'
+import PlaylistInsights from '../components/playlist/PlaylistInsights'
 import './PlaylistsPage.css'
 
 /*
@@ -18,7 +18,7 @@ const PlaylistsPage = () =>  {
     if (selectedPlaylist) {
         const playlistId = selectedPlaylist.id;
         return (
-            <PlaylistSongs 
+            <PlaylistInsights
                 playlist={selectedPlaylist} 
                 playlistSongs={playlistSongs[playlistId]} 
                 playlistStats={playlistStats[playlistId]}
@@ -27,6 +27,15 @@ const PlaylistsPage = () =>  {
             />
         )
     }
+
+    // Pre-sort playlists by score
+    const sortedPlaylists = playlists
+        .slice()
+        .sort((a, b) => {
+            const scoreA = playlistScores[a.id]?.totalScore ?? -1; // use -1 so "N/A" goes last
+            const scoreB = playlistScores[b.id]?.totalScore ?? -1;
+            return scoreB - scoreA;
+        });
 
     return (
         <div className="Playlists-Page">
@@ -42,48 +51,43 @@ const PlaylistsPage = () =>  {
                     <table>
                         <thead>
                             <tr>
+                                <th> Rank </th>
                                 <th> Cover </th>
                                 <th> Playlist Name </th>
                                 <th> Songs </th>
+                                <th> Total Score </th>
                                 <th> Maintenance Score </th>
                                 <th> User Relevance Score </th>
                                 <th> General Relevance Score </th>
                                 <th> Artist Diversity Score </th>
                                 <th> Song Likeness Score </th>
-                                <th> Total Score </th>
                             </tr>
                         </thead>
                         <tbody>
-                        {playlists
-                            .slice() // shallow copy
-                            .sort((a, b) => {
-                                const scoreA = playlistScores[a.id]?.totalScore ?? 0;
-                                const scoreB = playlistScores[b.id]?.totalScore ?? 0;
-                                return scoreB - scoreA; // descending (highest first)
-                            })
-                            .map((playlist) => (
-                                <tr key={playlist.id}>
-                                    <td>
-                                        <img 
-                                            src={playlist.images[0]?.url} 
-                                            alt={playlist.name} 
-                                            style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
-                                        />
-                                    </td>
-                                    <td>
-                                        <button onClick={() => setSelectedPlaylist(playlist)}>
-                                            {playlist.name}
-                                        </button>
-                                    </td>
-                                    <td>{playlist.tracks.total}</td>
-                                    <td>{playlistScores[playlist.id]?.maintenanceScores.totalMaintenanceScore ?? "N/A"}</td>
-                                    <td>{playlistScores[playlist.id]?.userRelevanceScores.totalUserRelevanceScore ?? "N/A"}</td>
-                                    <td>{playlistScores[playlist.id]?.generalRelevanceScores.totalGeneralRelevanceScore ?? "N/A"}</td>
-                                    <td>{playlistScores[playlist.id]?.artistDiversityScores.totalArtistDiversityScore ?? "N/A"}</td>
-                                    <td>{playlistScores[playlist.id]?.songLikenessScores.totalSongLikenessScore ?? "N/A"}</td>
-                                    <td>{playlistScores[playlist.id]?.totalScore ?? "N/A"}</td>
-                                </tr>
-                            ))}
+                        {sortedPlaylists.map((playlist, index) => (
+                            <tr key={playlist.id}>
+                                <td>{playlistScores[playlist.id]?.totalScore != null ? index + 1 : "–"}</td>
+                                <td>
+                                    <img 
+                                        src={playlist.images[0]?.url} 
+                                        alt={playlist.name} 
+                                        style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
+                                    />
+                                </td>
+                                <td>
+                                    <button onClick={() => setSelectedPlaylist(playlist)}>
+                                        {playlist.name}
+                                    </button>
+                                </td>
+                                <td>{playlist.tracks.total}</td>
+                                <td><b>{playlistScores[playlist.id]?.totalScore ?? "N/A"}</b></td>
+                                <td>{playlistScores[playlist.id]?.maintenanceScores.totalMaintenanceScore ?? "N/A"}</td>
+                                <td>{playlistScores[playlist.id]?.userRelevanceScores.totalUserRelevanceScore ?? "N/A"}</td>
+                                <td>{playlistScores[playlist.id]?.generalRelevanceScores.totalGeneralRelevanceScore ?? "N/A"}</td>
+                                <td>{playlistScores[playlist.id]?.artistDiversityScores.totalArtistDiversityScore ?? "N/A"}</td>
+                                <td>{playlistScores[playlist.id]?.songLikenessScores.totalSongLikenessScore ?? "N/A"}</td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 </div>

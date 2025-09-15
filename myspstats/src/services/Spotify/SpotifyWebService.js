@@ -81,9 +81,9 @@ const SpotifyWebService = () => {
     const getTopsSongs = async() => {
         const topSongs = {};
 
-        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 2]);
-        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 4]);
-        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 6]);
+        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 4]);
+        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 6]);
+        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 10]);
         
         return topSongs;
     }
