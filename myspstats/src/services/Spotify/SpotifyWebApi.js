@@ -310,7 +310,7 @@ const useSpotifyWebApi = () => {
      * Given an access token, fetch the user's saved songs (Liked)
      * Default 20 pages
      */
-    const fetchSavedSongs = useCallback(async (maxPages=20) => {
+    const fetchSavedSongs = useCallback(async (maxPages=60) => {
         // Validate access token
         if (!accessToken) {
             console.log(`No access token found for call to get saved songs`);

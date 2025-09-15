@@ -13,6 +13,8 @@ const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
     const [expandButtonIcon, setExpandButtonIcon] = useState("➕"); // state for controlling expand icon
     const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
 
+    const { category, statKey, type } = statDetails;
+
     const data = [
         {
             stat: 2
@@ -41,21 +43,22 @@ const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
      * Sorts playlist based on stat, stat type, and sort order
      */
     const getSortedPlaylists = () => {
-        const type = statDetails["type"]
-        const statKey = statDetails["statKey"];
-
         const sorted = [...playlists].sort((a, b) => {
             let aVal, bVal;
 
             if (type === "dateTime") {
-                aVal = playlistStats[a.id]?.[statKey] ? Date.parse(playlistStats[a.id][statKey]) : -Infinity;
-                bVal = playlistStats[b.id]?.[statKey] ? Date.parse(playlistStats[b.id][statKey]) : -Infinity;
+                aVal = playlistStats[a.id]?.[category]?.[statKey]
+                    ? Date.parse(playlistStats[a.id][category][statKey])
+                    : -Infinity;
+                bVal = playlistStats[b.id]?.[category]?.[statKey]
+                    ? Date.parse(playlistStats[b.id][category][statKey])
+                    : -Infinity;
             } else if (type.includes("artist")) {
-                aVal = playlistStats[a.id]?.[statKey]?.["artistCount"] ?? -Infinity;
-                bVal = playlistStats[b.id]?.[statKey]?.["artistCount"] ?? -Infinity;
+                aVal = playlistStats[a.id]?.[category]?.[statKey]?.artistCount ?? -Infinity;
+                bVal = playlistStats[b.id]?.[category]?.[statKey]?.artistCount ?? -Infinity;
             } else {
-                aVal = playlistStats[a.id]?.[statKey] ?? -Infinity;
-                bVal = playlistStats[b.id]?.[statKey] ?? -Infinity;
+                aVal = playlistStats[a.id]?.[category]?.[statKey] ?? -Infinity;
+                bVal = playlistStats[b.id]?.[category]?.[statKey] ?? -Infinity;
             }
 
             return isAscending ? aVal - bVal : bVal - aVal;
@@ -63,6 +66,7 @@ const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
 
         return sorted;
     };
+
 
     const sortedPlaylists = getSortedPlaylists();
 
@@ -99,16 +103,22 @@ const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
-                                    {statDetails["type"] === "dateTime" ? (
-                                        <div>{playlistStats[playlist.id][statDetails["statKey"]]?.substring(0,10)}</div>
-                                    ) : statDetails["type"].includes("artist") && statDetails["type"].includes("number") ? (
-                                         <div>{playlistStats[playlist.id][statDetails["statKey"]]["artistName"]}: {playlistStats[playlist.id][statDetails["statKey"]]["artistCount"]}</div>
-                                    ) : statDetails["type"].includes("artist") && statDetails["type"].includes("percentage") ? (
-                                         <div>{playlistStats[playlist.id][statDetails["statKey"]]["artistName"]}: {playlistStats[playlist.id][statDetails["statKey"]]["artistCount"]}%</div>
-                                    ) : statDetails["type"] === "number" ? (
-                                        <div>{playlistStats[playlist.id][statDetails["statKey"]]}</div>
+                                    {statDetails.type === "dateTime" ? (
+                                        <div>{playlistStats[playlist.id][category]?.[statKey]?.substring(0,10)}</div>
+                                    ) : statDetails.type.includes("artist") && statDetails.type.includes("number") ? (
+                                        <div>
+                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: 
+                                            {playlistStats[playlist.id][category]?.[statKey]?.artistCount}
+                                        </div>
+                                    ) : statDetails.type.includes("artist") && statDetails.type.includes("percentage") ? (
+                                        <div>
+                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: 
+                                            {playlistStats[playlist.id][category]?.[statKey]?.artistCount}%
+                                        </div>
+                                    ) : statDetails.type === "number" ? (
+                                        <div>{playlistStats[playlist.id][category]?.[statKey]}</div>
                                     ) : (
-                                        <div>{playlistStats[playlist.id][statDetails["statKey"]]}%</div>
+                                        <div>{playlistStats[playlist.id][category]?.[statKey]}%</div>
                                     )}
                                 </div>
                             ) : (
