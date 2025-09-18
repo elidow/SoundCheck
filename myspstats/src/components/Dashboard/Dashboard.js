@@ -61,8 +61,41 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
         return sorted;
     };
 
-
     const sortedPlaylists = getSortedPlaylists();
+
+    const categoryToScoreKey = {
+        artistStats: "artistDiversity",
+        songStats: "songLikeness",
+    };
+
+    const renderScoreBar = (playlist, statKey, category) => {
+        const scoreCategory = categoryToScoreKey[category] || category;
+        const scoreKey = `${statKey}Score`;
+        const score = playlistScores[playlist.id]?.[`${scoreCategory}Scores`]?.[scoreKey] ?? null;
+
+        if (score == null) {
+            return <div>No score available</div>;
+        }
+
+        const barData = [{ name: statKey, score }];
+
+        return (
+            <BarChart
+                layout="vertical"
+                width={200}
+                height={20}
+                data={barData}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                >
+                <XAxis type="number" domain={[0, 100]} hide />
+                <YAxis type="category" dataKey="name" hide />
+                <Bar
+                    dataKey="score"
+                    fill={mapScoreToColor(score)}
+                />
+            </BarChart>
+        );
+    }
 
     const mapScoreToColor = (score) => {
         // Clamp score between 0 and 100
@@ -89,10 +122,12 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
         <div className="dashboard">
             <div className="dashboard-header">
                 <div className="dashboard-header-left-items">{name}</div>
-                <button className="dashboard-header-right-items">⭐</button>
-                <button className="dashboard-header-right-items" onClick={toggleSortOrder}>🔄</button>
-                <button className="dashboard-header-right-items" onClick={toggleExpandView}>{expandButtonIcon}</button>
-                <button className="dashboard-header-right-items">✏️</button>
+                <div className="dashboard-header-right-group">
+                    <button className="dashboard-header-right-items">⭐</button>
+                    <button className="dashboard-header-right-items" onClick={toggleSortOrder}>🔄</button>
+                    <button className="dashboard-header-right-items" onClick={toggleExpandView}>{expandButtonIcon}</button>
+                    <button className="dashboard-header-right-items">✏️</button>
+                </div>
             </div>
             <div className="dashboard-items">
                 {sortedPlaylists.length === 0 ? (
@@ -131,34 +166,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                             )}
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-graph-data">
-                                    {(() => {
-                                        const scoreKey = `${statKey}Score`;
-                                        const score =
-                                            playlistScores[playlist.id]?.[`${category}Scores`]?.[scoreKey] ?? null;
-
-                                        if (score == null) {
-                                            return <p>No score available</p>;
-                                        }
-
-                                        const barData = [{ name: statKey, score }];
-
-                                        return (
-                                            <BarChart
-                                                layout="vertical"
-                                                width={300}
-                                                height={20}
-                                                data={barData}
-                                                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-                                                >
-                                                <XAxis type="number" domain={[0, 100]} hide />
-                                                <YAxis type="category" dataKey="name" hide />
-                                                <Bar
-                                                    dataKey="score"
-                                                    fill={mapScoreToColor(score)}
-                                                />
-                                            </BarChart>
-                                        );
-                                    })()}
+                                    {renderScoreBar(playlist, statKey, category)}
                                 </div>
                             ) : (
                                 <p>No stats available</p>

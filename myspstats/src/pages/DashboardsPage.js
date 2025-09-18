@@ -29,9 +29,11 @@ const DashboardsPage = () =>  {
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
-                {statObjects.map(([key, value]) => (
-                    <Dashboard key={key} name={key} playlists={playlists} playlistStats={playlistStats} playlistScores={playlistScores} statDetails={value} />
+                <div className="dashboards">
+                    {statObjects.map(([key, value]) => (
+                        <Dashboard key={key} name={key} playlists={playlists} playlistStats={playlistStats} playlistScores={playlistScores} statDetails={value} />
                 ))}
+                </div>
             </div>
         </div>
     )
