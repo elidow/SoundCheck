@@ -7,7 +7,7 @@ import { BarChart, Bar, XAxis, YAxis } from 'recharts';
  * Dashboard
  * Component representation for a dashboard
  */
-const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails }) => {
+const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails, expandedDashboard, setExpandedDashboard }) => {
 
     const [indexView, setIndexView] = useState(10);  // state for controlling number of displayed items in a dashboard
     const [expandButtonIcon, setExpandButtonIcon] = useState("➕"); // state for controlling expand icon
@@ -19,10 +19,17 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
      * toggleExpandView
      * Toggles icon and index view count based on current
      */
-    const toggleExpandView = () => {
-        setExpandButtonIcon(prev => (prev === "➕" ? "➖" : "➕"))
-        setIndexView(prev => (prev === 10 ? 100 : 10));
-    };
+const toggleExpandView = () => {
+    if (expandButtonIcon === "➕") {
+        setExpandButtonIcon("➖");
+        setIndexView(100);
+        setExpandedDashboard(name); // mark this dashboard as expanded
+    } else {
+        setExpandButtonIcon("➕");
+        setIndexView(10);
+        setExpandedDashboard(null); // collapse
+    }
+};
 
     /*
      * toggleSortOrder
@@ -119,7 +126,12 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
     }
 
     return (
-        <div className="dashboard">
+        <div
+            className="dashboard"
+            style={{
+                gridColumn: expandedDashboard === name ? "span 2" : "auto",
+            }}
+        >
             <div className="dashboard-header">
                 <div className="dashboard-header-left-items">{name}</div>
                 <div className="dashboard-header-right-group">
