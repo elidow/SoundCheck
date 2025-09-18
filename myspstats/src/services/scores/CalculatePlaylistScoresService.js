@@ -21,11 +21,20 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: 70 is 100, <=20 is 0, >= 120 is 0 
      */
     const calculateSongCountScore = useCallback((count) => {
-        if(count < 20 || count > 120) {
+        if (count < 20 || count > 130) {
             return 0;
         }
 
-        return 100 - (2 * Math.abs(count - 70))
+        if (count >= 70 && count <= 80) {
+            return 100;
+        }
+
+        // Distance to the nearest boundary of [70, 80]
+        const distance = count < 70 ? 70 - count : count - 80;
+
+        const score = 100 - (2 * distance);
+
+        return Math.max(score, 0);
     }, []);
 
     /*
@@ -38,27 +47,28 @@ const useCalculatePlaylistScoresService = () => {
     }, []);
 
     /*
-     * calculateAvgSongAddedDateScore
-     * Calculates score 0-100 on what the average song added date is
-     * Calculation: % decay 
-     */
+    * calculateAvgSongAddedDateScore
+    * Calculates score 0-100 based on average song added date
+    * Decay curve:
+    * - ~95 at 60 days
+    * - ~80 at 180 days
+    * - ~50 at 365 days
+    * - ~0 at 540 days
+    */
     const calculateAvgSongAddedDateScore = useCallback((date) => {
         const inputDate = new Date(date);
         const today = new Date();
-        
+
         // difference in days
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24));
-        
-        // 0 to 365 clamp
-        const x = Math.min(Math.max(daysDiff, 0), 365);
 
-        // Logistic parameters tuned so:
-        // ~95 at 30 days
-        // ~80 at 90 days
-        // ~50 at 180 days
-        // ~0 at 365 days
-        const k = 0.025;  // steepness
-        const midpoint = 200; // where it crosses ~50
+        // Clamp to [0, 540]
+        const x = Math.min(Math.max(daysDiff, 0), 540);
+
+        // Logistic parameters tuned for target points
+        const k = 0.015;        // steepness of curve
+        const midpoint = 365;   // where it crosses ~50
+
         const score = 100 / (1 + Math.exp(k * (x - midpoint)));
 
         return Math.round(score);
@@ -67,7 +77,11 @@ const useCalculatePlaylistScoresService = () => {
     /*
      * calculateLastSongAddedDateScore
      * Calculates score 0-100 on what the last song added date is
-     * Calculation: % decay 
+     * Decay Curve
+     * - ~95 at 30 days
+     * - ~80 at 90 days
+     * - ~50 at 180 days
+     * - ~0 at 365 days
      */
     const calculateLastSongAddedDateScore = useCallback((date) => {
         const inputDate = new Date(date);
@@ -76,14 +90,10 @@ const useCalculatePlaylistScoresService = () => {
         // difference in days
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24));
         
-        // 0 to 365 clamp
+        // Clamp to [0, 365]
         const x = Math.min(Math.max(daysDiff, 0), 365);
 
-        // Logistic parameters tuned so:
-        // ~95 at 30 days
-        // ~80 at 90 days
-        // ~50 at 180 days
-        // ~0 at 365 days
+        // Logistic parameters tuned for target points
         const k = 0.025;  // steepness
         const midpoint = 200; // where it crosses ~50
         const score = 100 / (1 + Math.exp(k * (x - midpoint)));
