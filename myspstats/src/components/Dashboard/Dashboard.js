@@ -1,25 +1,19 @@
 /* Dashboard */
 
 import { useState } from 'react';
-import { BarChart, Bar } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis } from 'recharts';
 
 /*
  * Dashboard
  * Component representation for a dashboard
  */
-const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
+const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails }) => {
 
     const [indexView, setIndexView] = useState(10);  // state for controlling number of displayed items in a dashboard
     const [expandButtonIcon, setExpandButtonIcon] = useState("➕"); // state for controlling expand icon
     const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
 
     const { category, statKey, type } = statDetails;
-
-    const data = [
-        {
-            stat: 2
-        }
-    ]
 
     /*
      * toggleExpandView
@@ -70,14 +64,25 @@ const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
 
     const sortedPlaylists = getSortedPlaylists();
 
-    const fillGraphWithStat = (dp) => {
-        if (dp < 60) {
-            return "red"
-        } else if (dp < 80) {
-            return "yellow"
+    const mapScoreToColor = (score) => {
+        // Clamp score between 0 and 100
+        const value = Math.max(0, Math.min(100, score));
+
+        let r, g, b = 0;
+
+        if (value < 50) {
+            // 0 → 50: red to yellow
+            r = 255;
+            g = Math.round(5.1 * value); // 0 → 255
+            b = 0;
+        } else {
+            // 50 → 100: yellow to green
+            g = 255;
+            r = Math.round(510 - 5.1 * value); // 255 → 0
+            b = 0;
         }
 
-        return "green";
+        return `rgb(${r},${g},${b})`;
     }
 
     return (
@@ -126,9 +131,34 @@ const Dashboard = ({ name, playlists, playlistStats, statDetails }) => {
                             )}
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-graph-data">
-                                    <BarChart isHorizontal={true} width={200} height={20} data={data}>
-                                        <Bar dataKey="stat" fill={fillGraphWithStat(81)} />
-                                    </BarChart>
+                                    {(() => {
+                                        const scoreKey = `${statKey}Score`;
+                                        const score =
+                                            playlistScores[playlist.id]?.[`${category}Scores`]?.[scoreKey] ?? null;
+
+                                        if (score == null) {
+                                            return <p>No score available</p>;
+                                        }
+
+                                        const barData = [{ name: statKey, score }];
+
+                                        return (
+                                            <BarChart
+                                                layout="vertical"
+                                                width={300}
+                                                height={20}
+                                                data={barData}
+                                                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                                                >
+                                                <XAxis type="number" domain={[0, 100]} hide />
+                                                <YAxis type="category" dataKey="name" hide />
+                                                <Bar
+                                                    dataKey="score"
+                                                    fill={mapScoreToColor(score)}
+                                                />
+                                            </BarChart>
+                                        );
+                                    })()}
                                 </div>
                             ) : (
                                 <p>No stats available</p>

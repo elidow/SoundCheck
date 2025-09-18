@@ -10,7 +10,7 @@ import './DashboardsPage.css'
  * Functional Component to render dashboards page
  */
 const DashboardsPage = () =>  {
-    const { playlists, playlistStats, loading, error } = useMySPStatsContext();
+    const { playlists, playlistStats, playlistScores, loading, error } = useMySPStatsContext();
 
     const statObjects = Object.entries(statMap);
 
@@ -30,7 +30,7 @@ const DashboardsPage = () =>  {
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
                 {statObjects.map(([key, value]) => (
-                    <Dashboard key={key} name={key} playlists={playlists} playlistStats={playlistStats} statDetails={value} />
+                    <Dashboard key={key} name={key} playlists={playlists} playlistStats={playlistStats} playlistScores={playlistScores} statDetails={value} />
                 ))}
             </div>
         </div>
