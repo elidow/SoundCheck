@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import SpotifyWebService from '../services/Spotify/SpotifyWebService';
+import MySPStatsService from '../services/playlistDataManager/PlaylistDataManagerService';
 
-const SpotifyPlaylistContext = createContext();
+const MySPStatsContext = createContext();
 
-export const SpotifyPlaylistProvider = ({ children }) => {
-    const { retrievePlaylistsWithStats } = SpotifyWebService();
+export const MySPStatsProvider = ({ children }) => {
+    const { retrieveAllData } = MySPStatsService();
 
     const [playlists, setPlaylists] = useState([]);
     const [playlistSongs, setPlaylistSongs] = useState([]);
     const [playlistStats, setPlaylistStats] = useState([]);
+    const [playlistScores, setPlaylistScores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,11 +17,12 @@ export const SpotifyPlaylistProvider = ({ children }) => {
         console.log("Spotify Playlist Context: In Use Effect")
         const loadData = async () => {
             try {
-                const { playlists, playlistSongs, playlistStats } = await retrievePlaylistsWithStats();
+                const { playlists, playlistSongs, playlistStats, playlistScores } = await retrieveAllData();
 
                 setPlaylists(playlists);
-                setPlaylistSongs(playlistSongs)
+                setPlaylistSongs(playlistSongs);
                 setPlaylistStats(playlistStats);
+                setPlaylistScores(playlistScores);
             } catch (err) {
                 setLoading(false);
                 setError(err.message);
@@ -33,12 +35,12 @@ export const SpotifyPlaylistProvider = ({ children }) => {
     }, []);
 
     return (
-        <SpotifyPlaylistContext.Provider value={{ playlists, playlistSongs, playlistStats, loading, error }}>
+        <MySPStatsContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistScores, loading, error }}>
             {children}
-        </SpotifyPlaylistContext.Provider>
+        </MySPStatsContext.Provider>
     );
 }
 
-export const useSpotifyPlaylistContext = () => {
-    return useContext(SpotifyPlaylistContext);
+export const useMySPStatsContext = () => {
+    return useContext(MySPStatsContext);
 };

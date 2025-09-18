@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { SpotifyPlaylistProvider } from './context/SpotifyPlaylistContext'
+import { MySPStatsProvider } from './context/MySPStatsContext'
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
-        <SpotifyPlaylistProvider>
+        <MySPStatsProvider>
             <App />
-        </SpotifyPlaylistProvider>
+        </MySPStatsProvider>
     </React.StrictMode>
 );
 

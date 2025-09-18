@@ -10,8 +10,11 @@ const Navbar = () => {
         <>
             <Nav>
                 <NavMenu>
-                    <NavLink to="/dashboard" >
-                        Dashboard
+                    <NavLink to="/playlists" >
+                        Playlists
+                    </NavLink>
+                    <NavLink to="/dashboards" activestyle="true">
+                        Dashboards
                     </NavLink>
                     <NavLink to="/table" activestyle="true">
                         Table
