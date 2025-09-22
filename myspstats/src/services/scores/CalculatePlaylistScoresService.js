@@ -123,11 +123,11 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateShortTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 25) {
+        if (Number(percent) > 20) {
             return 100;
         }
         
-        return 4 * Number(percent);
+        return 5 * Number(percent);
     }, []);
 
     /*
@@ -136,11 +136,11 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateMediumTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 50) {
+        if (Number(percent) > 25) {
             return 100;
         }
         
-        return 2 * Number(percent);
+        return 4 * Number(percent);
     }, []);
 
     /*
@@ -149,7 +149,11 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateLongTermMostPlayedPercentageScore = useCallback((percent) => {
-        return Number(percent);
+        if (Number(percent) > 50) {
+            return 100;
+        }
+        
+        return 2 * Number(percent);
     }, []);
 
     /*
