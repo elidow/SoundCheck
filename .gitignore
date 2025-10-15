@@ -14,3 +14,4 @@ myspstats-poc/personal_data/
 
 # other
 .DS_Store
+myspstats-poc/__pycache__/

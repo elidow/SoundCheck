@@ -38,3 +38,18 @@
     background-color: white;
     color: black;
 }
+
+/* Bold the value in the currently-sorted column */
+.sorted-value {
+    font-weight: 700;
+}
+
+/* Highlight small numeric values in red */
+.small-number {
+    color: red; /* red */
+}
+
+/* If a value is both sorted and small, keep it bold */
+.sorted-value.small-number {
+    font-weight: 700;
+}

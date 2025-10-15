@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 from spotify_web_api import SpotifyWebApi
 
 load_dotenv()
-filePath = os.getenv("FILE_PATH")
+filePath = os.getenv("FILE_PATH") or ""
 
-out_file = filePath + 'mostFrequentArtistsInSavedSongs.txt'
+out_file = os.path.join(filePath, 'mostFrequentArtistsInSavedSongs.txt')
 scope = "user-library-read"
 
 def main():
@@ -23,26 +23,30 @@ def main():
 
     print("Fetching saved songs...")
     saved_songs = api.get_saved_songs()
+
+    # freq keyed by artist id, value is dict with name and count
     freq = {}
     for song in saved_songs:
         track = song.get("track")
         if not track:
             continue
         artists = track.get("artists")
-        if not artists or not artists[0].get("name"):
+        if not artists or not artists[0].get("id"):
             continue
-        main_artist = artists[0]["name"]
-        if main_artist in freq:
-            freq[main_artist] += 1
+        artist_id = artists[0]["id"]
+        artist_name = artists[0].get("name", "")
+        if artist_id in freq:
+            freq[artist_id]["count"] += 1
         else:
-            freq[main_artist] = 1
+            freq[artist_id] = {"name": artist_name, "count": 1}
 
-    # Sort by count descending, then artist name ascending
-    sorted_artists = sorted(freq.items(), key=lambda x: (-x[1], x[0]))
+    # convert to list of (name, count) then sort by count desc, name asc
+    artist_list = [(v["name"], v["count"]) for v in freq.values()]
+    sorted_artists = sorted(artist_list, key=lambda x: (-x[1], x[0]))
     with open(out_file, 'w') as fout:
         for artist, count in sorted_artists:
             fout.write(f"{count}: {artist}\n")
-    print(f"Wrote {len(sorted_artists)} artists to mostFrequentArtistsInSavedSongs.txt")
+    print(f"Wrote {len(sorted_artists)} artists to {out_file}")
 
 if __name__ == "__main__":
     main()

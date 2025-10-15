@@ -111,7 +111,7 @@ class SpotifyWebApi:
         url = "https://api.spotify.com/v1/me/top/tracks"
         params = {"time_range": time_range, "limit": 50, "offset": 0}
         i = 0
-        while url and i < 50:
+        while url and i < 100:
             response = requests.get(url, headers=self._get_headers(), params=params)
             if response.status_code != 200:
                 raise Exception(f"Failed to get top songs: {response.status_code}, {response.text}")

@@ -99,7 +99,7 @@ const PlaylistsPage = () =>  {
             setIsAscending(!isAscending); // toggle direction
         } else {
             setSortBy(columnKey);
-            setIsAscending(true); // default ascending
+            setIsAscending(false); // default descending
         }
     };
 
@@ -107,6 +107,27 @@ const PlaylistsPage = () =>  {
     const renderSortArrow = (columnKey) => {
         if (sortBy !== columnKey) return null;
         return isAscending ? ' ▲' : ' ▼';
+    };
+
+    // helper to render a table cell value
+    // - bold when the column is the active sorted column
+    // - add `small-number` class when the value is numeric and < 20 (but NOT for the 'rank' column)
+    const renderCell = (columnKey, value) => {
+        const isSorted = sortBy === columnKey;
+
+        // robust numeric coercion
+        const parsed = typeof value === 'number' ? value : Number(value);
+        const numeric = (typeof parsed === 'number' && !isNaN(parsed)) ? parsed : null;
+        const isSmallNumber = numeric !== null && numeric < 20 && columnKey !== 'rank';
+
+        const classNames = [];
+        if (isSorted) classNames.push('sorted-value');
+        if (isSmallNumber) classNames.push('small-number');
+
+        if (classNames.length > 0) {
+            return <span className={classNames.join(' ')}>{value}</span>;
+        }
+        return <>{value}</>;
     };
 
     return (
@@ -138,7 +159,7 @@ const PlaylistsPage = () =>  {
                         <tbody>
                         {sortedPlaylists.map((playlist, index) => (
                             <tr key={playlist.id}>
-                                <td>{playlistScores[playlist.id]?.totalScore != null ? index + 1 : "–"}</td>
+                                <td>{renderCell('rank', playlistScores[playlist.id]?.totalScore != null ? index + 1 : "–")}</td>
                                 <td>
                                     <img 
                                         src={playlist.images[0]?.url} 
@@ -151,13 +172,13 @@ const PlaylistsPage = () =>  {
                                         {playlist.name}
                                     </button>
                                 </td>
-                                <td>{playlist.tracks.total}</td>
-                                <td><b>{playlistScores[playlist.id]?.totalScore ?? "N/A"}</b></td>
-                                <td>{playlistScores[playlist.id]?.maintenanceScores.totalMaintenanceScore ?? "N/A"}</td>
-                                <td>{playlistScores[playlist.id]?.userRelevanceScores.totalUserRelevanceScore ?? "N/A"}</td>
-                                <td>{playlistScores[playlist.id]?.generalRelevanceScores.totalGeneralRelevanceScore ?? "N/A"}</td>
-                                <td>{playlistScores[playlist.id]?.artistDiversityScores.totalArtistDiversityScore ?? "N/A"}</td>
-                                <td>{playlistScores[playlist.id]?.songLikenessScores.totalSongLikenessScore ?? "N/A"}</td>
+                                <td>{renderCell('songs', playlist.tracks.total)}</td>
+                                <td>{renderCell('totalScore', playlistScores[playlist.id]?.totalScore ?? "N/A")}</td>
+                                <td>{renderCell('maintenanceScore', playlistScores[playlist.id]?.maintenanceScores.totalMaintenanceScore ?? "N/A")}</td>
+                                <td>{renderCell('userRelevanceScore', playlistScores[playlist.id]?.userRelevanceScores.totalUserRelevanceScore ?? "N/A")}</td>
+                                <td>{renderCell('generalRelevanceScore', playlistScores[playlist.id]?.generalRelevanceScores.totalGeneralRelevanceScore ?? "N/A")}</td>
+                                <td>{renderCell('artistDiversityScore', playlistScores[playlist.id]?.artistDiversityScores.totalArtistDiversityScore ?? "N/A")}</td>
+                                <td>{renderCell('songLikenessScore', playlistScores[playlist.id]?.songLikenessScores.totalSongLikenessScore ?? "N/A")}</td>
                             </tr>
                         ))}
                         </tbody>
