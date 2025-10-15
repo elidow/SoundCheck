@@ -1,6 +1,6 @@
 /* PlaylistsPage */
 import React, { useState, useMemo } from 'react';
-import { useMySPStatsContext } from '../context/MySPStatsContext';
+import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PlaylistInsights from '../components/playlist/PlaylistInsights';
 import './PlaylistsPage.css';
 
@@ -9,7 +9,7 @@ import './PlaylistsPage.css';
  * Functional Component to render playlists page
  */
 const PlaylistsPage = () =>  {
-    const { playlists, playlistSongs, playlistStats, playlistScores, loading, error } = useMySPStatsContext();
+    const { playlists, playlistSongs, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
     // Sorting state

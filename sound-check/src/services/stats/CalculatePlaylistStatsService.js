@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import gini from 'gini';
 
 /*
- * MySPStatsService
+ * useCalculatePlaylistStatsService
  * Custom hook to handle all stat calculations
  */
 const useCalculatePlaylistStatsService = () => {

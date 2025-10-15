@@ -1,6 +1,6 @@
 /* DashboardsPage */
 import React from 'react';
-import { useMySPStatsContext } from '../context/MySPStatsContext';
+import { useSoundCheckContext } from '../context/SoundCheckContext';
 import Dashboard from '../components/dashboard/Dashboard';
 import { statMap } from '../util/StatMaps'
 import './DashboardsPage.css'
@@ -10,7 +10,7 @@ import './DashboardsPage.css'
  * Functional Component to render dashboards page
  */
 const DashboardsPage = () => {
-    const { playlists, playlistStats, playlistScores, loading, error } = useMySPStatsContext();
+    const { playlists, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
     const statObjects = Object.entries(statMap);
 
     const [expandedDashboard, setExpandedDashboard] = React.useState(null); // track which dashboard is expanded

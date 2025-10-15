@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import MySPStatsService from '../services/playlistDataManager/PlaylistDataManagerService';
+import PlaylistDataManagerService from '../services/playlistDataManager/PlaylistDataManagerService';
 
-const MySPStatsContext = createContext();
+const SoundCheckContext = createContext();
 
-export const MySPStatsProvider = ({ children }) => {
-    const { retrieveAllData } = MySPStatsService();
+export const SoundCheckProvider = ({ children }) => {
+    const { retrieveAllData } = PlaylistDataManagerService();
 
     const [playlists, setPlaylists] = useState([]);
     const [playlistSongs, setPlaylistSongs] = useState([]);
@@ -35,12 +35,12 @@ export const MySPStatsProvider = ({ children }) => {
     }, []);
 
     return (
-        <MySPStatsContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistScores, loading, error }}>
+        <SoundCheckContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistScores, loading, error }}>
             {children}
-        </MySPStatsContext.Provider>
+        </SoundCheckContext.Provider>
     );
 }
 
-export const useMySPStatsContext = () => {
-    return useContext(MySPStatsContext);
+export const useSoundCheckContext = () => {
+    return useContext(SoundCheckContext);
 };

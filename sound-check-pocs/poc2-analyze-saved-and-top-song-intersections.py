@@ -1,6 +1,6 @@
 # Eli Dow
 # January 2025
-# MySPStats POC in Python
+# SoundCheck POC in Python
 
 
 

@@ -1,6 +1,6 @@
 # Eli Dow
 # September 2025
-# MySPStats POC - Saved Songs In No Playlists and Not Top Played
+# SoundCheck POC - Saved Songs In No Playlists and Not Top Played
 
 import os
 from dotenv import load_dotenv

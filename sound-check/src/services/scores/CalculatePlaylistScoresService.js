@@ -1,19 +1,12 @@
 import { useCallback } from 'react';
 
+/*
+ * useCalculatePlaylistScoresService
+ * Custom hook to handle all score calculations
+ */
 const useCalculatePlaylistScoresService = () => {
 
-    // const maintenanceScoreWeight = 0.35;
-    // const userRelevanceScoreWeight = 0.35;
-    // const generalRelevanceScoreWeight = 0.1;
-    // const artistDiversityScoreWeight = 0.1;
-    // const songLikenessScoreWeight = 0.1;
-
-    // constSongCountScoreWeight = 10;
-    // constTwoYearOldPercentageScoreWeight = 10;
-    // constAvgSongAddedDateScoreWeight = 10;
-    // constLastSongAddedDateScoreWeight = 5;
-
-    // --- User Relevance ---
+    // --- Maintenance ---
 
     /*
      * calculateSongCountScore

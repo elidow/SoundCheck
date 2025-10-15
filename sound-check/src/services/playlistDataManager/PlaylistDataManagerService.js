@@ -1,14 +1,14 @@
-/* MySPStatsService */
+/* PlaylistDataManagerService */
 
 import SpotifyWebService from '../spotify/SpotifyWebService';
 import useCalculatePlaylistStatsService from '../stats/CalculatePlaylistStatsService';
 import useCalculatePlaylistScoresService from '../scores/CalculatePlaylistScoresService';
 
 /*
- * MySPStatsService
- * Functional component to handle all MySPStats services
+ * PlaylistDataManagerService
+ * Functional component to manage all relevant playlist data and statistics
  */
-const MySPStatsService = () => {
+const PlaylistDataManagerService = () => {
     const { retrievePlaylistsAndSongs } = SpotifyWebService();
     const { calculateSongTimeRangePercentage, calculateAverageSongDateAdded,
             calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
@@ -261,4 +261,4 @@ const MySPStatsService = () => {
     return { retrieveAllData }
 }
 
-export default MySPStatsService;
+export default PlaylistDataManagerService;

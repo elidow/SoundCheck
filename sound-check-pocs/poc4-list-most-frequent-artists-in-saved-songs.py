@@ -1,6 +1,6 @@
 # Eli Dow
 # September 2025
-# MySPStats POC - Most Frequent Artists In Saved Songs
+# SoundCheck POC - Most Frequent Artists In Saved Songs
 
 import os
 from dotenv import load_dotenv

@@ -1,6 +1,6 @@
 # Eli Dow
 # January 2025
-# MySPStats POC in Python
+# SoundCheck POC in Python
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta

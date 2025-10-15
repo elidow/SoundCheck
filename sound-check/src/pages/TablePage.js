@@ -1,4 +1,4 @@
-import { useMySPStatsContext } from '../context/MySPStatsContext';
+import { useSoundCheckContext } from '../context/SoundCheckContext';
 import { statMap } from '../util/StatMaps';
 import StatTable from '../components/tables/StatTable';
 import './TablePage.css';
@@ -8,7 +8,7 @@ import './TablePage.css';
  * Functional Component to render multiple stat tables grouped by category
  */
 const TablePage = () => {
-    const { playlists, playlistStats, loading, error } = useMySPStatsContext();
+    const { playlists, playlistStats, loading, error } = useSoundCheckContext();
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>;
     if (error) return <p>Error: {error}</p>;
