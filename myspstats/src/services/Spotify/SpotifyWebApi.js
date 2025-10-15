@@ -209,7 +209,7 @@ const useSpotifyWebApi = () => {
 
                 playlists = [...playlists, // spread operator (...) expands an array into individual elements and makes shallow copies
                     ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" &&
-                        !item.name.includes("On Repeat 🎧") && !item.name.includes("Top 50") && !item.name.includes("Cape Cod"))];
+                        !item.name.includes("On Repeat 🎧"))];
                 nextUrl = response.data.next;
             }
             console.log("SpotifyWebApi: Playlists: ", playlists);

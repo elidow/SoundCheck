@@ -9,11 +9,9 @@ node_modules
 .env.production
 .env.test
 
-# Ignore personal files
-notTopSavedSongs.txt
-savedSongs.txt
-topSavedSongs.txt
-topSongs.txt
+# Ignore personal data and personal files folder in the poc
+myspstats-poc/personal_data/
 
 # other
 .DS_Store
+myspstats-poc/__pycache__/
