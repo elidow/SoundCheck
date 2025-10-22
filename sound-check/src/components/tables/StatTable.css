@@ -1,10 +1,8 @@
 /* Table-styling */
 .big-table {
-    width: 95%;               /* Make table take most of the width */
-    border-collapse: collapse;
+    /* base table layout handled by .base-table; add centering/width */
+    width: 95%;
     margin: 30px auto;
-    background-color: white;
-    color: black;
     border: 3px solid black;
     table-layout: fixed;      /* Evenly distribute column widths */
 }
@@ -23,7 +21,7 @@
     font-weight: bold;
     background-color: #f5f5f5;
 
-    white-space: normal;      /* ✅ allow wrapping in headers */
+    white-space: normal;      /* allow wrapping in headers */
     word-wrap: break-word;
     overflow-wrap: break-word;
 }

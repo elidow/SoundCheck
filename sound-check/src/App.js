@@ -10,13 +10,17 @@ import TablePage from './pages/TablePage.js'
 function App() {
     return (
         <Router>
-            <Navbar />
-            <Routes>
-                <Route path="/playlists" element={<PlaylistsPage />}></Route>
-                <Route path="/dashboards" element={<DashboardsPage />}></Route>
-                <Route path="/table" element={<TablePage />}></Route>
-            </Routes>
-            <PageFooter />
+            <div className="App">
+                <Navbar />
+                <div className="content">
+                    <Routes>
+                        <Route path="/playlists" element={<PlaylistsPage />}></Route>
+                        <Route path="/dashboards" element={<DashboardsPage />}></Route>
+                        <Route path="/table" element={<TablePage />}></Route>
+                    </Routes>
+                </div>
+                <PageFooter />
+            </div>
         </Router>
     );
 }

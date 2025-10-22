@@ -16,28 +16,15 @@
 }
 
 .playlist-song-data table {
-    display: 'flex';
-    flex-direction: column;
-    align-items: 'center';
-    justify-content: 'center';
-
+    /* Use base table styles for consistency (if needed, apply .base-table) */
     border-collapse: separate;   /* allows spacing */
     border-spacing: 10px 10px;   /* horizontal | vertical spacing */
 
-    border-style: solid;
-    border-color: black;
-    border-width: 1px;
-
+    border: 1px solid black;
     margin: 10px;
-
-    background-color: white;
-    color: black;
 }
 
 .playlist-song-data th {
     text-align: left;
 }
 
-.playlist-song-data td {
-
-}

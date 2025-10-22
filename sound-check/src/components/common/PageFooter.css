@@ -1,7 +1,8 @@
 .PageFooter {
-    background-color: #63d471;
+    background-color: var(--brand-green);
     text-align: center;
-    padding: 5px;
-    
+    padding: 12px 8px;
     border-top: 2px solid black;
+    width: 100%;
+    box-sizing: border-box;
 }
