@@ -1,0 +1,41 @@
+/* Table-styling */
+.big-table {
+    /* base table layout handled by .base-table; add centering/width */
+    width: 95%;
+    margin: 30px auto;
+    border: 3px solid black;
+    table-layout: fixed;      /* Evenly distribute column widths */
+}
+
+.categoryName {
+    color: green;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Header cells */
+.big-table th {
+    border-bottom: 2px solid black;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    background-color: #f5f5f5;
+
+    white-space: normal;      /* allow wrapping in headers */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Table rows */
+.big-table tr {
+    border-bottom: 1px solid black;
+}
+
+/* Data cells */
+.big-table td {
+    padding: 8px 12px;
+    text-align: center;
+    white-space: nowrap;       /* keep table content on one line */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

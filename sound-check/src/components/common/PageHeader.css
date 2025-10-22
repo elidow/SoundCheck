@@ -1,0 +1,11 @@
+.Page-Header {
+  background-color: var(--header-bg, #282c34);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  box-sizing: border-box;
+}

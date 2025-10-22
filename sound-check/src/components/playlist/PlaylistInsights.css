@@ -1,0 +1,30 @@
+.insights-header {
+    text-align: center;
+    font-size: 25px;
+}
+
+.playlist-stats-and-scores {
+    text-align: center;
+}
+
+.stats-group {
+    font-size: 16px;
+}
+
+.stats-group table {
+    margin-left: 33%;
+}
+
+.playlist-song-data table {
+    /* Use base table styles for consistency (if needed, apply .base-table) */
+    border-collapse: separate;   /* allows spacing */
+    border-spacing: 10px 10px;   /* horizontal | vertical spacing */
+
+    border: 1px solid black;
+    margin: 10px;
+}
+
+.playlist-song-data th {
+    text-align: left;
+}
+

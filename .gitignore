@@ -9,11 +9,9 @@ node_modules
 .env.production
 .env.test
 
-# Ignore personal files
-notTopSavedSongs.txt
-savedSongs.txt
-topSavedSongs.txt
-topSongs.txt
+# Ignore personal data and personal files folder in the poc
+sound-check-pocs/personal_data/
+sound-check-pocs/__pycache__/
 
 # other
 .DS_Store
