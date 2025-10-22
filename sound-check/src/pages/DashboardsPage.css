@@ -1,8 +1,9 @@
 .Dashboards-Page {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch; /* allow children to use full width */
     justify-content: center;
+    width: 100%;
 }
 
 .dashboards-page-header {
@@ -11,27 +12,54 @@
 }
 
 .dashboards {
+    /* Force exactly 2 columns while allowing shrinking. Increased max-width
+       and gap so cards take up more horizontal space on laptop/monitor. */
+    /* Make the dashboard grid span almost the full viewport so cards are very wide */
+    width: 98%;
+    max-width: none;
+    padding: 0 8px;
+    margin: 12px auto;
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns */
-    gap: 40px; /* spacing between rows and columns */
-    margin: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px; /* increase spacing between dashboard cards */
+    box-sizing: border-box;
 }
 
 .dashboard {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
+    align-items: stretch;
+    justify-content: flex-start;
     border: 2px solid black;
-    padding: 20px;
+    padding: 16px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: white;
+    color: black;
+    min-width: 0; /* allow children to shrink below their content width */
+}
+
+/* Styles for an expanded dashboard: spread items across available width */
+.dashboard.expanded .dashboard-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dashboard.expanded .dashboard-item {
+    justify-content: space-between; /* spread index / name / stat / graph */
+}
+
+/* Make collapsed dashboards' items also centered/spaced like expanded */
+.dashboard .dashboard-item {
+    justify-content: space-between;
 }
 
 .dashboard-header {
     display: flex;
     justify-content: space-between; /* push left vs right */
     align-items: center;
-    padding: 5px;
+    padding: 8px 0;
     font-size: 20px;
     width: 100%;
 }
@@ -43,7 +71,7 @@
 
 .dashboard-header-right-group {
     display: flex;
-    gap: 4px; /* tighter spacing between buttons */
+    gap: 8px; /* slightly more spacing */
     justify-content: flex-end;
 }
 
@@ -53,43 +81,55 @@
 }
 
 .dashboard-items {
-    margin-top: 20px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
 }
 
 .dashboard-item {
     display: flex;
-    margin: 10px;
-    white-space: nowrap;
-
+    gap: 12px;
+    align-items: center;
+    flex-wrap: nowrap; /* keep items on a single line */
+    margin: 0;
     font-size: 16px;
     text-align: left;
-
-    background-color: white;
-    color: black;
 }
 
 .dashboard-item-index {
-    width: 3ch; /* 3 characters */
-    padding-right: 1ch;
+    flex: 0 0 2ch; /* fixed small column */
+    padding-right: 0.5ch;
     text-align: center;
+    min-width: 18px;
 }
 
 .dashboard-item-playlist-name {
-    width: 35ch; /* 35 characters */
-    padding-right: 2ch;
-    text-align: left;
+    flex: 1 1 200px; /* grow/shrink but keep minimum width */
+    max-width: 20ch; /* show more characters before truncating */
+    padding-right: 1ch;
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Small screens: keep two columns but reduce gap and padding so it fits */
+@media (max-width: 900px) {
+    .dashboards { gap: 12px; padding: 0 8px; }
+    .dashboard { padding: 12px; }
+    .dashboard-item-playlist-name { max-width: 10ch; }
 }
 
 .dashboard-item-stat-data {
-    width: 20ch; /* 6 characters */
-    padding-right: 1ch;
-    text-align: left;
+    flex: 0 0 120px;
+    min-width: 80px;
+    padding: 0 1ch;
 }
 
 .dashboard-item-graph-data {
-    /* width: 100ch;
-    padding-right: 1ch;
-    text-align: left; */
     margin-left: 0px;
+    flex: 0 0 140px; /* reserve space for the small bar chart */
+    display: flex;
+    align-items: center;
 }

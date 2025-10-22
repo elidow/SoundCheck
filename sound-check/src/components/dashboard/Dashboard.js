@@ -9,8 +9,7 @@ import { BarChart, Bar, XAxis, YAxis } from 'recharts';
  */
 const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails, expandedDashboard, setExpandedDashboard }) => {
 
-    const [indexView, setIndexView] = useState(10);  // state for controlling number of displayed items in a dashboard
-    const [expandButtonIcon, setExpandButtonIcon] = useState("➕"); // state for controlling expand icon
+    // expansion is controlled by `expandedDashboard` prop (shared state)
     const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
 
     const { category, statKey, type } = statDetails;
@@ -20,14 +19,11 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
      * Toggles icon and index view count based on current
      */
 const toggleExpandView = () => {
-    if (expandButtonIcon === "➕") {
-        setExpandButtonIcon("➖");
-        setIndexView(100);
-        setExpandedDashboard(name); // mark this dashboard as expanded
+    // if this dashboard is already expanded, collapse it; otherwise expand this one
+    if (expandedDashboard === name) {
+        setExpandedDashboard(null);
     } else {
-        setExpandButtonIcon("➕");
-        setIndexView(10);
-        setExpandedDashboard(null); // collapse
+        setExpandedDashboard(name);
     }
 };
 
@@ -69,6 +65,8 @@ const toggleExpandView = () => {
     };
 
     const sortedPlaylists = getSortedPlaylists();
+    const indexView = expandedDashboard === name ? 100 : 10;
+    const expandButtonIcon = expandedDashboard === name ? "➖" : "➕";
 
     const categoryToScoreKey = {
         artistStats: "artistDiversity",
@@ -89,8 +87,8 @@ const toggleExpandView = () => {
         return (
             <BarChart
                 layout="vertical"
-                width={200}
-                height={20}
+                width={120}
+                height={14}
                 data={barData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
                 >
@@ -127,7 +125,7 @@ const toggleExpandView = () => {
 
     return (
         <div
-            className="dashboard"
+            className={"dashboard" + (expandedDashboard === name ? ' expanded' : '')}
             style={{
                 gridColumn: expandedDashboard === name ? "span 2" : "auto",
             }}
