@@ -51,8 +51,8 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
     const sortedPlaylists = getSortedPlaylists();
 
     return (
-        <div className="stat-table-wrapper">
-            <h2>{categoryName}</h2>
+        <div>
+            <h2 className="categoryName">{categoryName}</h2>
             <table className="big-table">
                 <thead>
                     <tr>

@@ -1,6 +1,7 @@
 /* PlaylistsPage */
 import React, { useState, useMemo } from 'react';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
+import PageHeader from '../components/common/PageHeader';
 import PlaylistInsights from '../components/playlist/PlaylistInsights';
 import './PlaylistsPage.css';
 
@@ -132,9 +133,7 @@ const PlaylistsPage = () =>  {
 
     return (
         <div className="Playlists-Page">
-            <header className="Page-Header">
-                <p>Spotify Playlists</p>
-            </header>
+            <PageHeader title="Playlists" />
             <div className="Page-Body">
                 <div className="playlists-page-header">
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>

@@ -1,27 +1,4 @@
-h1, h2 {
-    color: green;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Wrapper for dashboard playlists */
-.DashboardPlaylistData {
-    margin: 20px;
-    padding: 20px;
-    border: solid;
-}
-
-/* Page container */
-.Table-Page,
-.Stat-Table {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
-}
-
-/* Main table styling */
+/* Table-styling */
 .big-table {
     width: 95%;               /* Make table take most of the width */
     border-collapse: collapse;
@@ -30,6 +7,12 @@ h1, h2 {
     color: black;
     border: 3px solid black;
     table-layout: fixed;      /* Evenly distribute column widths */
+}
+
+.categoryName {
+    color: green;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 /* Header cells */

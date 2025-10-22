@@ -1,6 +1,7 @@
 /* DashboardsPage */
 import React from 'react';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
+import PageHeader from '../components/common/PageHeader';
 import Dashboard from '../components/dashboard/Dashboard';
 import { statMap } from '../util/StatMaps'
 import './DashboardsPage.css'
@@ -20,9 +21,7 @@ const DashboardsPage = () => {
 
     return (
         <div className="Dashboards-Page">
-            <header className="Page-Header">
-                <p>Spotify Playlist Dashboards</p>
-            </header>
+            <PageHeader title="Dashboards" />
             <div className="Page-Body">
                 <div className="dashboards-page-header">
                     <div>Owner: {playlists[0]["owner"]["display_name"]}</div>

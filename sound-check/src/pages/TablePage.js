@@ -1,4 +1,5 @@
 import { useSoundCheckContext } from '../context/SoundCheckContext';
+import PageHeader from '../components/common/PageHeader';
 import { statMap } from '../util/StatMaps';
 import StatTable from '../components/tables/StatTable';
 import './TablePage.css';
@@ -23,9 +24,7 @@ const TablePage = () => {
 
     return (
         <div className="Table-Page">
-            <header className="Page-Header">
-                <p>Spotify Playlist Tables</p>
-            </header>
+            <PageHeader title="Tables" />
             <div>
                 {Object.entries(groupedStats).map(([categoryName, statColumns]) => (
                     <StatTable
