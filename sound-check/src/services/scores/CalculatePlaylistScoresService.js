@@ -4,6 +4,12 @@ import { useCallback } from 'react';
  * useCalculatePlaylistScoresService
  * Custom hook to handle all score calculations
  */
+// applyLogisticDecay is used by multiple callbacks; define it before they are declared
+function applyLogisticDecay(x, k, midpoint) {
+    const score = 100 / (1 + Math.exp(k * (x - midpoint)));
+    return Math.round(score);
+}
+
 const useCalculatePlaylistScoresService = () => {
 
     // --- Maintenance ---
@@ -14,10 +20,6 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: 70 is 100, <=20 is 0, >= 120 is 0 
      */
     const calculateSongCountScore = useCallback((count) => {
-        if (count < 20 || count > 130) {
-            return 0;
-        }
-
         if (count >= 70 && count <= 80) {
             return 100;
         }
@@ -36,62 +38,56 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateTwoYearOldPercentageScore = useCallback((percentage) => {
-        return 100 - Number(percentage)
+        const val = Math.round(100 - Number(percentage));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
     * calculateAvgSongAddedDateScore
-    * Calculates score 0-100 based on average song added date
-    * Decay curve:
-    * - ~95 at 60 days
-    * - ~80 at 180 days
-    * - ~50 at 365 days
-    * - ~0 at 540 days
+    * Calculates score 0-100 based on average song added date.
+    * Target tuning (approximate):
+    *  - ~95 at 90 days
+    *  - ~80 at 365 days
+    *  - 50 (midpoint) at 638 days
+    *  - near 0 by ~730 days (clamped)
     */
     const calculateAvgSongAddedDateScore = useCallback((date) => {
         const inputDate = new Date(date);
         const today = new Date();
 
-        // difference in days
-        const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
+    const x = Math.max(daysDiff, 0);
+    const midpoint = Math.round(1.5 * 365);
+    const zeroClamp = Math.round(2 * 365);
+    const k = 0.012;
 
-        // Clamp to [0, 540]
-        const x = Math.min(Math.max(daysDiff, 0), 540);
+    if (x >= zeroClamp) return 0;
 
-        // Logistic parameters tuned for target points
-        const k = 0.015;        // steepness of curve
-        const midpoint = 365;   // where it crosses ~50
-
-        const score = 100 / (1 + Math.exp(k * (x - midpoint)));
-
-        return Math.round(score);
+    return applyLogisticDecay(x, k, midpoint);
     }, []);
 
     /*
      * calculateLastSongAddedDateScore
      * Calculates score 0-100 on what the last song added date is
-     * Decay Curve
-     * - ~95 at 30 days
-     * - ~80 at 90 days
-     * - ~50 at 180 days
-     * - ~0 at 365 days
+     * Target tuning (approximate):
+     *  - ~95 at 45 days
+     *  - ~80 at 180 days
+     *  - 50 (midpoint) at 270 days
+     *  - near 0 by ~365 days (clamped)
      */
     const calculateLastSongAddedDateScore = useCallback((date) => {
         const inputDate = new Date(date);
         const today = new Date();
         
-        // difference in days
-        const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24));
-        
-        // Clamp to [0, 365]
-        const x = Math.min(Math.max(daysDiff, 0), 365);
+        const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
+    const x = Math.max(daysDiff, 0);
+    const midpoint = Math.round(0.5 * 365);
+    const zeroClamp = 9 * 30;
+    const k = 0.03;
 
-        // Logistic parameters tuned for target points
-        const k = 0.025;  // steepness
-        const midpoint = 200; // where it crosses ~50
-        const score = 100 / (1 + Math.exp(k * (x - midpoint)));
+    if (x >= zeroClamp) return 0;
 
-        return Math.round(score);
+    return applyLogisticDecay(x, k, midpoint);
     }, []);
 
     /*
@@ -100,7 +96,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateTotalMaintenanceScore = useCallback((songCountScore, twoYearOldPercentageScore, avgSongAddedDateScore, lastSongAddedDateScore) => {
-        const temp = (songCountScore * (10/35)) 
+        let temp = (songCountScore * (10/35)) 
             + (twoYearOldPercentageScore * (10/35)) 
             + (avgSongAddedDateScore * (10/35)) 
             + (lastSongAddedDateScore * (5/35));
@@ -119,8 +115,8 @@ const useCalculatePlaylistScoresService = () => {
         if (Number(percent) > 20) {
             return 100;
         }
-        
-        return 5 * Number(percent);
+        const val = Math.round(5 * Number(percent));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
@@ -132,8 +128,8 @@ const useCalculatePlaylistScoresService = () => {
         if (Number(percent) > 25) {
             return 100;
         }
-        
-        return 4 * Number(percent);
+        const val = Math.round(4 * Number(percent));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
@@ -145,8 +141,8 @@ const useCalculatePlaylistScoresService = () => {
         if (Number(percent) > 50) {
             return 100;
         }
-        
-        return 2 * Number(percent);
+        const val = Math.round(2 * Number(percent));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
@@ -155,7 +151,8 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateSavedSongPercentageScore = useCallback((percent) => {
-        return Number(percent);
+        const val = Math.round(Number(percent));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
@@ -164,8 +161,10 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateTimesRecentlyPlayedScore = useCallback((count) => {
-        if(Number(count) > 0) {
+        if(Number(count) > 1) {
             return 100;
+        } else if(Number(count) > 0) {
+            return 90;
         }
 
         return 0;
@@ -177,7 +176,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateTotalUserRelevanceScore = useCallback((shortTermMostPlayedPercentageScore, mediumTermMostPlayedPercentageScore,
                                             longTermMostPlayedPercentageScore, savedSongPercentageScore, timesRecentlyPlayedScore) => {
-        const temp = (shortTermMostPlayedPercentageScore * (10/35)) 
+        let temp = (shortTermMostPlayedPercentageScore * (10/35)) 
             + (mediumTermMostPlayedPercentageScore * (10/35)) 
             + (longTermMostPlayedPercentageScore * (5/35))
             + (savedSongPercentageScore * (5/35)) 
@@ -198,22 +197,25 @@ const useCalculatePlaylistScoresService = () => {
         const formatDate = (date) =>
             date.toLocaleDateString("fr-CA", { year: "numeric", month: "2-digit", day: "2-digit" });
         const today = new Date();
+        const fiveYearsAgo = formatDate(new Date(today.getFullYear() - 5, today.getMonth(), today.getDate()));
         const tenYearsAgo = formatDate(new Date(today.getFullYear() - 10, today.getMonth(), today.getDate()));
         const twentyYearsAgo = formatDate(new Date(today.getFullYear() - 20, today.getMonth(), today.getDate()));
         const thirtyYearsAgo = formatDate(new Date(today.getFullYear() - 30, today.getMonth(), today.getDate()));
         const fortyYearsAgo = formatDate(new Date(today.getFullYear() - 40, today.getMonth(), today.getDate()));
         const fiftyYearsAgo = formatDate(new Date(today.getFullYear() - 50, today.getMonth(), today.getDate()));
         
-        if (date >= tenYearsAgo) {
+        if (date >= fiveYearsAgo) {
             return 100
+        } else if (date >= tenYearsAgo) {
+            return 90
         } else if (date >= twentyYearsAgo) {
             return 80
         } else if (date >= thirtyYearsAgo) {
-            return 60
+            return 70
         } else if (date >= fortyYearsAgo) {
-            return 40
+            return 60
         } else if (date >= fiftyYearsAgo) {
-            return 20
+            return 50
         } else {
             return 0
         }
@@ -224,7 +226,8 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how popular the average song is
      */
     const calculateAvgSongPopularityScore = useCallback((popularity) => {
-        return Number(popularity);
+        const val = Math.round(Number(popularity));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
@@ -232,8 +235,8 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how relevant the playlist is the based on popularity and recency
      */
     const calculateTotalGeneralRelevanceScore = useCallback((avgSongReleaseDateScore, avgSongPopularityScore) => {
-        const temp = (avgSongReleaseDateScore * (1/2)) 
-            + (avgSongPopularityScore * (1/2))
+        let temp = (avgSongReleaseDateScore * (1/3)) 
+            + (avgSongPopularityScore * (2/3))
         
         return Number(temp).toFixed(1);
     }, []);
@@ -245,7 +248,8 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how diverse the playlist is by artist
      */
     const calculateArtistDiversityScore = useCallback((diversity) =>  {
-        return Number(diversity);
+        const val = Math.round(Number(diversity));
+        return Math.max(0, Math.min(100, val));
     }, []);
 
     /*
@@ -263,7 +267,9 @@ const useCalculatePlaylistScoresService = () => {
      * closer to 0 is better
      */
     const calculateSongDurationVarianceScore = useCallback((variance) =>  {
-        return 100 - Number(variance) * 100;
+        let temp = 100 - Number(variance) * 100;
+        temp = Math.round(temp);
+        return Math.max(0, Math.min(100, temp));
     }, []);
 
     /*
@@ -272,7 +278,9 @@ const useCalculatePlaylistScoresService = () => {
      * closer to 0 is better
      */
     const calculateSongReleaseDateVarianceScore = useCallback((variance) =>  {
-        return 100 - Number(variance) * 100;
+        let temp = 100 - Number(variance) * 100;
+        temp = Math.round(temp);
+        return Math.max(0, Math.min(100, temp));
     }, []);
 
     /*
@@ -281,14 +289,18 @@ const useCalculatePlaylistScoresService = () => {
      * May add more but just song duration variance for now
      */
     const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore, songReleaseDateVariance) => {        
-        const temp = (songDurationVarianceScore * (1/2)) 
+        let temp = (songDurationVarianceScore * (1/2)) 
             + (songReleaseDateVariance * (1/2))
         
         return Number(temp).toFixed(1);
     }, []);
 
+    /*
+     * calculateTotalScore
+     * Calculates score 0-100 based on all the other scores
+     */
     const calculateTotalScore = useCallback((totalMaintenanceScore, totalUserRelevanceScore, totalGeneralRelevanceScore, totalArtistDiversityScore, totalSongLikenessScore) => {
-        const temp = (totalMaintenanceScore * (35/100)) 
+        let temp = (totalMaintenanceScore * (35/100)) 
             + (totalUserRelevanceScore * (35/100)) 
             + (totalGeneralRelevanceScore * (10/100)) 
             + (totalArtistDiversityScore * (10/100))
@@ -296,6 +308,8 @@ const useCalculatePlaylistScoresService = () => {
         
         return Number(temp).toFixed(1);
     }, []);
+
+    // note: applyLogisticDecay is defined at module top-level and reused here
 
     return {
         // Maintenance
