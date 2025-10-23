@@ -14,4 +14,4 @@ sound-check-pocs/personal_data/
 sound-check-pocs/__pycache__/
 
 # other
-.DS_Store
+.DS_Storebuild/
