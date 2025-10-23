@@ -2,9 +2,6 @@
 node_modules/
 node_modules
 
-# Ignore build
-sound-check/build/
-
 # Ignore environment files
 .env
 .env.local
@@ -17,4 +14,5 @@ sound-check-pocs/personal_data/
 sound-check-pocs/__pycache__/
 
 # other
-.DS_Storebuild/
+.DS_Store
+build/
