@@ -147,7 +147,7 @@ const toggleExpandView = () => {
         <div
             className={"dashboard" + (expandedDashboard === name ? ' expanded' : '')}
             style={{
-                gridColumn: expandedDashboard === name ? "span 2" : "auto",
+                gridColumn: expandedDashboard === name ? "span 1" : "auto",
             }}
         >
             <div className="dashboard-header">

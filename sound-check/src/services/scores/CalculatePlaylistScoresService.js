@@ -1,15 +1,48 @@
 import { useCallback } from 'react';
 
 /*
- * useCalculatePlaylistScoresService
- * Custom hook to handle all score calculations
+ * normalizeNumber 
+ * Helper function to normalize a number x between lowPoint and highPoint to a 0-100 scale
  */
+function normalizeNumber(x, lowPoint, highPoint) {
+    if (x <= lowPoint) return 0;
+    if (x >= highPoint) return 100;
+
+    return Math.floor(((x - lowPoint) / (highPoint - lowPoint)) * 100);
+}
+
+/*
+ * normalizeDate
+ * Helper function to normalize a date (YYYY-MM-DD) between earlyDate and lateDate to a 0-100 scale
+ */
+function normalizeDate(date, earlyDate, lateDate) {
+    if (!isFinite(date) || !isFinite(earlyDate) || !isFinite(lateDate)) {
+        return 0;
+    }
+
+    const t = date.getTime();
+    const lowT = earlyDate.getTime();
+    const highT = lateDate.getTime();
+
+    if (lowT === highT) return 100;
+    if (t <= lowT) return 0;
+    if (t >= highT) return 100;
+
+    const ratio = (t - lowT) / (highT - lowT);
+    return Math.floor(Math.max(0, Math.min(100, ratio * 100)));
+}
+
+
 // applyLogisticDecay is used by multiple callbacks; define it before they are declared
 function applyLogisticDecay(x, k, midpoint) {
     const score = 100 / (1 + Math.exp(k * (x - midpoint)));
-    return Math.round(score);
+    return Math.floor(score);
 }
 
+/*
+ * useCalculatePlaylistScoresService
+ * Custom hook to handle all score calculations
+ */
 const useCalculatePlaylistScoresService = () => {
 
     // --- Maintenance ---
@@ -38,7 +71,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateTwoYearOldPercentageScore = useCallback((percentage) => {
-        const val = Math.round(100 - Number(percentage));
+        const val = Math.floor(100 - Number(percentage));
         return Math.max(0, Math.min(100, val));
     }, []);
 
@@ -112,11 +145,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateShortTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 20) {
-            return 100;
-        }
-        const val = Math.round(5 * Number(percent));
-        return Math.max(0, Math.min(100, val));
+        return normalizeNumber(Number(percent), 0, 20);
     }, []);
 
     /*
@@ -125,11 +154,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateMediumTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 25) {
-            return 100;
-        }
-        const val = Math.round(4 * Number(percent));
-        return Math.max(0, Math.min(100, val));
+        return normalizeNumber(Number(percent), 0, 25);
     }, []);
 
     /*
@@ -138,11 +163,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateLongTermMostPlayedPercentageScore = useCallback((percent) => {
-        if (Number(percent) > 50) {
-            return 100;
-        }
-        const val = Math.round(2 * Number(percent));
-        return Math.max(0, Math.min(100, val));
+        return normalizeNumber(Number(percent), 0, 50);
     }, []);
 
     /*
@@ -151,7 +172,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculation: %
      */
     const calculateSavedSongPercentageScore = useCallback((percent) => {
-        const val = Math.round(Number(percent));
+        const val = Math.floor(Number(percent));
         return Math.max(0, Math.min(100, val));
     }, []);
 
@@ -197,28 +218,10 @@ const useCalculatePlaylistScoresService = () => {
         const formatDate = (date) =>
             date.toLocaleDateString("fr-CA", { year: "numeric", month: "2-digit", day: "2-digit" });
         const today = new Date();
-        const fiveYearsAgo = formatDate(new Date(today.getFullYear() - 5, today.getMonth(), today.getDate()));
-        const tenYearsAgo = formatDate(new Date(today.getFullYear() - 10, today.getMonth(), today.getDate()));
-        const twentyYearsAgo = formatDate(new Date(today.getFullYear() - 20, today.getMonth(), today.getDate()));
-        const thirtyYearsAgo = formatDate(new Date(today.getFullYear() - 30, today.getMonth(), today.getDate()));
-        const fortyYearsAgo = formatDate(new Date(today.getFullYear() - 40, today.getMonth(), today.getDate()));
-        const fiftyYearsAgo = formatDate(new Date(today.getFullYear() - 50, today.getMonth(), today.getDate()));
+        const oneYearAgo = formatDate(new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()));
+        const oneHundredOneYearsAgo = formatDate(new Date(today.getFullYear() - 101, today.getMonth(), today.getDate()));
         
-        if (date >= fiveYearsAgo) {
-            return 100
-        } else if (date >= tenYearsAgo) {
-            return 90
-        } else if (date >= twentyYearsAgo) {
-            return 80
-        } else if (date >= thirtyYearsAgo) {
-            return 70
-        } else if (date >= fortyYearsAgo) {
-            return 60
-        } else if (date >= fiftyYearsAgo) {
-            return 50
-        } else {
-            return 0
-        }
+        return normalizeDate(new Date(date), new Date(oneHundredOneYearsAgo), new Date(oneYearAgo));
     }, []);
 
     /*
@@ -226,8 +229,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how popular the average song is
      */
     const calculateAvgSongPopularityScore = useCallback((popularity) => {
-        const val = Math.round(Number(popularity));
-        return Math.max(0, Math.min(100, val));
+        return normalizeNumber(Number(popularity), 30, 80);
     }, []);
 
     /*
@@ -248,7 +250,7 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how diverse the playlist is by artist
      */
     const calculateArtistDiversityScore = useCallback((diversity) =>  {
-        const val = Math.round(Number(diversity));
+        const val = Math.floor(Number(diversity));
         return Math.max(0, Math.min(100, val));
     }, []);
 
@@ -268,7 +270,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateSongDurationVarianceScore = useCallback((variance) =>  {
         let temp = 100 - Number(variance) * 100;
-        temp = Math.round(temp);
+        temp = Math.floor(temp);
         return Math.max(0, Math.min(100, temp));
     }, []);
 
@@ -279,7 +281,7 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateSongReleaseDateVarianceScore = useCallback((variance) =>  {
         let temp = 100 - Number(variance) * 100;
-        temp = Math.round(temp);
+        temp = Math.floor(temp);
         return Math.max(0, Math.min(100, temp));
     }, []);
 
