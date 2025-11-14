@@ -62,8 +62,8 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
           bVal = b.track.popularity;
           break;
         case 'saved':
-          aVal = a.saved ? 1 : 0; // adjust if you have a saved field
-          bVal = b.saved ? 1 : 0;
+          aVal = a.isSaved ? 1 : 0; // adjust if you have a saved field
+          bVal = b.isSaved ? 1 : 0;
           break;
         default:
           aVal = 0;
