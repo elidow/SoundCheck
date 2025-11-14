@@ -20,7 +20,7 @@ const useCalculatePlaylistStatsService = () => {
             }
         }
         
-        return ((outdated / playlistSongs.length) * 100).toFixed(1)
+        return Number(((outdated / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
     /*
@@ -51,7 +51,7 @@ const useCalculatePlaylistStatsService = () => {
             }
         }
         
-        return ((topSongCount / playlistSongs.length) * 100).toFixed(1)
+        return Number(((topSongCount / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
     /*
@@ -69,7 +69,7 @@ const useCalculatePlaylistStatsService = () => {
             }
         }
         
-        return ((savedSongCount / playlistSongs.length) * 100).toFixed(1)
+        return Number(((savedSongCount / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
     // TODO: need to confirm accurracy
@@ -124,7 +124,7 @@ const useCalculatePlaylistStatsService = () => {
         const songPopularityScores = playlistSongs.map(playlistSong => playlistSong.track.popularity);
         const avgSongPopularityScore = songPopularityScores.reduce((sum, sps) => sum + sps, 0) / songPopularityScores.length;
         
-        return (avgSongPopularityScore).toFixed(2);
+        return Number((avgSongPopularityScore).toFixed(1));
     }, []);
 
     /*
@@ -190,7 +190,7 @@ const useCalculatePlaylistStatsService = () => {
 
         evennessScore = gini.unordered(distributionData);
         
-        return (richnessScore * (1 - evennessScore) * 100).toFixed(1)
+        return Number((richnessScore * (1 - evennessScore) * 100).toFixed(1))
     }, []);
 
     /*
@@ -202,7 +202,7 @@ const useCalculatePlaylistStatsService = () => {
         const songDurations = playlistSongs.map(playlistSong => playlistSong.track.duration_ms);
         const avgSongDuration = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
         
-        return ((avgSongDuration / 1000) / 60).toFixed(2);
+        return Number(((avgSongDuration / 1000) / 60).toFixed(1));
     }, []);
 
     /*

@@ -62,8 +62,8 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
           bVal = b.track.popularity;
           break;
         case 'saved':
-          aVal = a.saved ? 1 : 0; // adjust if you have a saved field
-          bVal = b.saved ? 1 : 0;
+          aVal = a.isSaved ? 1 : 0; // adjust if you have a saved field
+          bVal = b.isSaved ? 1 : 0;
           break;
         default:
           aVal = 0;
@@ -152,7 +152,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                   <td>{song.track.album.release_date}</td>
                   <td>{((song.track.duration_ms / 1000) / 60).toFixed(2)}</td>
                   <td>{song.track.popularity}</td>
-                  <td>{song.saved ? 'Yes' : 'No'}</td>
+                  <td>{song.isSaved ? 'Yes' : 'No'}</td>
                 </tr>
               ))}
             </tbody>

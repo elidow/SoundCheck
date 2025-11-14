@@ -1,6 +1,6 @@
 import React from "react";
 import './App.css';
-import Navbar from "./navbar/index.js";
+import Navbar from "./components/navbar/index.js";
 import PageFooter from './components/common/PageFooter.js';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import PlaylistsPage from './pages/PlaylistsPage.js'

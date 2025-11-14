@@ -1,7 +1,7 @@
 /* Dashboard */
 
 import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 /*
  * Dashboard
@@ -73,6 +73,25 @@ const toggleExpandView = () => {
         songStats: "songLikeness",
     };
 
+    const CustomTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            const score = payload[0].value;
+            return (
+                <div style={{
+                    background: 'rgba(0,0,0,0.85)',
+                    color: '#fff',
+                    padding: '6px 8px',
+                    borderRadius: 4,
+                    fontSize: 12,
+                    pointerEvents: 'none'
+                }}>
+                    {`Score: ${score}`}
+                </div>
+            );
+        }
+        return null;
+    };
+
     const renderScoreBar = (playlist, statKey, category) => {
         const scoreCategory = categoryToScoreKey[category] || category;
         const scoreKey = `${statKey}Score`;
@@ -92,6 +111,7 @@ const toggleExpandView = () => {
                 data={barData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
                 >
+                <Tooltip content={<CustomTooltip />} />
                 <XAxis type="number" domain={[0, 100]} hide />
                 <YAxis type="category" dataKey="name" hide />
                 <Bar
@@ -127,7 +147,7 @@ const toggleExpandView = () => {
         <div
             className={"dashboard" + (expandedDashboard === name ? ' expanded' : '')}
             style={{
-                gridColumn: expandedDashboard === name ? "span 2" : "auto",
+                gridColumn: expandedDashboard === name ? "span 1" : "auto",
             }}
         >
             <div className="dashboard-header">
