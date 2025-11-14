@@ -152,7 +152,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                   <td>{song.track.album.release_date}</td>
                   <td>{((song.track.duration_ms / 1000) / 60).toFixed(2)}</td>
                   <td>{song.track.popularity}</td>
-                  <td>{song.saved ? 'Yes' : 'No'}</td>
+                  <td>{song.isSaved ? 'Yes' : 'No'}</td>
                 </tr>
               ))}
             </tbody>

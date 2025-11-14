@@ -32,6 +32,18 @@ const PlaylistDataManagerService = () => {
         // Total Score
         calculateTotalScore } = useCalculatePlaylistScoresService();
 
+    /*
+     * addSavedSongs
+     * Marks songs that are saved in user's library
+     */
+    const addSavedSongs = (playlistSongs, savedSongs) => {
+        for (let playlistId in playlistSongs) {
+            playlistSongs[playlistId] = playlistSongs[playlistId].map(song => ({
+                ...song,
+                isSaved: savedSongs.some(savedSong => savedSong.track.id === song.track.id)
+            }));
+        }
+    };
 
     /*
      * getDates
@@ -245,6 +257,7 @@ const PlaylistDataManagerService = () => {
     const retrieveAllData = async () => {
         try {
                 const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs } = await retrievePlaylistsAndSongs();
+                addSavedSongs(playlistSongs, savedSongs);
 
                 const dates = getDates();
 
