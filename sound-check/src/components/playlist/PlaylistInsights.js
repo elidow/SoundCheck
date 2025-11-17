@@ -93,7 +93,13 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
               return (
                 <tr className="stats-group-row" key={key}>
                   <td>{key}</td>
-                  <td>{String(value)}</td>
+                  {key.includes("mostFrequentArtistBy") ? (
+                    <td>
+                      {value?.artistName}: {value?.artistCount}
+                    </td>
+                  ) : ( 
+                    <td>{String(value)}</td>
+                  )}
                   {score !== undefined && <td>Score: {score}</td>}
                 </tr>
               );
