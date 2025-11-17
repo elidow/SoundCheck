@@ -19,17 +19,26 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
             } else {
                 const stat = statColumns.find(([key]) => key === sortBy);
                 const statKey = stat?.[1]?.statKey;
+                let aInputVal = playlistStats[a.id]?.[categoryName]?.[statKey];
+                let bInputVal = playlistStats[b.id]?.[categoryName]?.[statKey];
                 const type = stat?.[1]?.type ?? 'number';
 
                 if (type === 'dateTime') {
-                    aVal = Date.parse(playlistStats[a.id]?.[categoryName]?.[statKey]) || -Infinity;
-                    bVal = Date.parse(playlistStats[b.id]?.[categoryName]?.[statKey]) || -Infinity;
+                    aVal = Date.parse(aInputVal) || -Infinity;
+                    bVal = Date.parse(bInputVal) || -Infinity;
                 } else if (type.includes('artist')) {
-                    aVal = Number(playlistStats[a.id]?.[categoryName]?.[statKey]?.artistCount) ?? -Infinity;
-                    bVal = Number(playlistStats[b.id]?.[categoryName]?.[statKey]?.artistCount) ?? -Infinity;
+                    aVal = Number(aInputVal?.artistCount) ?? -Infinity;
+                    bVal = Number(bInputVal?.artistCount) ?? -Infinity;
+                } else if (type === 'time') {
+                    aVal = aInputVal 
+                        ? Number(aInputVal.split(":")[0]) * 60 + Number(aInputVal.split(":")[1])
+                        : -Infinity;
+                    bVal = bInputVal 
+                        ? Number(bInputVal.split(":")[0]) * 60 + Number(bInputVal.split(":")[1])
+                        : -Infinity;
                 } else {
-                    aVal = Number(playlistStats[a.id]?.[categoryName]?.[statKey]) ?? -Infinity;
-                    bVal = Number(playlistStats[b.id]?.[categoryName]?.[statKey]) ?? -Infinity;
+                    aVal = Number(aInputVal) ?? -Infinity;
+                    bVal = Number(bInputVal) ?? -Infinity;
                 }
             }
 

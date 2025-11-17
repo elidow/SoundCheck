@@ -42,20 +42,29 @@ const toggleExpandView = () => {
     const getSortedPlaylists = () => {
         const sorted = [...playlists].sort((a, b) => {
             let aVal, bVal;
+            let aInputVal = playlistStats[a.id]?.[category]?.[statKey];
+            let bInputVal = playlistStats[b.id]?.[category]?.[statKey];
 
             if (type === "dateTime") {
-                aVal = playlistStats[a.id]?.[category]?.[statKey]
+                aVal = aInputVal
                     ? Date.parse(playlistStats[a.id][category][statKey])
                     : -Infinity;
-                bVal = playlistStats[b.id]?.[category]?.[statKey]
+                bVal = bInputVal
                     ? Date.parse(playlistStats[b.id][category][statKey])
                     : -Infinity;
             } else if (type.includes("artist")) {
-                aVal = playlistStats[a.id]?.[category]?.[statKey]?.artistCount ?? -Infinity;
-                bVal = playlistStats[b.id]?.[category]?.[statKey]?.artistCount ?? -Infinity;
+                aVal = aInputVal?.artistCount ?? -Infinity;
+                bVal = bInputVal?.artistCount ?? -Infinity;
+            } else if (type === "time") {
+                aVal = aInputVal 
+                    ? Number(aInputVal.split(":")[0]) * 60 + Number(aInputVal.split(":")[1])
+                    : -Infinity;
+                bVal = bInputVal 
+                    ? Number(bInputVal.split(":")[0]) * 60 + Number(bInputVal.split(":")[1])
+                    : -Infinity;
             } else {
-                aVal = playlistStats[a.id]?.[category]?.[statKey] ?? -Infinity;
-                bVal = playlistStats[b.id]?.[category]?.[statKey] ?? -Infinity;
+                aVal = aInputVal ?? -Infinity;
+                bVal = bInputVal ?? -Infinity;
             }
 
             return isAscending ? aVal - bVal : bVal - aVal;
@@ -71,6 +80,7 @@ const toggleExpandView = () => {
     const categoryToScoreKey = {
         artistStats: "artistDiversity",
         songStats: "songLikeness",
+        advancedSongStats: "songLikeness"
     };
 
     const CustomTooltip = ({ active, payload }) => {
@@ -185,7 +195,7 @@ const toggleExpandView = () => {
                                             {playlistStats[playlist.id][category]?.[statKey]?.artistName}: 
                                             {playlistStats[playlist.id][category]?.[statKey]?.artistCount}%
                                         </div>
-                                    ) : statDetails.type === "number" ? (
+                                    ) : statDetails.type === "number" || statDetails.type === "time" ? (
                                         <div>{playlistStats[playlist.id][category]?.[statKey]}</div>
                                     ) : (
                                         <div>{playlistStats[playlist.id][category]?.[statKey]}%</div>

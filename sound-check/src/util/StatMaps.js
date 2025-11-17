@@ -2,6 +2,7 @@ const number = "number";
 const percentage = "percentage";
 const dateTime = "dateTime";
 const artist = "artist";
+const time = "time";
 
 export const statMap = {
     "Song Count": {
@@ -74,10 +75,15 @@ export const statMap = {
         statKey: "mostFrequentArtistByPercentage",
         type: artist + ", " + percentage,
     },
+    // "Most Frequent Artist By Count": {
+    //     category: "artistStats",
+    //     statKey: "mostFrequentArtistByCount",
+    //     type: artist + ", " + number,
+    // },
     "Average Song Duration": {
         category: "songStats",
         statKey: "avgSongDuration",
-        type: number,
+        type: time,
     },
     "Song Duration Variance": {
         category: "advancedSongStats",

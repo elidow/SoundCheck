@@ -106,8 +106,8 @@ const PlaylistDataManagerService = () => {
                 },
                 artistStats: {
                     artistDiversity: withSongs(songs, calculateArtistDiversity),
+                    //mostFrequentArtistByCount: withSongs(songs, (s) => calculateMostFrequentArtist(s, true)),
                     mostFrequentArtistByPercentage: withSongs(songs, (s) => calculateMostFrequentArtist(s, false)),
-                    // mostFrequentArtistByCount: withSongs(songs, (s) => calculateMostFrequentArtist(s, true)),
                 },
                 songStats: {
                     avgSongDuration: withSongs(songs, calculateAverageSongDuration),

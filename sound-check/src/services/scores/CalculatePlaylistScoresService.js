@@ -269,9 +269,7 @@ const useCalculatePlaylistScoresService = () => {
      * closer to 0 is better
      */
     const calculateSongDurationVarianceScore = useCallback((variance) =>  {
-        let temp = 100 - Number(variance) * 100;
-        temp = Math.floor(temp);
-        return Math.max(0, Math.min(100, temp));
+        return 100 - normalizeNumber(Number(variance), 0, 4);
     }, []);
 
     /*
@@ -280,9 +278,7 @@ const useCalculatePlaylistScoresService = () => {
      * closer to 0 is better
      */
     const calculateSongReleaseDateVarianceScore = useCallback((variance) =>  {
-        let temp = 100 - Number(variance) * 100;
-        temp = Math.floor(temp);
-        return Math.max(0, Math.min(100, temp));
+        return 100 - normalizeNumber(Number(variance), 0, 400);
     }, []);
 
     /*
