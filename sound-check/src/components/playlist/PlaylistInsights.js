@@ -93,7 +93,13 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
               return (
                 <tr className="stats-group-row" key={key}>
                   <td>{key}</td>
-                  <td>{String(value)}</td>
+                  {key.includes("mostFrequentArtistBy") ? (
+                    <td>
+                      {value?.artistName}: {value?.artistCount}
+                    </td>
+                  ) : ( 
+                    <td>{String(value)}</td>
+                  )}
                   {score !== undefined && <td>Score: {score}</td>}
                 </tr>
               );
@@ -150,7 +156,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                   <td>{song.track.album.name}</td>
                   <td>{song.added_at?.substring(0, 10)}</td>
                   <td>{song.track.album.release_date}</td>
-                  <td>{((song.track.duration_ms / 1000) / 60).toFixed(2)}</td>
+                  <td>{Math.floor((song.track.duration_ms / 1000) / 60)}:{Math.floor((song.track.duration_ms / 1000) % 60).toString().padStart(2, '0')}</td>
                   <td>{song.track.popularity}</td>
                   <td>{song.isSaved ? 'Yes' : 'No'}</td>
                 </tr>
