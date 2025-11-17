@@ -106,7 +106,7 @@ const PlaylistDataManagerService = () => {
                 },
                 artistStats: {
                     artistDiversity: withSongs(songs, calculateArtistDiversity),
-                    //mostFrequentArtistByCount: withSongs(songs, (s) => calculateMostFrequentArtist(s, true)),
+                    mostFrequentArtistByCount: withSongs(songs, (s) => calculateMostFrequentArtist(s, true)),
                     mostFrequentArtistByPercentage: withSongs(songs, (s) => calculateMostFrequentArtist(s, false)),
                 },
                 songStats: {

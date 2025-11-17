@@ -187,13 +187,11 @@ const toggleExpandView = () => {
                                         <div>{playlistStats[playlist.id][category]?.[statKey]?.substring(0,10)}</div>
                                     ) : statDetails.type.includes("artist") && statDetails.type.includes("number") ? (
                                         <div>
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: 
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistCount}
+                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: {playlistStats[playlist.id][category]?.[statKey]?.artistCount}
                                         </div>
                                     ) : statDetails.type.includes("artist") && statDetails.type.includes("percentage") ? (
                                         <div>
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: 
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistCount}%
+                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: {playlistStats[playlist.id][category]?.[statKey]?.artistCount}%
                                         </div>
                                     ) : statDetails.type === "number" || statDetails.type === "time" ? (
                                         <div>{playlistStats[playlist.id][category]?.[statKey]}</div>

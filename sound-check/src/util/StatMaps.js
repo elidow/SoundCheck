@@ -75,11 +75,11 @@ export const statMap = {
         statKey: "mostFrequentArtistByPercentage",
         type: artist + ", " + percentage,
     },
-    // "Most Frequent Artist By Count": {
-    //     category: "artistStats",
-    //     statKey: "mostFrequentArtistByCount",
-    //     type: artist + ", " + number,
-    // },
+    "Most Frequent Artist By Count": {
+        category: "artistStats",
+        statKey: "mostFrequentArtistByCount",
+        type: artist + ", " + number,
+    },
     "Average Song Duration": {
         category: "songStats",
         statKey: "avgSongDuration",

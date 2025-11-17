@@ -91,9 +91,9 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                                         {type === 'dateTime' && val ? (
                                             val.substring(0, 10)
                                         ) : type.includes('artist') && type.includes('number') ? (
-                                            `${val?.artistName ?? '-'}, ${val?.artistCount ?? '-'}`
+                                            `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}`
                                         ) : type.includes('artist') && type.includes('percentage') ? (
-                                            `${val?.artistName ?? '-'}, ${val?.artistCount ?? '-'}%`
+                                            `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}%`
                                         ) : (
                                             val ?? '-'
                                         )}
