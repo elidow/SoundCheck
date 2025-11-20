@@ -2,7 +2,7 @@ import React from "react";
 import './App.css';
 import Navbar from "./components/navbar/index.js";
 import PageFooter from './components/common/PageFooter.js';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import PlaylistsPage from './pages/PlaylistsPage.js'
 import DashboardsPage from './pages/DashboardsPage.js'
 import TablePage from './pages/TablePage.js'
@@ -14,9 +14,11 @@ function App() {
                 <Navbar />
                 <div className="content">
                     <Routes>
+                        <Route path="/" element={<Navigate to="/playlists" replace />} />
                         <Route path="/playlists" element={<PlaylistsPage />}></Route>
                         <Route path="/dashboards" element={<DashboardsPage />}></Route>
                         <Route path="/table" element={<TablePage />}></Route>
+                        <Route path="*" element={<Navigate to="/playlists" replace />} />
                     </Routes>
                 </div>
                 <PageFooter />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './StatTable.css';
+import { useNavigate } from 'react-router-dom';
 
 /*
  * StatTable
@@ -8,6 +9,7 @@ import './StatTable.css';
 const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
     const [sortBy, setSortBy] = useState('name');
     const [isAscending, setIsAscending] = useState(true);
+    const navigate = useNavigate();
 
     const getSortedPlaylists = () => {
         return [...playlists].sort((a, b) => {
@@ -59,6 +61,11 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
 
     const sortedPlaylists = getSortedPlaylists();
 
+    const handlePlaylistClick = (e, playlistId) => {
+        e.preventDefault();
+        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
+    };
+
     return (
         <div>
             <h2 className="categoryName">{categoryName}</h2>
@@ -79,7 +86,7 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                     {sortedPlaylists.map((playlist) => (
                         <tr className="big-table-row" key={playlist.id}>
                             <td>
-                                <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">
+                                <a href="#" onClick={(e) => handlePlaylistClick(e, playlist.id)}>
                                     {playlist.name}
                                 </a>
                             </td>

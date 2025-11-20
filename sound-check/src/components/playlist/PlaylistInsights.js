@@ -113,7 +113,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
   return (
     <div className="insights">
       <header className="insights-header">
-        <p>{playlist.name} Insights</p>
+        <p>
+          <div><a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">{playlist.name}</a></div>
+          <div>Insights</div>
+        </p>
       </header>
       <div className="insights-body">
         <button onClick={onBack}>Back to Playlists</button>

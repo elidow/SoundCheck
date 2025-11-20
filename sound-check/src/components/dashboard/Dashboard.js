@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 /*
  * Dashboard
@@ -9,6 +10,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
  */
 const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails, expandedDashboard, setExpandedDashboard }) => {
 
+    const navigate = useNavigate();
     // expansion is controlled by `expandedDashboard` prop (shared state)
     const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
 
@@ -153,6 +155,11 @@ const toggleExpandView = () => {
         return `rgb(${r},${g},${b})`;
     }
 
+    const handlePlaylistClick = (e, playlistId) => {
+        e.preventDefault();
+        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
+    };
+
     return (
         <div
             className={"dashboard" + (expandedDashboard === name ? ' expanded' : '')}
@@ -177,9 +184,9 @@ const toggleExpandView = () => {
                         <div className="dashboard-item" key={playlist.id}>
                             <div className="dashboard-item-index"> {index + 1} </div>
                             <div className="dashboard-item-playlist-name">
-                                <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">
+                                <a href="#" onClick={(e) => handlePlaylistClick(e, playlist.id)}>
                                     {playlist.name}
-                                 </a>
+                                </a>
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
