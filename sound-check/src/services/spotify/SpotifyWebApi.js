@@ -10,7 +10,7 @@ const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
 const LOCAL_STORAGE_KEYS = {
     ACCESS_TOKEN: "spotify_access_token",
-    REFRESH_TOKEN: "spoitfy_refresh_token",
+    REFRESH_TOKEN: "spotify_refresh_token",
     TOKEN_TIMESTAMP: "spotify_token_timestamp",
     CODE_VERIFIER: "spotify_code_verifier",
 };
@@ -159,6 +159,11 @@ const useSpotifyWebApi = () => {
         }
     }, []);
 
+    // NOTE: IF YOU HAVE AN AUTHENTICATION ISSUE, FORCE REAUTHORIZATION:
+    // 1. UNCOMMENT THIS FUNCTION
+    // 2. CALL forceReauth() in the first elseIf block
+    // 3. Call fetchAccassToken in the elseIf block
+    // 4. Revert
     // const forceReauth = useCallback(() => {
     //     console.log("Forcing Spotify reauthorization – clearing stored tokens...");
     //     Object.values(LOCAL_STORAGE_KEYS).forEach(key => localStorage.removeItem(key));

@@ -1,33 +1,32 @@
 /* Dashboard */
 
-import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import useTableUtils from '../../util/TableUtils';
 
 /*
  * Dashboard
- * Component representation for a dashboard
+ * Component for rendering a single dashboard for a stat/score
  */
 const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails, expandedDashboard, setExpandedDashboard }) => {
-
+    const [isAscending, setIsAscending] = useState(false);
     const navigate = useNavigate();
-    // expansion is controlled by `expandedDashboard` prop (shared state)
-    const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
-
     const { category, statKey, type } = statDetails;
+    const { getComparableValuesForSort } = useTableUtils();
 
     /*
      * toggleExpandView
      * Toggles icon and index view count based on current
      */
-const toggleExpandView = () => {
-    // if this dashboard is already expanded, collapse it; otherwise expand this one
-    if (expandedDashboard === name) {
-        setExpandedDashboard(null);
-    } else {
-        setExpandedDashboard(name);
-    }
-};
+    const toggleExpandView = () => {
+        // if this dashboard is already expanded, collapse it; otherwise expand this one
+        if (expandedDashboard === name) {
+            setExpandedDashboard(null);
+        } else {
+            setExpandedDashboard(name);
+        }
+    };
 
     /*
      * toggleSortOrder
@@ -41,41 +40,16 @@ const toggleExpandView = () => {
      * getSortedPlaylists
      * Sorts playlist based on stat, stat type, and sort order
      */
-    const getSortedPlaylists = () => {
-        const sorted = [...playlists].sort((a, b) => {
-            let aVal, bVal;
+    const sortedPlaylists = useMemo(() => {
+        return [...playlists].sort((a, b) => {
             let aInputVal = playlistStats[a.id]?.[category]?.[statKey];
             let bInputVal = playlistStats[b.id]?.[category]?.[statKey];
 
-            if (type === "dateTime") {
-                aVal = aInputVal
-                    ? Date.parse(playlistStats[a.id][category][statKey])
-                    : -Infinity;
-                bVal = bInputVal
-                    ? Date.parse(playlistStats[b.id][category][statKey])
-                    : -Infinity;
-            } else if (type.includes("artist")) {
-                aVal = aInputVal?.artistCount ?? -Infinity;
-                bVal = bInputVal?.artistCount ?? -Infinity;
-            } else if (type === "time") {
-                aVal = aInputVal 
-                    ? Number(aInputVal.split(":")[0]) * 60 + Number(aInputVal.split(":")[1])
-                    : -Infinity;
-                bVal = bInputVal 
-                    ? Number(bInputVal.split(":")[0]) * 60 + Number(bInputVal.split(":")[1])
-                    : -Infinity;
-            } else {
-                aVal = aInputVal ?? -Infinity;
-                bVal = bInputVal ?? -Infinity;
-            }
+            let { aVal, bVal } = getComparableValuesForSort(type, aInputVal, bInputVal);
 
             return isAscending ? aVal - bVal : bVal - aVal;
         });
-
-        return sorted;
-    };
-
-    const sortedPlaylists = getSortedPlaylists();
+    }, [playlists, playlistStats, isAscending, category, statKey, type, getComparableValuesForSort]);
     const indexView = expandedDashboard === name ? 100 : 10;
     const expandButtonIcon = expandedDashboard === name ? "➖" : "➕";
 

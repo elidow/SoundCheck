@@ -1,17 +1,19 @@
-import { useState } from 'react';
-import './StatTable.css';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useTableUtils from '../../util/TableUtils';
+import './StatTable.css';
 
 /*
  * StatTable
- * Renders a single table for a given stat category
+ * Component for rendering a single table for a given stat category
  */
 const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
+    const { getComparableValuesForSort } = useTableUtils();
     const [sortBy, setSortBy] = useState('name');
     const [isAscending, setIsAscending] = useState(true);
     const navigate = useNavigate();
 
-    const getSortedPlaylists = () => {
+    const sortedPlaylists = useMemo(() => {
         return [...playlists].sort((a, b) => {
             let aVal, bVal;
 
@@ -20,35 +22,19 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                 bVal = b.name.toLowerCase();
             } else {
                 const stat = statColumns.find(([key]) => key === sortBy);
+                const type = stat?.[1]?.type ?? 'number';
                 const statKey = stat?.[1]?.statKey;
                 let aInputVal = playlistStats[a.id]?.[categoryName]?.[statKey];
                 let bInputVal = playlistStats[b.id]?.[categoryName]?.[statKey];
-                const type = stat?.[1]?.type ?? 'number';
 
-                if (type === 'dateTime') {
-                    aVal = Date.parse(aInputVal) || -Infinity;
-                    bVal = Date.parse(bInputVal) || -Infinity;
-                } else if (type.includes('artist')) {
-                    aVal = Number(aInputVal?.artistCount) ?? -Infinity;
-                    bVal = Number(bInputVal?.artistCount) ?? -Infinity;
-                } else if (type === 'time') {
-                    aVal = aInputVal 
-                        ? Number(aInputVal.split(":")[0]) * 60 + Number(aInputVal.split(":")[1])
-                        : -Infinity;
-                    bVal = bInputVal 
-                        ? Number(bInputVal.split(":")[0]) * 60 + Number(bInputVal.split(":")[1])
-                        : -Infinity;
-                } else {
-                    aVal = Number(aInputVal) ?? -Infinity;
-                    bVal = Number(bInputVal) ?? -Infinity;
-                }
+                ({ aVal, bVal } = getComparableValuesForSort(type, aInputVal, bInputVal));
             }
 
             if (aVal < bVal) return isAscending ? -1 : 1;
             if (aVal > bVal) return isAscending ? 1 : -1;
             return 0;
         });
-    };
+    }, [playlists, playlistStats, sortBy, isAscending, categoryName, statColumns, getComparableValuesForSort]);
 
     const handleSort = (columnTitle) => {
         if (sortBy === columnTitle) {
@@ -58,8 +44,6 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
             setIsAscending(true);
         }
     };
-
-    const sortedPlaylists = getSortedPlaylists();
 
     const handlePlaylistClick = (e, playlistId) => {
         e.preventDefault();
