@@ -20,7 +20,7 @@ const useCalculatePlaylistStatsService = () => {
             }
         }
         
-        return ((outdated / playlistSongs.length) * 100).toFixed(1)
+        return Number(((outdated / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
     /*
@@ -51,7 +51,7 @@ const useCalculatePlaylistStatsService = () => {
             }
         }
         
-        return ((topSongCount / playlistSongs.length) * 100).toFixed(1)
+        return Number(((topSongCount / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
     /*
@@ -69,7 +69,7 @@ const useCalculatePlaylistStatsService = () => {
             }
         }
         
-        return ((savedSongCount / playlistSongs.length) * 100).toFixed(1)
+        return Number(((savedSongCount / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
     // TODO: need to confirm accurracy
@@ -124,7 +124,7 @@ const useCalculatePlaylistStatsService = () => {
         const songPopularityScores = playlistSongs.map(playlistSong => playlistSong.track.popularity);
         const avgSongPopularityScore = songPopularityScores.reduce((sum, sps) => sum + sps, 0) / songPopularityScores.length;
         
-        return (avgSongPopularityScore).toFixed(2);
+        return Number((avgSongPopularityScore).toFixed(1));
     }, []);
 
     /*
@@ -190,19 +190,22 @@ const useCalculatePlaylistStatsService = () => {
 
         evennessScore = gini.unordered(distributionData);
         
-        return (richnessScore * (1 - evennessScore) * 100).toFixed(1)
+        return Number((richnessScore * (1 - evennessScore) * 100).toFixed(1))
     }, []);
 
     /*
      * calculateAverageSongDuration
-     * Given a playlist's songs, calculates the average song duration in minutes
+     * Given a playlist's songs, calculates the average song duration in the format MM:SS
      */
     const calculateAverageSongDuration = useCallback((playlistSongs) => {
 
         const songDurations = playlistSongs.map(playlistSong => playlistSong.track.duration_ms);
         const avgSongDuration = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+
+        const minutes = Math.floor((avgSongDuration / 1000) / 60);
+        const seconds = Math.floor((avgSongDuration / 1000) % 60).toString().padStart(2, '0');
         
-        return ((avgSongDuration / 1000) / 60).toFixed(2);
+        return `${minutes}:${seconds}`;
     }, []);
 
     /*
@@ -211,19 +214,14 @@ const useCalculatePlaylistStatsService = () => {
      */
     const calculateSongDurationVariance = useCallback((playlistSongs) => {
 
-        // if (playlistSongs.length === 0) {
-        //     return 0;
-        // }
+        const songDurations = playlistSongs.map(playlistSong => Number(((playlistSong.track.duration_ms / 1000) / 60).toFixed(2)));
+        const mean = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
 
-        // const songDurations = playlistSongs.map(playlistSong => Number(((playlistSong.track.duration_ms / 1000) / 60).toFixed(2)));
-        // const mean = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+        const squaredDifferences = songDurations.map(duration => Math.pow(duration - mean, 2));
+        const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
 
-        // const squaredDifferences = songDurations.map(duration => Math.pow(duration - mean, 2));
-        // const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
-
-        // // return population variance
-        // return sumOfSquaredDifferences / playlistSongs.length;
-        return 0;
+        // return song duration variance
+        return Number(sumOfSquaredDifferences / playlistSongs.length).toFixed(2);
     }, []);
 
     /*
@@ -231,31 +229,26 @@ const useCalculatePlaylistStatsService = () => {
     * Given a playlist's songs, calculates the release date variance in days
     */
     const calculateSongReleaseDateVariance = useCallback((playlistSongs) => {
-        // if (playlistSongs.length === 0) {
-        //     return 0;
-        // }
+        // Convert YYYY-MM-DD → timestamp in days
+        const releaseDates = playlistSongs
+            .map(song => song.track.album.release_date)
+            .filter(Boolean) // in case of missing release_date
+            .map(dateStr => {
+                const date = new Date(dateStr);
+                return Math.floor(date.getTime() / (1000 * 60 * 60 * 24 * 365.25)); // convert to days
+            });
 
-        // // Convert YYYY-MM-DD → timestamp in days
-        // const releaseDates = playlistSongs
-        //     .map(song => song.track.album.release_date)
-        //     .filter(Boolean) // in case of missing release_date
-        //     .map(dateStr => {
-        //         const date = new Date(dateStr);
-        //         return Math.floor(date.getTime() / (1000 * 60 * 60 * 24)); // convert to days
-        //     });
+        if (releaseDates.length === 0) {
+            return 0;
+        }
 
-        // if (releaseDates.length === 0) {
-        //     return 0;
-        // }
+        const mean = releaseDates.reduce((sum, d) => sum + d, 0) / releaseDates.length;
 
-        // const mean = releaseDates.reduce((sum, d) => sum + d, 0) / releaseDates.length;
+        const squaredDifferences = releaseDates.map(d => Math.pow(d - mean, 2));
+        const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
 
-        // const squaredDifferences = releaseDates.map(d => Math.pow(d - mean, 2));
-        // const sumOfSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
-
-        // // return population variance (in days²)
-        // return sumOfSquaredDifferences / releaseDates.length;
-        return 0;
+        // return population variance (in days²)
+        return Number(sumOfSquaredDifferences / releaseDates.length).toFixed(2);
     }, []);
 
 

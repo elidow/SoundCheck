@@ -4,8 +4,6 @@ import PlaylistDataManagerService from '../services/playlistDataManager/Playlist
 const SoundCheckContext = createContext();
 
 export const SoundCheckProvider = ({ children }) => {
-    const { retrieveAllData } = PlaylistDataManagerService();
-
     const [playlists, setPlaylists] = useState([]);
     const [playlistSongs, setPlaylistSongs] = useState([]);
     const [playlistStats, setPlaylistStats] = useState([]);
@@ -13,8 +11,9 @@ export const SoundCheckProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const { retrieveAllData } = PlaylistDataManagerService();
+
     useEffect(() => {
-        console.log("Spotify Playlist Context: In Use Effect")
         const loadData = async () => {
             try {
                 const { playlists, playlistSongs, playlistStats, playlistScores } = await retrieveAllData();
