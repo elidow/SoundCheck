@@ -1,7 +1,7 @@
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
-import { statMap } from '../util/StatMaps';
 import StatTable from '../components/tables/StatTable';
+import { statMap } from '../util/StatMaps';
 import './TablePage.css';
 
 /*

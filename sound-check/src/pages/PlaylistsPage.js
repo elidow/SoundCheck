@@ -1,9 +1,9 @@
 /* PlaylistsPage */
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
 import PlaylistInsights from '../components/playlist/PlaylistInsights';
-import { useLocation } from 'react-router-dom';
 import './PlaylistsPage.css';
 
 /*
@@ -11,13 +11,11 @@ import './PlaylistsPage.css';
  * Functional Component to render playlists page
  */
 const PlaylistsPage = () =>  {
-    const { playlists, playlistSongs, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-    const location = useLocation();
-
-    // Sorting state
     const [sortBy, setSortBy] = useState('rank'); // default sort by rank
     const [isAscending, setIsAscending] = useState(false);
+    const location = useLocation();
+    const { playlists, playlistSongs, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
 
     useEffect(() => {
         const selectedId = location?.state?.selectedPlaylistId;
@@ -27,7 +25,20 @@ const PlaylistsPage = () =>  {
         }
     }, [location?.state?.selectedPlaylistId, playlists]);
 
-    // ---- Hooks & Memoized sorted playlists ----
+    /*
+     * handleSort
+     * Handles sorting when a column header is clicked
+     */
+    const handleSort = (columnKey) => {
+        if (sortBy === columnKey) {
+            setIsAscending(!isAscending); // toggle direction
+        } else {
+            setSortBy(columnKey);
+            setIsAscending(false); // default descending
+        }
+    };
+
+    // memoized sorted playlists
     const sortedPlaylists = useMemo(() => {
         return [...playlists].sort((a, b) => {
             let aVal, bVal;
@@ -88,7 +99,6 @@ const PlaylistsPage = () =>  {
         });
     }, [playlists, playlistScores, sortBy, isAscending]);
 
-    // ---- Conditional returns after hooks ----
     if (loading) return <p>Spotify Playlist Data is loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (selectedPlaylist) {
@@ -104,29 +114,22 @@ const PlaylistsPage = () =>  {
         );
     }
 
-    // ---- Sorting click handler ----
-    const handleSort = (columnKey) => {
-        if (sortBy === columnKey) {
-            setIsAscending(!isAscending); // toggle direction
-        } else {
-            setSortBy(columnKey);
-            setIsAscending(false); // default descending
-        }
-    };
-
-    // ---- Arrow indicator for sorting ----
+    /* 
+     * renderSortArrow
+     * Renders sort arrow for column headers
+     */
     const renderSortArrow = (columnKey) => {
         if (sortBy !== columnKey) return null;
         return isAscending ? ' ▲' : ' ▼';
     };
 
-    // helper to render a table cell value
-    // - bold when the column is the active sorted column
-    // - add `small-number` class when the value is numeric and < 20 (but NOT for the 'rank' column)
+    /*
+     * renderCell
+     * Renders a table cell with conditional styling based on value
+     */
     const renderCell = (columnKey, value) => {
         const isSorted = sortBy === columnKey;
 
-        // robust numeric coercion
         const parsed = typeof value === 'number' ? value : Number(value);
         const numeric = (typeof parsed === 'number' && !isNaN(parsed)) ? parsed : null;
         const isSmallNumber = numeric !== null && numeric < 20 && columnKey !== 'rank';

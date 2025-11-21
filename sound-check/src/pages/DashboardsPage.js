@@ -11,10 +11,9 @@ import './DashboardsPage.css'
  * Functional Component to render dashboards page
  */
 const DashboardsPage = () => {
-    const { playlists, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
+    const [expandedDashboard, setExpandedDashboard] = React.useState(null);
     const statObjects = Object.entries(statMap);
-
-    const [expandedDashboard, setExpandedDashboard] = React.useState(null); // track which dashboard is expanded
+    const { playlists, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>
     if (error) return <p>Error: {error}</p>;

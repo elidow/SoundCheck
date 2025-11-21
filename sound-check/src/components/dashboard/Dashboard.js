@@ -1,33 +1,61 @@
 /* Dashboard */
 
-import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import useTableUtils from '../../util/TableUtils';
+import useRenderUtils from '../../util/RenderUtils';
+import './Dashboard.css';
 
 /*
  * Dashboard
- * Component representation for a dashboard
+ * Component for rendering a single dashboard for a stat/score
  */
 const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails, expandedDashboard, setExpandedDashboard }) => {
-
+    const [isAscending, setIsAscending] = useState(false);
     const navigate = useNavigate();
-    // expansion is controlled by `expandedDashboard` prop (shared state)
-    const [isAscending, setIsAscending] = useState(false); // state for controlling order of list, Default: false = descending
+    const { getComparableValuesForSort } = useTableUtils();
+    const { renderFormattedStatValue, renderSortArrow } = useRenderUtils();
 
     const { category, statKey, type } = statDetails;
 
+    const indexView = expandedDashboard === name ? 100 : 10;
+    const expandButtonIcon = expandedDashboard === name ? "➖" : "➕";
+
+    const CATEGORY_TO_SCORE_KEY = {
+        artistStats: "artistDiversity",
+        songStats: "songLikeness",
+        advancedSongStats: "songLikeness"
+    };
+
+    /*
+     * mapScoreToColor
+     * Maps a score (0-100) to a color from red (0) to green (100)
+     */
+    const mapScoreToColor = (score) => {
+        let r, g, b = 0;
+        const value = Math.max(0, Math.min(100, score));
+
+        if (value < 50) { // 0 → 50: red to yellow
+            r = 255;
+            g = Math.round(5.1 * value); // 0 → 255
+            b = 0;
+        } else { // 50 → 100: yellow to green
+            g = 255;
+            r = Math.round(510 - 5.1 * value); // 255 → 0
+            b = 0;
+        }
+
+        return `rgb(${r},${g},${b})`;
+    };
+
     /*
      * toggleExpandView
-     * Toggles icon and index view count based on current
+     * Toggles expand/collapse view of dashboard
      */
-const toggleExpandView = () => {
-    // if this dashboard is already expanded, collapse it; otherwise expand this one
-    if (expandedDashboard === name) {
-        setExpandedDashboard(null);
-    } else {
-        setExpandedDashboard(name);
-    }
-};
+    const toggleExpandView = () => {
+        setExpandedDashboard(expandedDashboard === name ? null : name);
+    };
 
     /*
      * toggleSortOrder
@@ -38,54 +66,31 @@ const toggleExpandView = () => {
     };
 
     /*
-     * getSortedPlaylists
-     * Sorts playlist based on stat, stat type, and sort order
+     * handlePlaylistClick
+     * Navigates from Dashboard page to Playlist page with selected playlist ID
      */
-    const getSortedPlaylists = () => {
-        const sorted = [...playlists].sort((a, b) => {
-            let aVal, bVal;
+    const handlePlaylistClick = (e, playlistId) => {
+        e.preventDefault();
+        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
+    };
+
+    // memoized sorted playlists
+    const sortedPlaylists = useMemo(() => {
+        return [...playlists].sort((a, b) => {
             let aInputVal = playlistStats[a.id]?.[category]?.[statKey];
             let bInputVal = playlistStats[b.id]?.[category]?.[statKey];
 
-            if (type === "dateTime") {
-                aVal = aInputVal
-                    ? Date.parse(playlistStats[a.id][category][statKey])
-                    : -Infinity;
-                bVal = bInputVal
-                    ? Date.parse(playlistStats[b.id][category][statKey])
-                    : -Infinity;
-            } else if (type.includes("artist")) {
-                aVal = aInputVal?.artistCount ?? -Infinity;
-                bVal = bInputVal?.artistCount ?? -Infinity;
-            } else if (type === "time") {
-                aVal = aInputVal 
-                    ? Number(aInputVal.split(":")[0]) * 60 + Number(aInputVal.split(":")[1])
-                    : -Infinity;
-                bVal = bInputVal 
-                    ? Number(bInputVal.split(":")[0]) * 60 + Number(bInputVal.split(":")[1])
-                    : -Infinity;
-            } else {
-                aVal = aInputVal ?? -Infinity;
-                bVal = bInputVal ?? -Infinity;
-            }
+            let { aVal, bVal } = getComparableValuesForSort(type, aInputVal, bInputVal);
 
             return isAscending ? aVal - bVal : bVal - aVal;
         });
+    }, [playlists, playlistStats, isAscending, category, statKey, type, getComparableValuesForSort]);
 
-        return sorted;
-    };
-
-    const sortedPlaylists = getSortedPlaylists();
-    const indexView = expandedDashboard === name ? 100 : 10;
-    const expandButtonIcon = expandedDashboard === name ? "➖" : "➕";
-
-    const categoryToScoreKey = {
-        artistStats: "artistDiversity",
-        songStats: "songLikeness",
-        advancedSongStats: "songLikeness"
-    };
-
-    const CustomTooltip = ({ active, payload }) => {
+    /*
+     * ScoreTooltip
+     * Custom tooltip for score bar chart
+     */
+    const ScoreTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const score = payload[0].value;
             return (
@@ -104,8 +109,12 @@ const toggleExpandView = () => {
         return null;
     };
 
+    /*
+     * renderScoreBar
+     * Renders a horizontal bar chart for the playlist score
+     */
     const renderScoreBar = (playlist, statKey, category) => {
-        const scoreCategory = categoryToScoreKey[category] || category;
+        const scoreCategory = CATEGORY_TO_SCORE_KEY[category] || category;
         const scoreKey = `${statKey}Score`;
         const score = playlistScores[playlist.id]?.[`${scoreCategory}Scores`]?.[scoreKey] ?? null;
 
@@ -123,7 +132,7 @@ const toggleExpandView = () => {
                 data={barData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
                 >
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<ScoreTooltip/>} />
                 <XAxis type="number" domain={[0, 100]} hide />
                 <YAxis type="category" dataKey="name" hide />
                 <Bar
@@ -132,32 +141,6 @@ const toggleExpandView = () => {
                 />
             </BarChart>
         );
-    }
-
-    const mapScoreToColor = (score) => {
-        // Clamp score between 0 and 100
-        const value = Math.max(0, Math.min(100, score));
-
-        let r, g, b = 0;
-
-        if (value < 50) {
-            // 0 → 50: red to yellow
-            r = 255;
-            g = Math.round(5.1 * value); // 0 → 255
-            b = 0;
-        } else {
-            // 50 → 100: yellow to green
-            g = 255;
-            r = Math.round(510 - 5.1 * value); // 255 → 0
-            b = 0;
-        }
-
-        return `rgb(${r},${g},${b})`;
-    }
-
-    const handlePlaylistClick = (e, playlistId) => {
-        e.preventDefault();
-        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
     };
 
     return (
@@ -190,21 +173,7 @@ const toggleExpandView = () => {
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
-                                    {statDetails.type === "dateTime" ? (
-                                        <div>{playlistStats[playlist.id][category]?.[statKey]?.substring(0,10)}</div>
-                                    ) : statDetails.type.includes("artist") && statDetails.type.includes("number") ? (
-                                        <div>
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: {playlistStats[playlist.id][category]?.[statKey]?.artistCount}
-                                        </div>
-                                    ) : statDetails.type.includes("artist") && statDetails.type.includes("percentage") ? (
-                                        <div>
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: {playlistStats[playlist.id][category]?.[statKey]?.artistCount}%
-                                        </div>
-                                    ) : statDetails.type === "number" || statDetails.type === "time" ? (
-                                        <div>{playlistStats[playlist.id][category]?.[statKey]}</div>
-                                    ) : (
-                                        <div>{playlistStats[playlist.id][category]?.[statKey]}%</div>
-                                    )}
+                                    <div>{renderFormattedStatValue(playlistStats[playlist.id][category]?.[statKey], type)}</div>
                                 </div>
                             ) : (
                                 <p>No stats available</p>
