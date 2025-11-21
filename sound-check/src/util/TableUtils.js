@@ -1,6 +1,11 @@
 import { useCallback } from 'react';
 
 const useTableUtils = () => {
+
+    /* 
+     * getComparableValuesForSort   
+     * Converts input values to comparable values based on type for sorting
+     */
     const getComparableValuesForSort = useCallback((type, aInputVal, bInputVal) => {
         let aVal, bVal;
         

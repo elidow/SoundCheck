@@ -8,11 +8,34 @@ import './StatTable.css';
  * Component for rendering a single table for a given stat category
  */
 const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
-    const { getComparableValuesForSort } = useTableUtils();
     const [sortBy, setSortBy] = useState('name');
     const [isAscending, setIsAscending] = useState(true);
     const navigate = useNavigate();
+    const { getComparableValuesForSort } = useTableUtils();
 
+    /*
+     * handleSort
+     * Handles sorting when a column header is clicked
+     */
+    const handleSort = (columnTitle) => {
+        if (sortBy === columnTitle) {
+            setIsAscending((prev) => !prev);
+        } else {
+            setSortBy(columnTitle);
+            setIsAscending(true);
+        }
+    };
+
+    /*
+     * handlePlaylistClick
+     * Navigates from Dashboard page to Playlist page with selected playlist ID
+     */
+    const handlePlaylistClick = (e, playlistId) => {
+        e.preventDefault();
+        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
+    };
+
+    // memoized sorted playlists
     const sortedPlaylists = useMemo(() => {
         return [...playlists].sort((a, b) => {
             let aVal, bVal;
@@ -35,20 +58,6 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
             return 0;
         });
     }, [playlists, playlistStats, sortBy, isAscending, categoryName, statColumns, getComparableValuesForSort]);
-
-    const handleSort = (columnTitle) => {
-        if (sortBy === columnTitle) {
-            setIsAscending((prev) => !prev);
-        } else {
-            setSortBy(columnTitle);
-            setIsAscending(true);
-        }
-    };
-
-    const handlePlaylistClick = (e, playlistId) => {
-        e.preventDefault();
-        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
-    };
 
     return (
         <div>

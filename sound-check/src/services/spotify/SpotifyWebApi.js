@@ -164,6 +164,8 @@ const useSpotifyWebApi = () => {
     // 2. CALL forceReauth() in the first elseIf block
     // 3. Call fetchAccassToken in the elseIf block
     // 4. Revert
+    // OR
+    // Check into feature/common-scores branch and check back into current later
     // const forceReauth = useCallback(() => {
     //     console.log("Forcing Spotify reauthorization – clearing stored tokens...");
     //     Object.values(LOCAL_STORAGE_KEYS).forEach(key => localStorage.removeItem(key));

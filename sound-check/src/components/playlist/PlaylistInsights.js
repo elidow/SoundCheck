@@ -11,6 +11,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         window.scrollTo(0, 0);
     }, [playlist]);
 
+    /*
+     * handleSort
+     * Handles sorting when a column header is clicked
+     */
     const handleSort = (columnKey) => {
         if (sortBy === columnKey) {
             setIsAscending(!isAscending); // toggle
@@ -20,12 +24,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         }
     };
 
-    const renderSortArrow = (columnKey) => {
-        if (sortBy !== columnKey) return null;
-        return isAscending ? ' ▲' : ' ▼';
-    };
-
-    // ----- Memoized sorted songs -----
+    // memoized sorted songs
     const sortedSongs = useMemo(() => {
         return [...playlistSongs].sort((a, b) => {
             let aVal, bVal;
@@ -78,6 +77,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         });
     }, [playlistSongs, sortBy, isAscending]);
 
+    /*
+     * renderStatsGroup
+     * Renders a stats group table given title, stats, and scores
+     */
     const renderStatsGroup = (title, playlistStats, playlistScores) => {
         return (
             <div className="stats-group">
@@ -106,6 +109,15 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                 </table>
             </div>
         );
+    };
+
+    /* 
+     * renderSortArrow
+     * Renders sort arrow for column headers
+     */
+    const renderSortArrow = (columnKey) => {
+        if (sortBy !== columnKey) return null;
+        return isAscending ? ' ▲' : ' ▼';
     };
 
     return (

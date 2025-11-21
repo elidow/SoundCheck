@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import useTableUtils from '../../util/TableUtils';
+import './Dashboard.css';
 
 /*
  * Dashboard
@@ -12,20 +13,46 @@ import useTableUtils from '../../util/TableUtils';
 const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails, expandedDashboard, setExpandedDashboard }) => {
     const [isAscending, setIsAscending] = useState(false);
     const navigate = useNavigate();
-    const { category, statKey, type } = statDetails;
     const { getComparableValuesForSort } = useTableUtils();
+
+    const { category, statKey, type } = statDetails;
+
+    const indexView = expandedDashboard === name ? 100 : 10;
+    const expandButtonIcon = expandedDashboard === name ? "➖" : "➕";
+
+    const CATEGORY_TO_SCORE_KEY = {
+        artistStats: "artistDiversity",
+        songStats: "songLikeness",
+        advancedSongStats: "songLikeness"
+    };
+
+    /*
+    * mapScoreToColor
+    * Maps a score (0-100) to a color from red (0) to green (100)
+    */
+    const mapScoreToColor = (score) => {
+        let r, g, b = 0;
+        const value = Math.max(0, Math.min(100, score));
+
+        if (value < 50) { // 0 → 50: red to yellow
+            r = 255;
+            g = Math.round(5.1 * value); // 0 → 255
+            b = 0;
+        } else { // 50 → 100: yellow to green
+            g = 255;
+            r = Math.round(510 - 5.1 * value); // 255 → 0
+            b = 0;
+        }
+
+        return `rgb(${r},${g},${b})`;
+    }
 
     /*
      * toggleExpandView
-     * Toggles icon and index view count based on current
+     * Toggles expand/collapse view of dashboard
      */
     const toggleExpandView = () => {
-        // if this dashboard is already expanded, collapse it; otherwise expand this one
-        if (expandedDashboard === name) {
-            setExpandedDashboard(null);
-        } else {
-            setExpandedDashboard(name);
-        }
+        setExpandedDashboard(expandedDashboard === name ? null : name);
     };
 
     /*
@@ -37,9 +64,15 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
     };
 
     /*
-     * getSortedPlaylists
-     * Sorts playlist based on stat, stat type, and sort order
+     * handlePlaylistClick
+     * Navigates from Dashboard page to Playlist page with selected playlist ID
      */
+    const handlePlaylistClick = (e, playlistId) => {
+        e.preventDefault();
+        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
+    };
+
+    // memoized sorted playlists
     const sortedPlaylists = useMemo(() => {
         return [...playlists].sort((a, b) => {
             let aInputVal = playlistStats[a.id]?.[category]?.[statKey];
@@ -50,16 +83,12 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
             return isAscending ? aVal - bVal : bVal - aVal;
         });
     }, [playlists, playlistStats, isAscending, category, statKey, type, getComparableValuesForSort]);
-    const indexView = expandedDashboard === name ? 100 : 10;
-    const expandButtonIcon = expandedDashboard === name ? "➖" : "➕";
 
-    const categoryToScoreKey = {
-        artistStats: "artistDiversity",
-        songStats: "songLikeness",
-        advancedSongStats: "songLikeness"
-    };
-
-    const CustomTooltip = ({ active, payload }) => {
+    /*
+     * ScoreTooltip
+     * Custom tooltip for score bar chart
+     */
+    const ScoreTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const score = payload[0].value;
             return (
@@ -78,8 +107,12 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
         return null;
     };
 
+    /*
+     * renderScoreBar
+     * Renders a horizontal bar chart for the playlist score
+     */
     const renderScoreBar = (playlist, statKey, category) => {
-        const scoreCategory = categoryToScoreKey[category] || category;
+        const scoreCategory = CATEGORY_TO_SCORE_KEY[category] || category;
         const scoreKey = `${statKey}Score`;
         const score = playlistScores[playlist.id]?.[`${scoreCategory}Scores`]?.[scoreKey] ?? null;
 
@@ -97,7 +130,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                 data={barData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
                 >
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<ScoreTooltip/>} />
                 <XAxis type="number" domain={[0, 100]} hide />
                 <YAxis type="category" dataKey="name" hide />
                 <Bar
@@ -106,32 +139,6 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                 />
             </BarChart>
         );
-    }
-
-    const mapScoreToColor = (score) => {
-        // Clamp score between 0 and 100
-        const value = Math.max(0, Math.min(100, score));
-
-        let r, g, b = 0;
-
-        if (value < 50) {
-            // 0 → 50: red to yellow
-            r = 255;
-            g = Math.round(5.1 * value); // 0 → 255
-            b = 0;
-        } else {
-            // 50 → 100: yellow to green
-            g = 255;
-            r = Math.round(510 - 5.1 * value); // 255 → 0
-            b = 0;
-        }
-
-        return `rgb(${r},${g},${b})`;
-    }
-
-    const handlePlaylistClick = (e, playlistId) => {
-        e.preventDefault();
-        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
     };
 
     return (
