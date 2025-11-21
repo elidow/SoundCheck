@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import useTableUtils from '../../util/TableUtils';
-import useFormatUtils from '../../util/FormatUtils';
+import useRenderUtils from '../../util/RenderUtils';
 import './Dashboard.css';
 
 /*
@@ -15,7 +15,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
     const [isAscending, setIsAscending] = useState(false);
     const navigate = useNavigate();
     const { getComparableValuesForSort } = useTableUtils();
-    const { renderStatValue } = useFormatUtils();
+    const { renderFormattedStatValue, renderSortArrow } = useRenderUtils();
 
     const { category, statKey, type } = statDetails;
 
@@ -173,7 +173,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
-                                    <div>{renderStatValue(playlistStats[playlist.id][category]?.[statKey], type)}</div>
+                                    <div>{renderFormattedStatValue(playlistStats[playlist.id][category]?.[statKey], type)}</div>
                                 </div>
                             ) : (
                                 <p>No stats available</p>

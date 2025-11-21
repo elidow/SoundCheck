@@ -1,6 +1,7 @@
 /* PlaylistInsights */
 import { useEffect, useState, useMemo } from 'react';
 import './PlaylistInsights.css';
+import useRenderUtils from '../../util/RenderUtils';
 
 const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
     const [sortBy, setSortBy] = useState('trackNumber');
@@ -111,14 +112,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         );
     };
 
-    /* 
-     * renderSortArrow
-     * Renders sort arrow for column headers
-     */
-    const renderSortArrow = (columnKey) => {
-        if (sortBy !== columnKey) return null;
-        return isAscending ? ' ▲' : ' ▼';
-    };
+    const { renderSortArrow } = useRenderUtils();
 
     return (
         <div className="insights">
@@ -159,14 +153,14 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                     <table>
                         <thead>
                             <tr>
-                                <th onClick={() => handleSort('song')}>Song{renderSortArrow('song')}</th>
-                                <th onClick={() => handleSort('artist')}>Artist{renderSortArrow('artist')}</th>
-                                <th onClick={() => handleSort('album')}>Album{renderSortArrow('album')}</th>
-                                <th onClick={() => handleSort('added')}>Song Added Date{renderSortArrow('added')}</th>
-                                <th onClick={() => handleSort('release')}>Song Release Date{renderSortArrow('release')}</th>
-                                <th onClick={() => handleSort('length')}>Length{renderSortArrow('length')}</th>
-                                <th onClick={() => handleSort('popularity')}>Popularity{renderSortArrow('popularity')}</th>
-                                <th onClick={() => handleSort('saved')}>Saved{renderSortArrow('saved')}</th>
+                                <th onClick={() => handleSort('song')}>Song {renderSortArrow('song', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('artist')}>Artist {renderSortArrow('artist', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('album')}>Album {renderSortArrow('album', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('added')}>Song Added Date {renderSortArrow('added', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('release')}>Song Release Date {renderSortArrow('release', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('length')}>Length {renderSortArrow('length', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('popularity')}>Popularity {renderSortArrow('popularity', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('saved')}>Saved {renderSortArrow('saved', sortBy, isAscending)}</th>
                             </tr>
                         </thead>
                         <tbody>

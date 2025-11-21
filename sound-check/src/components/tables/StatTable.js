@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTableUtils from '../../util/TableUtils';
-import useFormatUtils from '../../util/FormatUtils';
+import useRenderUtils from '../../util/RenderUtils';
 import './StatTable.css';
 
 /*
@@ -13,7 +13,7 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
     const [isAscending, setIsAscending] = useState(true);
     const navigate = useNavigate();
     const { getComparableValuesForSort } = useTableUtils();
-    const { renderStatValue } = useFormatUtils();
+    const { renderFormattedStatValue, renderSortArrow } = useRenderUtils();
 
     /*
      * handleSort
@@ -68,11 +68,11 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                 <thead>
                     <tr>
                         <th onClick={() => handleSort('name')}>
-                            Playlist Name {sortBy === 'name' ? (isAscending ? '↑' : '↓') : ''}
+                            Playlist Name {renderSortArrow('name', sortBy, isAscending)}
                         </th>
                         {statColumns.map(([key]) => (
                             <th key={key} onClick={() => handleSort(key)}>
-                                {key} {sortBy === key ? (isAscending ? '↑' : '↓') : ''}
+                                {key} {renderSortArrow(key, sortBy, isAscending)}
                             </th>
                         ))}
                     </tr>
@@ -90,7 +90,7 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                                 const type = value.type;
                                 return (
                                     <td key={key}>
-                                        {renderStatValue(val, type)}
+                                        {renderFormattedStatValue(val, type)}
                                     </td>
                                 );
                             })}
