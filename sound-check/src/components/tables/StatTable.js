@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTableUtils from '../../util/TableUtils';
+import useFormatUtils from '../../util/FormatUtils';
 import './StatTable.css';
 
 /*
@@ -12,6 +13,7 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
     const [isAscending, setIsAscending] = useState(true);
     const navigate = useNavigate();
     const { getComparableValuesForSort } = useTableUtils();
+    const { renderStatValue } = useFormatUtils();
 
     /*
      * handleSort
@@ -88,15 +90,7 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                                 const type = value.type;
                                 return (
                                     <td key={key}>
-                                        {type === 'dateTime' && val ? (
-                                            val.substring(0, 10)
-                                        ) : type.includes('artist') && type.includes('number') ? (
-                                            `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}`
-                                        ) : type.includes('artist') && type.includes('percentage') ? (
-                                            `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}%`
-                                        ) : (
-                                            val ?? '-'
-                                        )}
+                                        {renderStatValue(val, type)}
                                     </td>
                                 );
                             })}

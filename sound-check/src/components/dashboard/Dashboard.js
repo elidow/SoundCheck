@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import useTableUtils from '../../util/TableUtils';
+import useFormatUtils from '../../util/FormatUtils';
 import './Dashboard.css';
 
 /*
@@ -14,6 +15,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
     const [isAscending, setIsAscending] = useState(false);
     const navigate = useNavigate();
     const { getComparableValuesForSort } = useTableUtils();
+    const { renderStatValue } = useFormatUtils();
 
     const { category, statKey, type } = statDetails;
 
@@ -27,9 +29,9 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
     };
 
     /*
-    * mapScoreToColor
-    * Maps a score (0-100) to a color from red (0) to green (100)
-    */
+     * mapScoreToColor
+     * Maps a score (0-100) to a color from red (0) to green (100)
+     */
     const mapScoreToColor = (score) => {
         let r, g, b = 0;
         const value = Math.max(0, Math.min(100, score));
@@ -45,7 +47,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
         }
 
         return `rgb(${r},${g},${b})`;
-    }
+    };
 
     /*
      * toggleExpandView
@@ -171,21 +173,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                             </div>
                             {playlistStats[playlist.id] ? (
                                 <div className="dashboard-item-stat-data">
-                                    {statDetails.type === "dateTime" ? (
-                                        <div>{playlistStats[playlist.id][category]?.[statKey]?.substring(0,10)}</div>
-                                    ) : statDetails.type.includes("artist") && statDetails.type.includes("number") ? (
-                                        <div>
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: {playlistStats[playlist.id][category]?.[statKey]?.artistCount}
-                                        </div>
-                                    ) : statDetails.type.includes("artist") && statDetails.type.includes("percentage") ? (
-                                        <div>
-                                            {playlistStats[playlist.id][category]?.[statKey]?.artistName}: {playlistStats[playlist.id][category]?.[statKey]?.artistCount}%
-                                        </div>
-                                    ) : statDetails.type === "number" || statDetails.type === "time" ? (
-                                        <div>{playlistStats[playlist.id][category]?.[statKey]}</div>
-                                    ) : (
-                                        <div>{playlistStats[playlist.id][category]?.[statKey]}%</div>
-                                    )}
+                                    <div>{renderStatValue(playlistStats[playlist.id][category]?.[statKey], type)}</div>
                                 </div>
                             ) : (
                                 <p>No stats available</p>
