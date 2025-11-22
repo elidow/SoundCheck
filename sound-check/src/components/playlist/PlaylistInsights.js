@@ -1,8 +1,12 @@
 /* PlaylistInsights */
 import { useEffect, useState, useMemo } from 'react';
-import './PlaylistInsights.css';
 import useRenderUtils from '../../util/RenderUtils';
+import './PlaylistInsights.css';
 
+/*
+ * PlaylistInsights
+ * Component for rendering playlist insights including stats, scores, and song data
+ */
 const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
     const [sortBy, setSortBy] = useState('trackNumber');
     const [isAscending, setIsAscending] = useState(true);
@@ -18,7 +22,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
      */
     const handleSort = (columnKey) => {
         if (sortBy === columnKey) {
-            setIsAscending(!isAscending); // toggle
+            setIsAscending(!isAscending);
         } else {
             setSortBy(columnKey);
             setIsAscending(true);
@@ -128,8 +132,6 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
             </header>
             <div className="insights-body">
                 <button onClick={onBack}>Back to Playlists</button>
-
-                {/* Stats + Scores */}
                 <div className="playlist-stats-and-scores">
                     {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores)}
                     {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores)}
@@ -140,15 +142,11 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                         { ...playlistStats.songStats, ...playlistStats.advancedSongStats },
                         playlistScores.songLikenessScores
                     )}
-
-                    {/* Total score at the end */}
                     <div className="total-score">
                         <h3>Total Score</h3>
                         <p>{playlistScores.totalScore}</p>
                     </div>
                 </div>
-
-                {/* Songs table */}
                 <div className="playlist-song-data">
                     <table>
                         <thead>
