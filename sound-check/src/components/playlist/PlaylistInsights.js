@@ -1,6 +1,7 @@
 /* PlaylistInsights */
 import { useEffect, useState, useMemo } from 'react';
 import useRenderUtils from '../../util/RenderUtils';
+import { statMap } from '../../util/StatMaps'
 import './PlaylistInsights.css';
 
 /*
@@ -83,10 +84,23 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
     }, [playlistSongs, sortBy, isAscending]);
 
     /*
+     * getDisplayName
+     * Looks up the display name from statMap using the statKey
+     */
+    const getDisplayName = (statKey) => {
+        for (const [displayName, config] of Object.entries(statMap)) {
+            if (config.statKey === statKey) {
+                return displayName;
+            }
+        }
+        return statKey; // fallback to developer name if not found
+    };
+
+    /*
      * renderStatsGroup
      * Renders a stats group table given title, stats, and scores
      */
-    const renderStatsGroup = (title, playlistStats, playlistScores) => {
+    const renderStatsGroup = (title, playlistStats, playlistScores, totalScore) => {
         return (
             <div className="stats-group">
                 <h3>{title}</h3>
@@ -95,10 +109,11 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                         {Object.entries(playlistStats).map(([key, value]) => {
                             const scoreKey = `${key}Score`;
                             const score = playlistScores && playlistScores[scoreKey];
+                            const displayName = getDisplayName(key);
 
                             return (
                                 <tr className="stats-group-row" key={key}>
-                                    <td>{key}</td>
+                                    <td>{displayName}</td>
                                     {key.includes("mostFrequentArtistBy") ? (
                                         <td>
                                             {value?.artistName}: {value?.artistCount}
@@ -112,6 +127,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                         })}
                     </tbody>
                 </table>
+                <div className="stats-group-score">{totalScore}</div>
             </div>
         );
     };
@@ -133,16 +149,14 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
             <div className="insights-body">
                 <button onClick={onBack}>Back to Playlists</button>
                 <div className="playlist-stats-and-scores">
-                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores)}
-                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores)}
-                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores)}
-                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores)}
-                    {renderStatsGroup(
-                        "Song Stats",
-                        { ...playlistStats.songStats, ...playlistStats.advancedSongStats },
-                        playlistScores.songLikenessScores
+                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore)}
+                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores, playlistScores.userRelevanceScores.totalUserRelevanceScore)}
+                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores, playlistScores.generalRelevanceScores.totalGeneralRelevanceScore)}
+                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores, playlistScores.artistDiversityScores.totalArtistDiversityScore)}
+                    {renderStatsGroup("Song Stats", { ...playlistStats.songStats, ...playlistStats.advancedSongStats },
+                        playlistScores.songLikenessScores, playlistScores.songLikenessScores.totalSongLikenessScore
                     )}
-                    <div className="total-score">
+                    <div className="insights-total-score">
                         <h3>Total Score</h3>
                         <p>{playlistScores.totalScore}</p>
                     </div>
