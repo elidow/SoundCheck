@@ -41,3 +41,13 @@
 .sorted-value.small-number {
     font-weight: 700;
 }
+
+.playlistNameButton {
+    font-size: 18px;
+}
+
+.playlistNameButton:hover{
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}

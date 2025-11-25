@@ -180,9 +180,9 @@ const PlaylistsPage = () =>  {
                                     />
                                 </td>
                                 <td>
-                                    <button onClick={() => setSelectedPlaylist(playlist)}>
+                                    <div className="playlistNameButton" onClick={() => setSelectedPlaylist(playlist)}>
                                         {playlist.name}
-                                    </button>
+                                    </div>
                                 </td>
                                 <td>{renderCell('songs', playlist.tracks.total)}</td>
                                 <td>{renderCell('totalScore', playlistScores[playlist.id]?.totalScore ?? "N/A")}</td>
