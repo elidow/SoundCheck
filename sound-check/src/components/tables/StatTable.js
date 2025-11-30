@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import useTableUtils from '../../util/TableUtils';
 import useRenderUtils from '../../util/RenderUtils';
 import './StatTable.css';
-import { useNavigate } from 'react-router-dom';
 
 /*
  * StatTable

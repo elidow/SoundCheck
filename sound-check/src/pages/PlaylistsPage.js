@@ -1,10 +1,9 @@
 /* PlaylistsPage */
-import { useEffect, useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
 import PlaylistInsights from '../components/playlist/PlaylistInsights';
-import { useLocation } from 'react-router-dom';
 import './PlaylistsPage.css';
 
 /*
@@ -13,17 +12,8 @@ import './PlaylistsPage.css';
  */
 const PlaylistsPage = () =>  {
     const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-    const location = useLocation();
     const [sortBy, setSortBy] = useState('rank'); // default sort by rank
     const [isAscending, setIsAscending] = useState(false);
-
-    useEffect(() => {
-        const selectedId = location?.state?.selectedPlaylistId;
-        if (selectedId && Array.isArray(playlists) && playlists.length) {
-            const pl = playlists.find(p => p.id === selectedId);
-            if (pl) setSelectedPlaylist(pl);
-        }
-    }, [location?.state?.selectedPlaylistId, playlists]);
     const location = useLocation();
     const { playlists, playlistSongs, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
 

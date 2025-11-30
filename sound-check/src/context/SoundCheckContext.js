@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import PlaylistDataManagerService from '../services/playlistDataManager/PlaylistDataManagerService';
+import { createContext, useContext, useState, useEffect } from 'react';
+import PlaylistDataManagerService from '../services/data-management/PlaylistDataManagerService';
 
 const SoundCheckContext = createContext();
 

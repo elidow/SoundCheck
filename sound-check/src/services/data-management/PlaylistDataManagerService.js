@@ -1,8 +1,9 @@
 /* PlaylistDataManagerService */
 
+import { useMemo } from 'react';
 import SpotifyWebService from '../spotify/SpotifyWebService';
-import useCalculatePlaylistStatsService from '../stats/CalculatePlaylistStatsService';
-import useCalculatePlaylistScoresService from '../scores/CalculatePlaylistScoresService';
+import useCalculatePlaylistStatsService from '../analytics/CalculatePlaylistStatsService';
+import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistScoresService';
 
 /*
  * PlaylistDataManagerService
@@ -250,6 +251,80 @@ const PlaylistDataManagerService = () => {
         return scores;
     };
 
+    const useRankedScores = (scoresByPlaylist) => {
+        return useMemo(() => {
+            if (!scoresByPlaylist) return {};
+
+            // Convert map → array of { playlistId, scores }
+            const playlistEntries = Object.entries(scoresByPlaylist);
+
+            // 1. Collect all score paths (e.g. ["songLikenessScores", "songDurationVarianceScore"])
+            const scorePaths = new Set();
+
+            const findScorePaths = (obj, path = []) => {
+            Object.entries(obj).forEach(([key, value]) => {
+                if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+                findScorePaths(value, [...path, key]);
+                } else if (typeof value === "number") {
+                // leaf numeric score
+                scorePaths.add(JSON.stringify([...path, key]));
+                }
+            });
+            };
+
+            playlistEntries.forEach(([_, playlistScores]) => {
+            findScorePaths(playlistScores);
+            });
+
+            // Helper to get value at path
+            const getValue = (obj, pathArr) =>
+            pathArr.reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+
+            // Helper to set value at path
+            const setValue = (obj, pathArr, value) => {
+            const lastKey = pathArr[pathArr.length - 1];
+            const parent = pathArr.slice(0, -1).reduce((acc, key) => {
+                if (!acc[key]) acc[key] = {};
+                return acc[key];
+            }, obj);
+            parent[lastKey] = value;
+            };
+
+            // 2. Build new ranked object
+            const rankedScores = {};
+
+            scorePaths.forEach((pathJson) => {
+            const path = JSON.parse(pathJson);
+            const parentPath = path.slice(0, -1);
+            const key = path[path.length - 1];
+            const rankKey = key + "Rank";
+
+            // Gather all values for ranking
+            const values = playlistEntries.map(([id, scoreObj]) => ({
+                playlistId: id,
+                value: getValue(scoreObj, path),
+            }));
+
+            // Sort descending (1 = highest)
+            const sorted = [...values].sort((a, b) => b.value - a.value);
+
+            // Assign rank
+            sorted.forEach((entry, index) => {
+                if (!rankedScores[entry.playlistId]) {
+                rankedScores[entry.playlistId] = JSON.parse(
+                    JSON.stringify(scoresByPlaylist[entry.playlistId])
+                );
+                }
+
+                // Set rank at correct nested path
+                setValue(rankedScores[entry.playlistId], [...parentPath, rankKey], index + 1);
+            });
+            });
+
+            return rankedScores;
+        }, [scoresByPlaylist]);
+    };
+
     /*
      * retrievePlaylistsWithStats
      * Custom react hook used to interact with Spotify Web API client and calculate playlist statistics
@@ -263,6 +338,7 @@ const PlaylistDataManagerService = () => {
 
                 const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates);
                 const playlistScores = computePlaylistScores(playlists, playlistStats);
+                // const rankedScores = useRankedScores(scores);
 
             return { playlists, playlistSongs, playlistStats, playlistScores }
         } catch (error) {
@@ -271,7 +347,7 @@ const PlaylistDataManagerService = () => {
         }
     };
 
-    return { retrieveAllData }
+    return { retrieveAllData, useRankedScores }
 }
 
 export default PlaylistDataManagerService;

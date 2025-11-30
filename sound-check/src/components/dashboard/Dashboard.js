@@ -6,7 +6,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import useTableUtils from '../../util/TableUtils';
 import useRenderUtils from '../../util/RenderUtils';
 import './Dashboard.css';
-import { useNavigate } from 'react-router-dom';
 
 /*
  * Dashboard
@@ -142,32 +141,6 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                 />
             </BarChart>
         );
-    }
-
-    const mapScoreToColor = (score) => {
-        // Clamp score between 0 and 100
-        const value = Math.max(0, Math.min(100, score));
-
-        let r, g, b = 0;
-
-        if (value < 50) {
-            // 0 → 50: red to yellow
-            r = 255;
-            g = Math.round(5.1 * value); // 0 → 255
-            b = 0;
-        } else {
-            // 50 → 100: yellow to green
-            g = 255;
-            r = Math.round(510 - 5.1 * value); // 255 → 0
-            b = 0;
-        }
-
-        return `rgb(${r},${g},${b})`;
-    }
-
-    const handlePlaylistClick = (e, playlistId) => {
-        e.preventDefault();
-        navigate('/playlists', { state: { selectedPlaylistId: playlistId } });
     };
 
     return (
@@ -195,9 +168,7 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
                             <div className="dashboard-item-index"> {index + 1} </div>
                             <div className="dashboard-item-playlist-name">
                                 <a href="#" onClick={(e) => handlePlaylistClick(e, playlist.id)}>
-                                <a href="#" onClick={(e) => handlePlaylistClick(e, playlist.id)}>
                                     {playlist.name}
-                                </a>
                                 </a>
                             </div>
                             {playlistStats[playlist.id] ? (
