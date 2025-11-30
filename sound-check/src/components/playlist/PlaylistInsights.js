@@ -1,5 +1,6 @@
 /* PlaylistInsights */
 import { useEffect, useState, useMemo } from 'react';
+import PageHeader from '../../components/common/PageHeader';
 import useRenderUtils from '../../util/RenderUtils';
 import { statMap } from '../../util/StatMaps'
 import './PlaylistInsights.css';
@@ -103,94 +104,102 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
     const renderStatsGroup = (title, playlistStats, playlistScores, totalScore) => {
         return (
             <div className="stats-group">
-                <h3>{title}</h3>
-                <table>
-                    <tbody>
-                        {Object.entries(playlistStats).map(([key, value]) => {
-                            const scoreKey = `${key}Score`;
-                            const score = playlistScores && playlistScores[scoreKey];
-                            const displayName = getDisplayName(key);
+                <h3>{title}: {totalScore}</h3>
+                <div className="stats-group-container">
+                    {Object.entries(playlistStats).map(([key, value]) => {
+                        const scoreKey = `${key}Score`;
+                        const score = playlistScores && playlistScores[scoreKey];
+                        const displayName = getDisplayName(key);
+                        
+                        let statValue;
+                        if (key.includes("mostFrequentArtistBy")) {
+                            statValue = `${value?.artistName}: ${value?.artistCount}`;
+                        } else if (displayName && statMap[displayName]?.type === "dateTime") {
+                            statValue = String(value)?.substring(0, 10) || String(value);
+                        } else {
+                            statValue = String(value);
+                        }
 
-                            return (
-                                <tr className="stats-group-row" key={key}>
-                                    <td>{displayName}</td>
-                                    {key.includes("mostFrequentArtistBy") ? (
-                                        <td>
-                                            {value?.artistName}: {value?.artistCount}
-                                        </td>
-                                    ) : (
-                                        <td>{String(value)}</td>
-                                    )}
-                                    {score !== undefined && <td>Score: {score}</td>}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-                <div className="stats-group-score">{totalScore}</div>
+                        return (
+                            <div className="stat-box" key={key}>
+                                <div className="stat-box-title">{displayName}</div>
+                                <div className="stat-box-content">
+                                    <div className="stat-box-value">{statValue}</div>
+                                    {score !== undefined ? (
+                                        <div className="stat-box-score">Score: {score}</div>
+                                    ) : <div className="stat-box-score">Score: N/A</div>
+                                    }
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         );
     };
 
     const { renderSortArrow } = useRenderUtils();
 
-  return (
-    <div className="insights">
-      <header className="insights-header">
-        <p>{playlist.name} Insights</p>
-      </header>
-      <div className="insights-body">
-        <button onClick={onBack}>Back to Playlists</button>
-
-        {/* Stats + Scores */}
-        <div className="playlist-stats-and-scores">
-          {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores)}
-          {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores)}
-          {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores)}
-          {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores)}
-          {renderStatsGroup("Song Stats", { ...playlistStats.songStats, ...playlistStats.advancedSongStats }, playlistScores.songLikenessScores)}
-
-          {/* Total score at the end */}
-          <div className="total-score">
-            <h3>Total Score</h3>
-            <p>{playlistScores.totalScore}</p>
-          </div>
+    return (
+        <div className="insights">
+            <PageHeader title="Playlist Insights" />
+            <button className="backToPlaylistButton" onClick={onBack}>Back to Playlists</button>
+            <header className="insights-header">
+                <p>
+                    <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">{playlist.name}</a>
+                </p>
+            </header>
+            <div className="insights-body">
+                <div className="insights-total-score">
+                    <p>{playlistScores.totalScore}</p>
+                </div>
+                <div className="playlist-stats-and-scores">
+                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore)}
+                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores, playlistScores.userRelevanceScores.totalUserRelevanceScore)}
+                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores, playlistScores.generalRelevanceScores.totalGeneralRelevanceScore)}
+                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores, playlistScores.artistDiversityScores.totalArtistDiversityScore)}
+                    {renderStatsGroup("Song Stats", { ...playlistStats.songStats, ...playlistStats.advancedSongStats },
+                        playlistScores.songLikenessScores, playlistScores.songLikenessScores.totalSongLikenessScore
+                    )}
+                </div>
+                <div className="playlist-song-data">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onClick={() => handleSort('song')}>Song {renderSortArrow('song', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('artist')}>Artist {renderSortArrow('artist', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('album')}>Album {renderSortArrow('album', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('added')}>Song Added Date {renderSortArrow('added', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('release')}>Song Release Date {renderSortArrow('release', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('length')}>Length {renderSortArrow('length', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('popularity')}>Popularity {renderSortArrow('popularity', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('saved')}>Saved {renderSortArrow('saved', sortBy, isAscending)}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedSongs.map((song) => (
+                                <tr key={song.track.id}>
+                                    <td>{song.track.name}</td>
+                                    <td>{song.track.artists[0].name}</td>
+                                    <td>{song.track.album.name}</td>
+                                    <td>{song.added_at?.substring(0, 10)}</td>
+                                    <td>{song.track.album.release_date}</td>
+                                    <td>
+                                        {Math.floor((song.track.duration_ms / 1000) / 60)}:
+                                        {Math.floor((song.track.duration_ms / 1000) % 60)
+                                            .toString()
+                                            .padStart(2, '0')}
+                                    </td>
+                                    <td>{song.track.popularity}</td>
+                                    <td>{song.isSaved ? 'Yes' : 'No'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
-        {/* Songs table */}
-        <div className="playlist-song-data">
-          <table>
-            <thead>
-              <tr>
-                <th onClick={() => handleSort('song')}>Song{renderSortArrow('song')}</th>
-                <th onClick={() => handleSort('artist')}>Artist{renderSortArrow('artist')}</th>
-                <th onClick={() => handleSort('album')}>Album{renderSortArrow('album')}</th>
-                <th onClick={() => handleSort('added')}>Song Added Date{renderSortArrow('added')}</th>
-                <th onClick={() => handleSort('release')}>Song Release Date{renderSortArrow('release')}</th>
-                <th onClick={() => handleSort('length')}>Length{renderSortArrow('length')}</th>
-                <th onClick={() => handleSort('popularity')}>Popularity{renderSortArrow('popularity')}</th>
-                <th onClick={() => handleSort('saved')}>Saved{renderSortArrow('saved')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedSongs.map((song, index) => (
-                <tr key={song.track.id}>
-                  <td>{song.track.name}</td>
-                  <td>{song.track.artists[0].name}</td>
-                  <td>{song.track.album.name}</td>
-                  <td>{song.added_at?.substring(0, 10)}</td>
-                  <td>{song.track.album.release_date}</td>
-                  <td>{Math.floor((song.track.duration_ms / 1000) / 60)}:{Math.floor((song.track.duration_ms / 1000) % 60).toString().padStart(2, '0')}</td>
-                  <td>{song.track.popularity}</td>
-                  <td>{song.isSaved ? 'Yes' : 'No'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default PlaylistInsights;
