@@ -4,22 +4,64 @@
 }
 
 .playlist-stats-and-scores {
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
 }
 
 .stats-group {
     font-size: 16px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 300px;
+    flex-basis: calc(46% - 10px);
+}
+
+.stats-group h3 {
+    margin-top: 0;
+    text-align: center;
+    font-size: 20px;
 }
 
 .stats-group table {
-    margin-left: 33%;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-group table td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.stats-group-score {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.insights-total-score {
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 300px;
+    flex-basis: calc(46% - 10px);
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.insights-total-score h3 {
+    margin-top: 0;
 }
 
 .playlist-song-data table {
     /* Use base table styles for consistency (if needed, apply .base-table) */
     border-collapse: separate;   /* allows spacing */
     border-spacing: 10px 10px;   /* horizontal | vertical spacing */
-
     border: 1px solid black;
     margin: 10px;
 }

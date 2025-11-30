@@ -1,122 +1,143 @@
 /* PlaylistInsights */
-import React, { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import useRenderUtils from '../../util/RenderUtils';
+import { statMap } from '../../util/StatMaps'
 import './PlaylistInsights.css';
 
+/*
+ * PlaylistInsights
+ * Component for rendering playlist insights including stats, scores, and song data
+ */
 const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
+    const [sortBy, setSortBy] = useState('trackNumber');
+    const [isAscending, setIsAscending] = useState(true);
 
-  useEffect(() => {
-    // scroll to top when detail view loads
-    window.scrollTo(0, 0);
-  }, [playlist]);
+    useEffect(() => {
+        // scroll to top when detail view loads
+        window.scrollTo(0, 0);
+    }, [playlist]);
 
-  // ----- Sorting state for songs table -----
-  const [sortBy, setSortBy] = useState('trackNumber'); // default to original order
-  const [isAscending, setIsAscending] = useState(true);
+    /*
+     * handleSort
+     * Handles sorting when a column header is clicked
+     */
+    const handleSort = (columnKey) => {
+        if (sortBy === columnKey) {
+            setIsAscending(!isAscending);
+        } else {
+            setSortBy(columnKey);
+            setIsAscending(true);
+        }
+    };
 
-  const handleSort = (columnKey) => {
-    if (sortBy === columnKey) {
-      setIsAscending(!isAscending); // toggle
-    } else {
-      setSortBy(columnKey);
-      setIsAscending(true);
-    }
-  };
+    // memoized sorted songs
+    const sortedSongs = useMemo(() => {
+        return [...playlistSongs].sort((a, b) => {
+            let aVal, bVal;
 
-  const renderSortArrow = (columnKey) => {
-    if (sortBy !== columnKey) return null;
-    return isAscending ? ' ▲' : ' ▼';
-  };
+            switch (sortBy) {
+                case 'song':
+                    aVal = a.track.name.toLowerCase();
+                    bVal = b.track.name.toLowerCase();
+                    break;
+                case 'artist':
+                    aVal = a.track.artists[0].name.toLowerCase();
+                    bVal = b.track.artists[0].name.toLowerCase();
+                    break;
+                case 'album':
+                    aVal = a.track.album.name.toLowerCase();
+                    bVal = b.track.album.name.toLowerCase();
+                    break;
+                case 'added':
+                    aVal = new Date(a.added_at).getTime();
+                    bVal = new Date(b.added_at).getTime();
+                    break;
+                case 'release':
+                    aVal = new Date(a.track.album.release_date).getTime();
+                    bVal = new Date(b.track.album.release_date).getTime();
+                    break;
+                case 'length':
+                    aVal = a.track.duration_ms;
+                    bVal = b.track.duration_ms;
+                    break;
+                case 'popularity':
+                    aVal = a.track.popularity;
+                    bVal = b.track.popularity;
+                    break;
+                case 'saved':
+                    aVal = a.isSaved ? 1 : 0;
+                    bVal = b.isSaved ? 1 : 0;
+                    break;
+                default:
+                    aVal = 0;
+                    bVal = 0;
+            }
 
-  // ----- Memoized sorted songs -----
-  const sortedSongs = useMemo(() => {
-    return [...playlistSongs].sort((a, b) => {
-      let aVal, bVal;
+            if (typeof aVal === 'number' && typeof bVal === 'number') {
+                return isAscending ? aVal - bVal : bVal - aVal;
+            } else {
+                return isAscending
+                    ? String(aVal).localeCompare(String(bVal))
+                    : String(bVal).localeCompare(String(aVal));
+            }
+        });
+    }, [playlistSongs, sortBy, isAscending]);
 
-      switch (sortBy) {
-        case 'song':
-          aVal = a.track.name.toLowerCase();
-          bVal = b.track.name.toLowerCase();
-          break;
-        case 'artist':
-          aVal = a.track.artists[0].name.toLowerCase();
-          bVal = b.track.artists[0].name.toLowerCase();
-          break;
-        case 'album':
-          aVal = a.track.album.name.toLowerCase();
-          bVal = b.track.album.name.toLowerCase();
-          break;
-        case 'added':
-          aVal = new Date(a.added_at).getTime();
-          bVal = new Date(b.added_at).getTime();
-          break;
-        case 'release':
-          aVal = new Date(a.track.album.release_date).getTime();
-          bVal = new Date(b.track.album.release_date).getTime();
-          break;
-        case 'length':
-          aVal = a.track.duration_ms;
-          bVal = b.track.duration_ms;
-          break;
-        case 'popularity':
-          aVal = a.track.popularity;
-          bVal = b.track.popularity;
-          break;
-        case 'saved':
-          aVal = a.isSaved ? 1 : 0; // adjust if you have a saved field
-          bVal = b.isSaved ? 1 : 0;
-          break;
-        default:
-          aVal = 0;
-          bVal = 0;
-      }
+    /*
+     * getDisplayName
+     * Looks up the display name from statMap using the statKey
+     */
+    const getDisplayName = (statKey) => {
+        for (const [displayName, config] of Object.entries(statMap)) {
+            if (config.statKey === statKey) {
+                return displayName;
+            }
+        }
+        return statKey; // fallback to developer name if not found
+    };
 
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return isAscending ? aVal - bVal : bVal - aVal;
-      } else {
-        return isAscending
-          ? String(aVal).localeCompare(String(bVal))
-          : String(bVal).localeCompare(String(aVal));
-      }
-    });
-  }, [playlistSongs, sortBy, isAscending]);
+    /*
+     * renderStatsGroup
+     * Renders a stats group table given title, stats, and scores
+     */
+    const renderStatsGroup = (title, playlistStats, playlistScores, totalScore) => {
+        return (
+            <div className="stats-group">
+                <h3>{title}</h3>
+                <table>
+                    <tbody>
+                        {Object.entries(playlistStats).map(([key, value]) => {
+                            const scoreKey = `${key}Score`;
+                            const score = playlistScores && playlistScores[scoreKey];
+                            const displayName = getDisplayName(key);
 
-  const renderStatsGroup = (title, playlistStats, playlistScores) => {
-    return (
-      <div className="stats-group">
-        <h3>{title}</h3>
-        <table>
-          <tbody>
-            {Object.entries(playlistStats).map(([key, value]) => {
-              const scoreKey = `${key}Score`;
-              const score = playlistScores && playlistScores[scoreKey];
+                            return (
+                                <tr className="stats-group-row" key={key}>
+                                    <td>{displayName}</td>
+                                    {key.includes("mostFrequentArtistBy") ? (
+                                        <td>
+                                            {value?.artistName}: {value?.artistCount}
+                                        </td>
+                                    ) : (
+                                        <td>{String(value)}</td>
+                                    )}
+                                    {score !== undefined && <td>Score: {score}</td>}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+                <div className="stats-group-score">{totalScore}</div>
+            </div>
+        );
+    };
 
-              return (
-                <tr className="stats-group-row" key={key}>
-                  <td>{key}</td>
-                  {key.includes("mostFrequentArtistBy") ? (
-                    <td>
-                      {value?.artistName}: {value?.artistCount}
-                    </td>
-                  ) : ( 
-                    <td>{String(value)}</td>
-                  )}
-                  {score !== undefined && <td>Score: {score}</td>}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
+    const { renderSortArrow } = useRenderUtils();
 
   return (
     <div className="insights">
       <header className="insights-header">
-        <p>
-          <div><a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">{playlist.name}</a></div>
-          <div>Insights</div>
-        </p>
+        <p>{playlist.name} Insights</p>
       </header>
       <div className="insights-body">
         <button onClick={onBack}>Back to Playlists</button>
