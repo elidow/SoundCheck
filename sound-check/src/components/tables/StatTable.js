@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTableUtils from '../../util/TableUtils';
 import useRenderUtils from '../../util/RenderUtils';
+import { categoryDisplayNames } from '../../util/StatMaps';
 import './StatTable.css';
 
 /*
@@ -63,7 +64,7 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
 
     return (
         <div>
-            <h2 className="categoryName">{categoryName}</h2>
+            <h2 className="categoryName">{categoryDisplayNames[categoryName]}</h2>
             <table className="big-table">
                 <thead>
                     <tr>

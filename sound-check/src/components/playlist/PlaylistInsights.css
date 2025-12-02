@@ -101,9 +101,4 @@
 
 .playlist-song-data th {
     text-align: left;
-    font-weight: bold;
-
-    white-space: normal;      /* allow wrapping in headers */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
 }
