@@ -388,7 +388,35 @@ const useSpotifyWebApi = () => {
         }
     }, [accessToken, refreshAccessToken]);
 
-    return { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs, fetchRecentlyPlayedSongs }
+    /*
+     * fetchUserProfile
+     * Given an access token, fetch the user's profile information
+     */
+    const fetchUserProfile = useCallback(async () => {
+        // Validate access token
+        if (!accessToken) {
+            console.log(`No access token found for call to get user profile`);
+            return null;
+        }
+
+        try {
+            const response = await axios.get(`https://api.spotify.com/v1/me`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+
+            console.log(`SpotifyWebApi: User Profile:`, response.data)
+            return response.data;
+        } catch (err) {
+            console.error(`Spotify Web Api failed to fetch user profile:`, err);
+            if (err.response && err.response.status === 401) {
+                console.warn("Access token expired. Refreshing access token");
+                await refreshAccessToken();
+            }
+            return null;
+        }
+    }, [accessToken, refreshAccessToken]);
+
+    return { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs, fetchRecentlyPlayedSongs, fetchUserProfile }
 }
 
 export default useSpotifyWebApi;

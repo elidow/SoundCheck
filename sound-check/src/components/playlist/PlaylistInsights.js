@@ -192,6 +192,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                                     </td>
                                     <td>{song.track.popularity}</td>
                                     <td>{song.isSaved ? 'Yes' : 'No'}</td>
+                                    <td>Sup</td>
                                 </tr>
                             ))}
                         </tbody>

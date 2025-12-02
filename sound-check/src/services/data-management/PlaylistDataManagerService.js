@@ -47,6 +47,21 @@ const PlaylistDataManagerService = () => {
     };
 
     /*
+     * addTopSongs
+     * Marks songs that are in short/medium/long_term top songs
+     */
+    const addTopSongs = (playlistSongs, topSongs) => {
+        for (let playlistId in playlistSongs) {
+            playlistSongs[playlistId] = playlistSongs[playlistId].map(song => ({
+                ...song,
+                isTopShortTerm: topSongs["short_term"].some(topSong => topSong.id === song.track.id),
+                isTopMediumTerm: topSongs["medium_term"].some(topSong => topSong.id === song.track.id),
+                isTopLongTerm: topSongs["long_term"].some(topSong => topSong.id === song.track.id)
+            }));
+        }
+    };
+
+    /*
      * getDates
      * Retrieve relevate dates
      */
@@ -251,78 +266,48 @@ const PlaylistDataManagerService = () => {
         return scores;
     };
 
-    const useRankedScores = (scoresByPlaylist) => {
-        return useMemo(() => {
-            if (!scoresByPlaylist) return {};
+    /*
+     * computeMetaStats
+     * Calculates all necessary playlist meta statistics
+     */
+    const computeMetaStats = (playlists, playlistSongs, savedSongs, playlistScores, userProfile) => {
+        const metaStats = {};
 
-            // Convert map → array of { playlistId, scores }
-            const playlistEntries = Object.entries(scoresByPlaylist);
+        metaStats[""] = {
+            userName : userProfile?.display_name || "N/A",
+            profilePic : userProfile?.images?.length > 0 ? userProfile.images[0].url : null,
+            playlistCount: playlists.length,
+            savedSongCount: savedSongs.length,
+            mostPopularArtist: "Kendrick Lamar",
+            mostPopularSong: "Time of Our Lives",
+            highestTotalScoringPlaylist: (() => {
+                let highestScore = -1;
+                let highestPlaylist = null;
 
-            // 1. Collect all score paths (e.g. ["songLikenessScores", "songDurationVarianceScore"])
-            const scorePaths = new Set();
+                playlists.forEach((pl) => {
+                    const plScore = playlistScores[pl.id]?.totalScore || 0;
+                    if (plScore > highestScore) {
+                        highestScore = plScore;
+                        highestPlaylist = pl;
+                    }
+                });
 
-            const findScorePaths = (obj, path = []) => {
-            Object.entries(obj).forEach(([key, value]) => {
-                if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-                findScorePaths(value, [...path, key]);
-                } else if (typeof value === "number") {
-                // leaf numeric score
-                scorePaths.add(JSON.stringify([...path, key]));
-                }
-            });
-            };
+                return highestPlaylist ? highestPlaylist.name : "N/A";
+            })(),
+            averageTotalPlaylistScore: (() => {
+                let totalScore = 0;
 
-            playlistEntries.forEach(([_, playlistScores]) => {
-            findScorePaths(playlistScores);
-            });
+                playlists.forEach((pl) => {
+                    totalScore += Number(playlistScores[pl.id]?.totalScore) || 0;
+                });
 
-            // Helper to get value at path
-            const getValue = (obj, pathArr) =>
-            pathArr.reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+                return playlists.length > 0 ? (totalScore / playlists.length).toFixed(2) : "N/A";
+            })()
+        }
 
-            // Helper to set value at path
-            const setValue = (obj, pathArr, value) => {
-            const lastKey = pathArr[pathArr.length - 1];
-            const parent = pathArr.slice(0, -1).reduce((acc, key) => {
-                if (!acc[key]) acc[key] = {};
-                return acc[key];
-            }, obj);
-            parent[lastKey] = value;
-            };
+        console.log("Meta Stats:", metaStats);
 
-            // 2. Build new ranked object
-            const rankedScores = {};
-
-            scorePaths.forEach((pathJson) => {
-            const path = JSON.parse(pathJson);
-            const parentPath = path.slice(0, -1);
-            const key = path[path.length - 1];
-            const rankKey = key + "Rank";
-
-            // Gather all values for ranking
-            const values = playlistEntries.map(([id, scoreObj]) => ({
-                playlistId: id,
-                value: getValue(scoreObj, path),
-            }));
-
-            // Sort descending (1 = highest)
-            const sorted = [...values].sort((a, b) => b.value - a.value);
-
-            // Assign rank
-            sorted.forEach((entry, index) => {
-                if (!rankedScores[entry.playlistId]) {
-                rankedScores[entry.playlistId] = JSON.parse(
-                    JSON.stringify(scoresByPlaylist[entry.playlistId])
-                );
-                }
-
-                // Set rank at correct nested path
-                setValue(rankedScores[entry.playlistId], [...parentPath, rankKey], index + 1);
-            });
-            });
-
-            return rankedScores;
-        }, [scoresByPlaylist]);
+        return metaStats;
     };
 
     /*
@@ -331,23 +316,24 @@ const PlaylistDataManagerService = () => {
      */
     const retrieveAllData = async () => {
         try {
-                const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs } = await retrievePlaylistsAndSongs();
+                const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, userProfile } = await retrievePlaylistsAndSongs();
                 addSavedSongs(playlistSongs, savedSongs);
+                addTopSongs(playlistSongs, topSongs);
 
                 const dates = getDates();
 
                 const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates);
                 const playlistScores = computePlaylistScores(playlists, playlistStats);
-                // const rankedScores = useRankedScores(scores);
+                const metaStats = computeMetaStats(playlists, playlistSongs, savedSongs, playlistScores, userProfile);
 
-            return { playlists, playlistSongs, playlistStats, playlistScores }
+            return { playlists, playlistSongs, playlistStats, playlistScores, metaStats }
         } catch (error) {
             console.error("Error in service")
             throw error;
         }
     };
 
-    return { retrieveAllData, useRankedScores }
+    return { retrieveAllData }
 }
 
 export default PlaylistDataManagerService;
