@@ -173,6 +173,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                                 <th onClick={() => handleSort('release')}>Song Release Date {renderSortArrow('release', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('length')}>Length {renderSortArrow('length', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('popularity')}>Popularity {renderSortArrow('popularity', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('top')}>Top {renderSortArrow('top', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('saved')}>Saved {renderSortArrow('saved', sortBy, isAscending)}</th>
                             </tr>
                         </thead>
@@ -191,8 +192,8 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                                             .padStart(2, '0')}
                                     </td>
                                     <td>{song.track.popularity}</td>
+                                    <td>{song.isTopShortTerm ? 'S' : ''}{song.isTopMediumTerm ? 'M' : ''}{song.isTopLongTerm ? 'L' : ''}</td>
                                     <td>{song.isSaved ? 'Yes' : 'No'}</td>
-                                    <td>Sup</td>
                                 </tr>
                             ))}
                         </tbody>
