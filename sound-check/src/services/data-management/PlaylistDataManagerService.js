@@ -324,7 +324,7 @@ const PlaylistDataManagerService = () => {
             }
         });
 
-        let highestTotalScorePlaylistResult = `${highestScoringPlaylist}: ${highestScore}`;
+        let highestTotalScorePlaylistResult = `${highestScoringPlaylist.name}: ${highestScore}`;
 
         return highestTotalScorePlaylistResult;
     };
@@ -349,14 +349,14 @@ const PlaylistDataManagerService = () => {
      */
     const computeMetaStats = (playlists, playlistSongs, savedSongs, playlistScores, userProfile) => {
         const metaStats = {};
-        const { mostPopularArtist, mostPopularSong } = calculateMostPopularMedia(playlists, playlistSongs);
+        const { mostPopularArtistResult, mostPopularSongResult } = calculateMostPopularMedia(playlists, playlistSongs);
 
         metaStats["Profile Pic"] = userProfile?.images?.length > 0 ? userProfile.images[0].url : null;
         metaStats["Username"] = userProfile?.display_name || "N/A";
         metaStats["Playlist Count"] = playlists.length;
         metaStats["Saved Song Count"] = savedSongs.length;
-        metaStats["Most Popular Artist"] = mostPopularArtist;
-        metaStats["Most Popular Song"] = mostPopularSong;
+        metaStats["Most Popular Artist"] = mostPopularArtistResult;
+        metaStats["Most Popular Song"] = mostPopularSongResult;
         metaStats["Highest Total Scoring Playlist"] = calculateHighestTotalScoringPlaylists(playlists, playlistScores);
         metaStats["Average Total Scoring Playlist"] = calculateAverageTotalPlaylistScore(playlists, playlistScores);
 

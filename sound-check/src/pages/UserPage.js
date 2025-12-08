@@ -1,5 +1,6 @@
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
+import './UserPage.css';
 
 /*
  * UserPage
@@ -13,23 +14,24 @@ const UserPage = () => {
 
     return (
         <div className="User-Page">
-            <PageHeader title="Users" />
+            <PageHeader title="User" />
             <h2>User Meta Stats</h2>
-
-            {Object.entries(metaStats).map(([key, value]) => (
-                <div key={key}>
-                    <strong>{key}:</strong>{' '}
-                    {key === "Profile Pic" ? (
-                        <img 
-                            src={value} 
-                            alt="User profile" 
-                            style={{ width: '100px', height: '100px', borderRadius: '8px' }} 
-                        />
-                    ) : (
-                        <span>{value}</span>
-                    )}
-                </div>
-            ))}
+            <div className="meta-stats-content">
+                {Object.entries(metaStats).map(([key, value]) => (
+                    <div key={key}>
+                        <strong>{key}:</strong>{' '}
+                        {key === "Profile Pic" ? (
+                            <img 
+                                src={value} 
+                                alt="User profile" 
+                                style={{ width: '200px', height: 'auto', display: 'block' }} 
+                            />
+                        ) : (
+                            <span>{value}</span>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     )
 };
