@@ -266,44 +266,99 @@ const PlaylistDataManagerService = () => {
         return scores;
     };
 
+
+    /*
+     * calculateMostPopularMedia
+     * Calculates most popular artist and song across all playlists
+     */
+    const calculateMostPopularMedia = (playlists, playlistSongs) => {
+        const artistCount = {};
+        const songCount = {};
+
+        playlists.forEach((pl) => {
+            const songs = playlistSongs[pl.id] || [];
+            songs.forEach((song) => {
+                artistCount[song.track.artists[0].name] = (artistCount[song.track.artists[0].name] || 0) + 1;
+                songCount[song.track.name] = (songCount[song.track.name] || 0) + 1;
+            });
+        });
+
+        let mostPopularArtist = null;
+        let highestArtistCount = -1;
+        let mostPopularSong = null;
+        let highestSongCount = -1;
+
+        for (let artist in artistCount) {
+            if (artistCount[artist] > highestArtistCount) {
+                highestArtistCount = artistCount[artist];
+                mostPopularArtist = artist;
+            }
+        }
+
+        for (let song in songCount) {
+            if (songCount[song] > highestSongCount) {
+                highestSongCount = songCount[song];
+                mostPopularSong = song;
+            }
+        }
+
+        let mostPopularArtistResult = `${mostPopularArtist}: ${highestArtistCount}`;
+        let mostPopularSongResult = `${mostPopularSong}: ${highestSongCount}`;
+
+        return { mostPopularArtistResult, mostPopularSongResult};
+    };
+
+    /*
+     * calculateHightestTotalScoringPlaylists
+     * Calculates highest total scoring playlist
+     */
+    const calculateHighestTotalScoringPlaylists = (playlists, playlistScores) => {
+        let highestScore = -1;
+        let highestScoringPlaylist = null;
+
+        playlists.forEach((pl) => {
+            const plScore = playlistScores[pl.id]?.totalScore || 0;
+            if (plScore > highestScore) {
+                highestScore = plScore;
+                highestScoringPlaylist = pl;
+            }
+        });
+
+        let highestTotalScorePlaylistResult = `${highestScoringPlaylist}: ${highestScore}`;
+
+        return highestTotalScorePlaylistResult;
+    };
+
+    /*
+     * calculateAverageTotalPlaylistScore
+     * Calculates average total playlist score
+     */
+    const calculateAverageTotalPlaylistScore = (playlists, playlistScores) => {
+        let totalScore = 0;
+
+        playlists.forEach((pl) => {
+            totalScore += Number(playlistScores[pl.id]?.totalScore) || 0;
+        });
+
+        return playlists.length > 0 ? (totalScore / playlists.length).toFixed(2) : "N/A";
+    };
+
     /*
      * computeMetaStats
      * Calculates all necessary playlist meta statistics
      */
     const computeMetaStats = (playlists, playlistSongs, savedSongs, playlistScores, userProfile) => {
         const metaStats = {};
+        const { mostPopularArtist, mostPopularSong } = calculateMostPopularMedia(playlists, playlistSongs);
 
-        metaStats[""] = {
-            userName : userProfile?.display_name || "N/A",
-            profilePic : userProfile?.images?.length > 0 ? userProfile.images[0].url : null,
-            playlistCount: playlists.length,
-            savedSongCount: savedSongs.length,
-            mostPopularArtist: "Kendrick Lamar",
-            mostPopularSong: "Time of Our Lives",
-            highestTotalScoringPlaylist: (() => {
-                let highestScore = -1;
-                let highestPlaylist = null;
-
-                playlists.forEach((pl) => {
-                    const plScore = playlistScores[pl.id]?.totalScore || 0;
-                    if (plScore > highestScore) {
-                        highestScore = plScore;
-                        highestPlaylist = pl;
-                    }
-                });
-
-                return highestPlaylist ? highestPlaylist.name : "N/A";
-            })(),
-            averageTotalPlaylistScore: (() => {
-                let totalScore = 0;
-
-                playlists.forEach((pl) => {
-                    totalScore += Number(playlistScores[pl.id]?.totalScore) || 0;
-                });
-
-                return playlists.length > 0 ? (totalScore / playlists.length).toFixed(2) : "N/A";
-            })()
-        }
+        metaStats["Profile Pic"] = userProfile?.images?.length > 0 ? userProfile.images[0].url : null;
+        metaStats["Username"] = userProfile?.display_name || "N/A";
+        metaStats["Playlist Count"] = playlists.length;
+        metaStats["Saved Song Count"] = savedSongs.length;
+        metaStats["Most Popular Artist"] = mostPopularArtist;
+        metaStats["Most Popular Song"] = mostPopularSong;
+        metaStats["Highest Total Scoring Playlist"] = calculateHighestTotalScoringPlaylists(playlists, playlistScores);
+        metaStats["Average Total Scoring Playlist"] = calculateAverageTotalPlaylistScore(playlists, playlistScores);
 
         console.log("Meta Stats:", metaStats);
 

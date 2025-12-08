@@ -19,8 +19,11 @@ const Navbar = () => {
                     <NavLink to="/dashboards" activestyle="true">
                         Dashboards
                     </NavLink>
-                    <NavLink to="/table" activestyle="true">
-                        Table
+                    <NavLink to="/tables" activestyle="true">
+                        Tables
+                    </NavLink>
+                    <NavLink to="/user" activestyle="true">
+                        User
                     </NavLink>
                 </NavMenu>
                 <ExternalLink href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">Go to Spotify</ExternalLink>

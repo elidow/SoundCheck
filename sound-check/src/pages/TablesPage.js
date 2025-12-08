@@ -3,13 +3,13 @@ import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
 import StatTable from '../components/tables/StatTable';
 import { statMap, categoryDisplayNames } from '../util/StatMaps';
-import './TablePage.css';
+import './TablesPage.css';
 
 /*
- * TablePage
+ * TablesPage
  * Functional Component to render multiple stat tables grouped by category
  */
-const TablePage = () => {
+const TablesPage = () => {
     const { playlists, playlistStats, loading, error } = useSoundCheckContext();
     const [selectedCategory, setSelectedCategory] = useState(null);
 
@@ -52,7 +52,7 @@ const TablePage = () => {
     };
 
     return (
-        <div className="Table-Page">
+        <div className="Tables-Page">
             <PageHeader title="Tables" />
 
             {/* Category Tabs */}
@@ -82,4 +82,4 @@ const TablePage = () => {
     );
 };
 
-export default TablePage;
+export default TablesPage;
