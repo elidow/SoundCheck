@@ -31,6 +31,21 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         }
     };
 
+    const calculateTopSongValue = (isTopShortTerm, isTopMediumTerm, isTopLongTerm) => {
+        let total = 0;
+        if (isTopShortTerm) {
+            total += 4;
+        }
+        if (isTopMediumTerm) {
+            total += 3;
+        }
+        if (isTopLongTerm) {
+            total += 2;
+        }
+
+        return total;
+    };
+
     // memoized sorted songs
     const sortedSongs = useMemo(() => {
         return [...playlistSongs].sort((a, b) => {
@@ -64,6 +79,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                 case 'popularity':
                     aVal = a.track.popularity;
                     bVal = b.track.popularity;
+                    break;
+                case 'top':
+                    aVal = calculateTopSongValue(a.isTopShortTerm, a.isTopMediumTerm, a.isTopLongTerm);
+                    bVal = calculateTopSongValue(b.isTopShortTerm, b.isTopMediumTerm, b.isTopLongTerm);
                     break;
                 case 'saved':
                     aVal = a.isSaved ? 1 : 0;
