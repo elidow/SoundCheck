@@ -1,11 +1,11 @@
-import React from "react";
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/navbar/index.js";
 import PageFooter from './components/common/PageFooter.js';
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import PlaylistsPage from './pages/PlaylistsPage.js'
 import DashboardsPage from './pages/DashboardsPage.js'
-import TablePage from './pages/TablePage.js'
+import TablesPage from './pages/TablesPage.js'
+import UserPage from './pages/UserPage.js'
+import './App.css';
 
 function App() {
     return (
@@ -17,7 +17,8 @@ function App() {
                         <Route path="/" element={<Navigate to="/playlists" replace />} />
                         <Route path="/playlists" element={<PlaylistsPage />}></Route>
                         <Route path="/dashboards" element={<DashboardsPage />}></Route>
-                        <Route path="/table" element={<TablePage />}></Route>
+                        <Route path="/tables" element={<TablesPage />}></Route>
+                        <Route path="/user" element={<UserPage />}></Route>
                         <Route path="*" element={<Navigate to="/playlists" replace />} />
                     </Routes>
                 </div>

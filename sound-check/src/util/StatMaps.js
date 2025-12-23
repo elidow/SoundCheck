@@ -96,3 +96,12 @@ export const statMap = {
         type: number,
     },
 };
+
+export const categoryDisplayNames = {
+    maintenance: "Maintenance",
+    userRelevance: "User Relevance",
+    generalRelevance: "General Relevance",
+    artistStats: "Artist Stats",
+    songStats: "Song Stats",
+    advancedSongStats: "Advanced Song Stats",
+};

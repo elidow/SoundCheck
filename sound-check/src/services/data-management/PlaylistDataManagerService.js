@@ -1,8 +1,9 @@
 /* PlaylistDataManagerService */
 
+import { useMemo } from 'react';
 import SpotifyWebService from '../spotify/SpotifyWebService';
-import useCalculatePlaylistStatsService from '../stats/CalculatePlaylistStatsService';
-import useCalculatePlaylistScoresService from '../scores/CalculatePlaylistScoresService';
+import useCalculatePlaylistStatsService from '../analytics/CalculatePlaylistStatsService';
+import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistScoresService';
 
 /*
  * PlaylistDataManagerService
@@ -41,6 +42,21 @@ const PlaylistDataManagerService = () => {
             playlistSongs[playlistId] = playlistSongs[playlistId].map(song => ({
                 ...song,
                 isSaved: savedSongs.some(savedSong => savedSong.track.id === song.track.id)
+            }));
+        }
+    };
+
+    /*
+     * addTopSongs
+     * Marks songs that are in short/medium/long_term top songs
+     */
+    const addTopSongs = (playlistSongs, topSongs) => {
+        for (let playlistId in playlistSongs) {
+            playlistSongs[playlistId] = playlistSongs[playlistId].map(song => ({
+                ...song,
+                isTopShortTerm: topSongs["short_term"].some(topSong => topSong.id === song.track.id),
+                isTopMediumTerm: topSongs["medium_term"].some(topSong => topSong.id === song.track.id),
+                isTopLongTerm: topSongs["long_term"].some(topSong => topSong.id === song.track.id)
             }));
         }
     };
@@ -250,21 +266,122 @@ const PlaylistDataManagerService = () => {
         return scores;
     };
 
+
+    /*
+     * calculateMostPopularMedia
+     * Calculates most popular artist and song across all playlists
+     */
+    const calculateMostPopularMedia = (playlists, playlistSongs) => {
+        const artistCount = {};
+        const songCount = {};
+
+        playlists.forEach((pl) => {
+            const songs = playlistSongs[pl.id] || [];
+            songs.forEach((song) => {
+                artistCount[song.track.artists[0].name] = (artistCount[song.track.artists[0].name] || 0) + 1;
+                songCount[song.track.name] = (songCount[song.track.name] || 0) + 1;
+            });
+        });
+
+        let mostPopularArtist = null;
+        let highestArtistCount = -1;
+        let mostPopularSong = null;
+        let highestSongCount = -1;
+
+        for (let artist in artistCount) {
+            if (artistCount[artist] > highestArtistCount) {
+                highestArtistCount = artistCount[artist];
+                mostPopularArtist = artist;
+            }
+        }
+
+        for (let song in songCount) {
+            if (songCount[song] > highestSongCount) {
+                highestSongCount = songCount[song];
+                mostPopularSong = song;
+            }
+        }
+
+        let mostPopularArtistResult = `${mostPopularArtist}: ${highestArtistCount}`;
+        let mostPopularSongResult = `${mostPopularSong}: ${highestSongCount}`;
+
+        return { mostPopularArtistResult, mostPopularSongResult};
+    };
+
+    /*
+     * calculateHightestTotalScoringPlaylists
+     * Calculates highest total scoring playlist
+     */
+    const calculateHighestTotalScoringPlaylists = (playlists, playlistScores) => {
+        let highestScore = -1;
+        let highestScoringPlaylist = null;
+
+        playlists.forEach((pl) => {
+            const plScore = playlistScores[pl.id]?.totalScore || 0;
+            if (plScore > highestScore) {
+                highestScore = plScore;
+                highestScoringPlaylist = pl;
+            }
+        });
+
+        let highestTotalScorePlaylistResult = `${highestScoringPlaylist.name}: ${highestScore}`;
+
+        return highestTotalScorePlaylistResult;
+    };
+
+    /*
+     * calculateAverageTotalPlaylistScore
+     * Calculates average total playlist score
+     */
+    const calculateAverageTotalPlaylistScore = (playlists, playlistScores) => {
+        let totalScore = 0;
+
+        playlists.forEach((pl) => {
+            totalScore += Number(playlistScores[pl.id]?.totalScore) || 0;
+        });
+
+        return playlists.length > 0 ? (totalScore / playlists.length).toFixed(2) : "N/A";
+    };
+
+    /*
+     * computeMetaStats
+     * Calculates all necessary playlist meta statistics
+     */
+    const computeMetaStats = (playlists, playlistSongs, savedSongs, playlistScores, userProfile) => {
+        const metaStats = {};
+        const { mostPopularArtistResult, mostPopularSongResult } = calculateMostPopularMedia(playlists, playlistSongs);
+
+        metaStats["Profile Pic"] = userProfile?.images?.length > 0 ? userProfile.images[0].url : null;
+        metaStats["Username"] = userProfile?.display_name || "N/A";
+        metaStats["Playlist Count"] = playlists.length;
+        metaStats["Saved Song Count"] = savedSongs.length;
+        metaStats["Most Popular Artist"] = mostPopularArtistResult;
+        metaStats["Most Popular Song"] = mostPopularSongResult;
+        metaStats["Highest Total Scoring Playlist"] = calculateHighestTotalScoringPlaylists(playlists, playlistScores);
+        metaStats["Average Total Scoring Playlist"] = calculateAverageTotalPlaylistScore(playlists, playlistScores);
+
+        console.log("Meta Stats:", metaStats);
+
+        return metaStats;
+    };
+
     /*
      * retrievePlaylistsWithStats
      * Custom react hook used to interact with Spotify Web API client and calculate playlist statistics
      */
     const retrieveAllData = async () => {
         try {
-                const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs } = await retrievePlaylistsAndSongs();
+                const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, userProfile } = await retrievePlaylistsAndSongs();
                 addSavedSongs(playlistSongs, savedSongs);
+                addTopSongs(playlistSongs, topSongs);
 
                 const dates = getDates();
 
                 const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates);
                 const playlistScores = computePlaylistScores(playlists, playlistStats);
+                const metaStats = computeMetaStats(playlists, playlistSongs, savedSongs, playlistScores, userProfile);
 
-            return { playlists, playlistSongs, playlistStats, playlistScores }
+            return { playlists, playlistSongs, playlistStats, playlistScores, metaStats }
         } catch (error) {
             console.error("Error in service")
             throw error;

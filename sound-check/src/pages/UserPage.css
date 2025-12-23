@@ -1,0 +1,15 @@
+.User-Page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.meta-stats-content {
+    text-align: center;
+    margin: 10px;
+}
+
+.meta-stats-content img {
+    padding-left: 100px;
+}

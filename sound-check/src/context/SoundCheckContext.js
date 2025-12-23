@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import PlaylistDataManagerService from '../services/playlistDataManager/PlaylistDataManagerService';
+import { createContext, useContext, useState, useEffect } from 'react';
+import PlaylistDataManagerService from '../services/data-management/PlaylistDataManagerService';
 
 const SoundCheckContext = createContext();
 
@@ -8,6 +8,7 @@ export const SoundCheckProvider = ({ children }) => {
     const [playlistSongs, setPlaylistSongs] = useState([]);
     const [playlistStats, setPlaylistStats] = useState([]);
     const [playlistScores, setPlaylistScores] = useState([]);
+    const [metaStats, setMetaStats] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,12 +17,13 @@ export const SoundCheckProvider = ({ children }) => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const { playlists, playlistSongs, playlistStats, playlistScores } = await retrieveAllData();
+                const { playlists, playlistSongs, playlistStats, playlistScores, metaStats } = await retrieveAllData();
 
                 setPlaylists(playlists);
                 setPlaylistSongs(playlistSongs);
                 setPlaylistStats(playlistStats);
                 setPlaylistScores(playlistScores);
+                setMetaStats(metaStats);
             } catch (err) {
                 setLoading(false);
                 setError(err.message);
@@ -34,7 +36,7 @@ export const SoundCheckProvider = ({ children }) => {
     }, []);
 
     return (
-        <SoundCheckContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistScores, loading, error }}>
+        <SoundCheckContext.Provider value={{ playlists, playlistSongs, playlistStats, playlistScores, metaStats, loading, error }}>
             {children}
         </SoundCheckContext.Provider>
     );
