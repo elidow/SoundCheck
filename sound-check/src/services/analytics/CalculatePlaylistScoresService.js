@@ -32,7 +32,6 @@ function normalizeDate(date, earlyDate, lateDate) {
     return Math.floor(Math.max(0, Math.min(100, ratio * 100)));
 }
 
-
 // applyLogisticDecay is used by multiple callbacks; define it before they are declared
 function applyLogisticDecay(x, k, midpoint) {
     const score = 100 / (1 + Math.exp(k * (x - midpoint)));
@@ -50,19 +49,39 @@ const useCalculatePlaylistScoresService = () => {
     /*
      * calculateSongCountScore
      * Calculates score 0-100 on the how many songs the playlist has
-     * Calculation: 70 is 100, <=20 is 0, >= 120 is 0 
+     * Calculation: 70-80 is 100, 50-69/81-100 is only -1 by distance, 40-49/101-110 is -2, 20-39/111-130 is -3, beyond is 0
      */
-    const calculateSongCountScore = useCallback((count) => {
-        if (count >= 70 && count <= 80) {
-            return 100;
+    const calculateSongCountScore = useCallback((x) => {
+        if (x >= 70 && x <= 80) return 100;
+
+        if (x >= 50 && x <= 69) {
+            const dist = 70 - x;
+            return 100 - dist;
+        }
+        if (x >= 81 && x <= 100) {
+            const dist = x - 80;
+            return 100 - dist;
         }
 
-        // Distance to the nearest boundary of [70, 80]
-        const distance = count < 70 ? 70 - count : count - 80;
+        if (x >= 40 && x <= 49) {
+            const dist = 50 - x;
+            return 80 - 2 * dist;
+        }
+        if (x >= 101 && x <= 110) {
+            const dist = x - 100;
+            return 80 - 2 * dist;
+        }
 
-        const score = 100 - (2 * distance);
+        if (x >= 20 && x <= 39) {
+            const dist = 40 - x;
+            return 60 - 3 * dist;
+        }
+        if (x >= 111 && x <= 130) {
+            const dist = x - 110;
+            return 60 - 3 * dist;
+        }
 
-        return Math.max(score, 0);
+        return 0;
     }, []);
 
     /*
@@ -89,14 +108,14 @@ const useCalculatePlaylistScoresService = () => {
         const today = new Date();
 
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
-    const x = Math.max(daysDiff, 0);
-    const midpoint = Math.round(1.5 * 365);
-    const zeroClamp = Math.round(2 * 365);
-    const k = 0.012;
+        const x = Math.max(daysDiff, 0);
+        const midpoint = Math.round(1.5 * 365);
+        const zeroClamp = Math.round(2 * 365);
+        const k = 0.012;
 
-    if (x >= zeroClamp) return 0;
+        if (x >= zeroClamp) return 0;
 
-    return applyLogisticDecay(x, k, midpoint);
+        return applyLogisticDecay(x, k, midpoint);
     }, []);
 
     /*
@@ -113,14 +132,14 @@ const useCalculatePlaylistScoresService = () => {
         const today = new Date();
         
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
-    const x = Math.max(daysDiff, 0);
-    const midpoint = Math.round(0.5 * 365);
-    const zeroClamp = 9 * 30;
-    const k = 0.03;
+        const x = Math.max(daysDiff, 0);
+        const midpoint = Math.round(0.5 * 365);
+        const zeroClamp = 9 * 30;
+        const k = 0.03;
 
-    if (x >= zeroClamp) return 0;
+        if (x >= zeroClamp) return 0;
 
-    return applyLogisticDecay(x, k, midpoint);
+        return applyLogisticDecay(x, k, midpoint);
     }, []);
 
     /*

@@ -1,0 +1,27 @@
+/* Page container */
+.Tables-Page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.Category-Tabs {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.Category-Tab {
+    padding: 8px 16px;
+    border: none;
+    background-color: #eee;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.Category-Tab.active {
+    background-color: #63d471;
+    color: white;
+}

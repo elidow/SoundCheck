@@ -8,7 +8,8 @@ import pLimit from 'p-limit';
  * Functional component to interact with Spotify Web API layer
  */
 const SpotifyWebService = () => {
-    const { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs, fetchTopSongs, fetchRecentlyPlayedSongs } = useSpotifyWebApi();
+    const { fetchPlaylists, fetchPlaylistSongs, fetchSavedSongs,
+        fetchTopSongs, fetchRecentlyPlayedSongs, fetchUserProfile } = useSpotifyWebApi();
 
     // Delay function for throttling requests
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -107,6 +108,15 @@ const SpotifyWebService = () => {
     }
 
     /*
+     * getUserProfile
+     * Fetches user profile from API
+     */
+    const getUserProfile = async() => {
+        const userProfile = await runLimited(fetchUserProfile);
+        return userProfile;
+    }
+
+    /*
      * retrievePlaylistsAndSongs
      * Custom react hook used to interact with Spotify Web API client and calculate playlist statistics
      */
@@ -119,11 +129,12 @@ const SpotifyWebService = () => {
             const topSongs = await getTopsSongs();
             const savedSongs = await getSavedSongs();
             const recentlyPlayedSongs = await getRecentlyPlayedSongs();
+            const userProfile = await getUserProfile();
 
             let end = Date.now() - start;
             console.log("End: " + end)
 
-            return { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs }
+            return { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, userProfile }
         } catch (error) {
             console.error("Error in service")
             throw error;
