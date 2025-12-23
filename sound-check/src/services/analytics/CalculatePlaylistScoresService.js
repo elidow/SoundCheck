@@ -32,7 +32,6 @@ function normalizeDate(date, earlyDate, lateDate) {
     return Math.floor(Math.max(0, Math.min(100, ratio * 100)));
 }
 
-
 // applyLogisticDecay is used by multiple callbacks; define it before they are declared
 function applyLogisticDecay(x, k, midpoint) {
     const score = 100 / (1 + Math.exp(k * (x - midpoint)));
@@ -109,14 +108,14 @@ const useCalculatePlaylistScoresService = () => {
         const today = new Date();
 
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
-    const x = Math.max(daysDiff, 0);
-    const midpoint = Math.round(1.5 * 365);
-    const zeroClamp = Math.round(2 * 365);
-    const k = 0.012;
+        const x = Math.max(daysDiff, 0);
+        const midpoint = Math.round(1.5 * 365);
+        const zeroClamp = Math.round(2 * 365);
+        const k = 0.012;
 
-    if (x >= zeroClamp) return 0;
+        if (x >= zeroClamp) return 0;
 
-    return applyLogisticDecay(x, k, midpoint);
+        return applyLogisticDecay(x, k, midpoint);
     }, []);
 
     /*
@@ -133,14 +132,14 @@ const useCalculatePlaylistScoresService = () => {
         const today = new Date();
         
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
-    const x = Math.max(daysDiff, 0);
-    const midpoint = Math.round(0.5 * 365);
-    const zeroClamp = 9 * 30;
-    const k = 0.03;
+        const x = Math.max(daysDiff, 0);
+        const midpoint = Math.round(0.5 * 365);
+        const zeroClamp = 9 * 30;
+        const k = 0.03;
 
-    if (x >= zeroClamp) return 0;
+        if (x >= zeroClamp) return 0;
 
-    return applyLogisticDecay(x, k, midpoint);
+        return applyLogisticDecay(x, k, midpoint);
     }, []);
 
     /*
