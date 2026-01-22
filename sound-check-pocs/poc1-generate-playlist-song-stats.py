@@ -135,6 +135,7 @@ def main():
                     "count": 1,
                     "id": album_id,
                     "name": album_name,
+                    "artist": artist_name,
                     "playlists": {title: 1}
                 }
 
@@ -190,7 +191,7 @@ def main():
     with open(filePath + 'playlist-songs/mostFrequentPlaylistSongAlbums.txt', 'w') as file:
         for entry in album_freq_list:
             playlists_str = ", ".join([f"{name} ({count})" for name, count in sorted(entry["playlists"].items(), key=lambda x: -x[1])])
-            file.write(f"{entry['count']}: {entry['name']} | {entry['id']} | Playlists: {playlists_str}\n")
+            file.write(f"{entry['count']}: {entry['name']} | {entry['artist']} | {entry['id']} | Playlists: {playlists_str}\n")
 
     end_time = time.time()
     total_time = end_time - start_time
