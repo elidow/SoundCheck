@@ -49,36 +49,27 @@ const useCalculatePlaylistScoresService = () => {
     /*
      * calculateSongCountScore
      * Calculates score 0-100 on the how many songs the playlist has
-     * Calculation: 70-80 is 100, 50-69/81-100 is only -1 by distance, 40-49/101-110 is -2, 20-39/111-130 is -3, beyond is 0
+     * Calculation: 60-100 is 100, 50-59/101-110 is only -1 by distance, 20-49/111-140 is -3, beyond is 0
      */
     const calculateSongCountScore = useCallback((x) => {
-        if (x >= 70 && x <= 80) return 100;
+        if (x >= 60 && x <= 100) return 100;
 
-        if (x >= 50 && x <= 69) {
-            const dist = 70 - x;
+        if (x >= 50 && x <= 59) {
+            const dist = 60 - x;
             return 100 - dist;
-        }
-        if (x >= 81 && x <= 100) {
-            const dist = x - 80;
-            return 100 - dist;
-        }
-
-        if (x >= 40 && x <= 49) {
-            const dist = 50 - x;
-            return 80 - 2 * dist;
         }
         if (x >= 101 && x <= 110) {
             const dist = x - 100;
-            return 80 - 2 * dist;
+            return 100 - dist;
         }
 
-        if (x >= 20 && x <= 39) {
-            const dist = 40 - x;
-            return 60 - 3 * dist;
+        if (x >= 20 && x <= 49) {
+            const dist = 50 - x;
+            return 90 - 3 * dist;
         }
         if (x >= 111 && x <= 130) {
             const dist = x - 110;
-            return 60 - 3 * dist;
+            return 90 - 3 * dist;
         }
 
         return 0;
