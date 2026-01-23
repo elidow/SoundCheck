@@ -120,3 +120,165 @@ class SpotifyWebApi:
             url = data.get('next')
             i += 1
         return top_songs
+
+    def save_songs(self, track_ids):
+        """
+        Save a list of songs to the user's library.
+        
+        Args:
+            track_ids: List of Spotify track IDs to save
+            
+        Returns:
+            Dictionary with 'saved' (list of saved track IDs), 'already_saved' (list of already-saved track IDs), and 'failed' (list of failed track IDs)
+        """
+        if not track_ids:
+            return {"saved": [], "already_saved": [], "failed": []}
+        
+        url = "https://api.spotify.com/v1/me/tracks"
+        headers = self._get_headers()
+        
+        result = {"saved": [], "already_saved": [], "failed": []}
+        
+        # Process in batches of 50 (Spotify API limit)
+        batch_size = 50
+        for i in range(0, len(track_ids), batch_size):
+            batch = track_ids[i:i+batch_size]
+            batch_num = i//batch_size + 1
+            
+            try:
+                # Check which songs are already saved
+                print(f"  Batch {batch_num}: Checking if {len(batch)} songs are already saved...")
+                check_response = requests.get(url, headers=headers, params={"ids": ",".join(batch)})
+                if check_response.status_code != 200:
+                    raise Exception(f"Failed to check saved songs: {check_response.status_code}, {check_response.text}")
+                
+                response_data = check_response.json()
+                print(f"  Batch {batch_num}: Got response type: {type(response_data).__name__}")
+                if isinstance(response_data, dict):
+                    print(f"  Batch {batch_num}: Response keys: {list(response_data.keys())}")
+                
+                # The response can be either a list or a dict with 'contains' field
+                if isinstance(response_data, dict) and "contains" in response_data:
+                    already_saved_flags = response_data["contains"]
+                elif isinstance(response_data, list):
+                    already_saved_flags = response_data
+                else:
+                    # If it's a dict without 'contains', try to use its values
+                    print(f"  Batch {batch_num}: Unexpected response format: {type(response_data).__name__}")
+                    print(f"  Batch {batch_num}: Full response: {response_data}")
+                    raise Exception(f"Unexpected response format: {type(response_data)}")
+                
+                print(f"  Batch {batch_num}: Got {len(already_saved_flags)} saved flags")
+                
+                # Separate tracks that are already saved from those that aren't
+                tracks_to_save = []
+                for j, track_id in enumerate(batch):
+                    if j < len(already_saved_flags) and already_saved_flags[j]:
+                        result["already_saved"].append(track_id)
+                    else:
+                        tracks_to_save.append(track_id)
+                
+                # Save tracks that aren't already saved
+                if tracks_to_save:
+                    print(f"  Batch {batch_num}: Saving {len(tracks_to_save)} new songs...")
+                    save_response = requests.put(
+                        url,
+                        headers=headers,
+                        json={"ids": tracks_to_save}
+                    )
+                    if save_response.status_code == 200:
+                        result["saved"].extend(tracks_to_save)
+                        print(f"  Batch {batch_num}: Successfully saved {len(tracks_to_save)} songs")
+                    else:
+                        result["failed"].extend(tracks_to_save)
+                        print(f"  Batch {batch_num}: Failed to save - {save_response.status_code}, {save_response.text}")
+                else:
+                    print(f"  Batch {batch_num}: All {len(batch)} songs were already saved")
+            except Exception as e:
+                result["failed"].extend(batch)
+                print(f"  Batch {batch_num}: Exception - {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+        
+        return result
+
+    def unsave_songs(self, track_ids):
+        """
+        Remove a list of songs from the user's library.
+        
+        Args:
+            track_ids: List of Spotify track IDs to unsave
+            
+        Returns:
+            Dictionary with 'unsaved' (list of unsaved track IDs), 'not_saved' (list of track IDs that weren't saved), and 'failed' (list of failed track IDs)
+        """
+        if not track_ids:
+            return {"unsaved": [], "not_saved": [], "failed": []}
+        
+        url = "https://api.spotify.com/v1/me/tracks"
+        headers = self._get_headers()
+        
+        result = {"unsaved": [], "not_saved": [], "failed": []}
+        
+        # Process in batches of 50 (Spotify API limit)
+        batch_size = 50
+        for i in range(0, len(track_ids), batch_size):
+            batch = track_ids[i:i+batch_size]
+            batch_num = i//batch_size + 1
+            
+            try:
+                # Check which songs are saved
+                print(f"  Batch {batch_num}: Checking if {len(batch)} songs are saved...")
+                check_response = requests.get(url, headers=headers, params={"ids": ",".join(batch)})
+                if check_response.status_code != 200:
+                    raise Exception(f"Failed to check saved songs: {check_response.status_code}, {check_response.text}")
+                
+                response_data = check_response.json()
+                print(f"  Batch {batch_num}: Got response type: {type(response_data).__name__}")
+                if isinstance(response_data, dict):
+                    print(f"  Batch {batch_num}: Response keys: {list(response_data.keys())}")
+                
+                # The response can be either a list or a dict with 'contains' field
+                if isinstance(response_data, dict) and "contains" in response_data:
+                    saved_flags = response_data["contains"]
+                elif isinstance(response_data, list):
+                    saved_flags = response_data
+                else:
+                    # If it's a dict without 'contains', try to use its values
+                    print(f"  Batch {batch_num}: Unexpected response format: {type(response_data).__name__}")
+                    print(f"  Batch {batch_num}: Full response: {response_data}")
+                    raise Exception(f"Unexpected response format: {type(response_data)}")
+                
+                print(f"  Batch {batch_num}: Got {len(saved_flags)} saved flags")
+                
+                # Separate tracks that are saved from those that aren't
+                tracks_to_unsave = []
+                for j, track_id in enumerate(batch):
+                    if j < len(saved_flags) and saved_flags[j]:
+                        tracks_to_unsave.append(track_id)
+                    else:
+                        result["not_saved"].append(track_id)
+                
+                # Unsave tracks that are saved
+                if tracks_to_unsave:
+                    print(f"  Batch {batch_num}: Unsaving {len(tracks_to_unsave)} songs...")
+                    unsave_response = requests.delete(
+                        url,
+                        headers=headers,
+                        json={"ids": tracks_to_unsave}
+                    )
+                    if unsave_response.status_code == 200:
+                        result["unsaved"].extend(tracks_to_unsave)
+                        print(f"  Batch {batch_num}: Successfully unsaved {len(tracks_to_unsave)} songs")
+                    else:
+                        result["failed"].extend(tracks_to_unsave)
+                        print(f"  Batch {batch_num}: Failed to unsave - {unsave_response.status_code}, {unsave_response.text}")
+                else:
+                    print(f"  Batch {batch_num}: All {len(batch)} songs were not saved")
+            except Exception as e:
+                result["failed"].extend(batch)
+                print(f"  Batch {batch_num}: Exception - {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
+        
+        return result

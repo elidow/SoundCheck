@@ -1,6 +1,6 @@
 # Eli Dow
-# December 2025
-# SoundCheck POC - List Top 100 Playlist Overlaps
+# January 2026
+# SoundCheck POC - List Playlist Overlaps (at least 4 common songs)
 
 import os
 from collections import Counter
@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 filePath = os.getenv("FILE_PATH") or ""
 
-input_file = os.path.join(filePath, 'mostFrequentPlaylistSongs.txt')
-output_file = os.path.join(filePath, 'top100PlaylistOverlaps.txt')
+input_file = os.path.join(filePath, 'playlist-songs/mostFrequentPlaylistSongs.txt')
+output_file = os.path.join(filePath, 'playlistOverlaps.txt')
 
 def main():
     pair_counter = Counter()
@@ -35,15 +35,16 @@ def main():
                 sorted_pair = tuple(sorted(pair))
                 pair_counter[sorted_pair] += 1
 
-    # Get top 100
-    top_100 = pair_counter.most_common(100)
+    # Filter for overlaps with at least 4 common songs and sort by count descending
+    overlaps = [(pair, count) for pair, count in pair_counter.items() if count >= 4]
+    overlaps.sort(key=lambda x: -x[1])
 
     with open(output_file, 'w') as fout:
-        for pair, count in top_100:
+        for pair, count in overlaps:
             playlist1, playlist2 = pair
             fout.write(f"{count}: {playlist1} + {playlist2}\n")
 
-    print(f"Wrote top 100 playlist overlaps to {output_file}")
+    print(f"Wrote {len(overlaps)} playlist overlaps (with at least 4 common songs) to {output_file}")
 
 if __name__ == "__main__":
     main()
