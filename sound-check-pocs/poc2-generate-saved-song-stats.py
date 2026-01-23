@@ -73,9 +73,11 @@ def main():
         if album and album.get("id"):
             album_id = album["id"]
             album_name = album.get("name", "Unknown")
+            release_date = album.get("release_date", "Unknown")
         else:
             album_id = None
             album_name = "Unknown"
+            release_date = "Unknown"
         
         # Track artist frequency
         if artist_id:
@@ -98,7 +100,8 @@ def main():
             "artist": artist_name,
             "popularity": popularity,
             "duration_ms": duration_ms,
-            "artist_id": artist_id
+            "artist_id": artist_id,
+            "release_date": release_date
         })
         
         # Track duplicates by ID or by artist + name
@@ -163,6 +166,14 @@ def main():
             duration_formatted = format_duration_long(song["duration_ms"])
             file.write(f"{duration_formatted}: {song['name']} - {song['artist']}\n")
     
+    # Write songs ordered by release date
+    print("Writing songs ordered by release date...")
+    sorted_by_release_date = sorted(songs_list, key=lambda x: (x["release_date"], x["name"]))
+    
+    with open(filePath + 'saved-songs/songsOrderedByReleaseDate.txt', 'w') as file:
+        for song in sorted_by_release_date:
+            file.write(f"{song['release_date']}: {song['name']} - {song['artist']}\n")
+    
     # Write duplicates
     print("Writing duplicates...")
     with open(filePath + 'saved-songs/repeats.txt', 'w') as file:
@@ -180,6 +191,7 @@ def main():
     print(f"Wrote {len(sorted_albums)} unique albums to mostFrequentAlbumsInSavedSongs.txt")
     print(f"Wrote {len(sorted_by_popularity)} songs to songsOrderedByPopularity.txt")
     print(f"Wrote {len(sorted_by_duration)} songs to songsOrderedByDuration.txt")
+    print(f"Wrote {len(sorted_by_release_date)} songs to songsOrderedByReleaseDate.txt")
     print(f"Wrote {len(duplicates)} duplicates to repeats.txt")
     print(f"Total time: {total_time:.2f} seconds")
 
