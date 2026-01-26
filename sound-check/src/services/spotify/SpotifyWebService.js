@@ -189,7 +189,7 @@ const SpotifyWebService = () => {
         }
     };
 
-    return { retrievePlaylistsAndSongs };
+    return { retrievePlaylistsAndSongs, getPlaylistSongs };
 };
 
 export default SpotifyWebService;

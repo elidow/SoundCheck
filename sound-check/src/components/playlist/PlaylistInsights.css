@@ -82,7 +82,7 @@
     min-width: 300px;
     flex-basis: calc(46% - 10px);
     text-align: center;
-    font-size: 24px;
+    font-size: 40px;
     font-weight: bold;
 }
 
@@ -101,4 +101,24 @@
 
 .playlist-song-data th {
     text-align: left;
+}
+
+.refresh-button {
+    padding: 12px 20px;
+    background-color: #1DB954; /* Spotify green */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.refresh-button:hover:not(:disabled) {
+    background-color: #1ed760;
+}
+
+.refresh-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

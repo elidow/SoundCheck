@@ -10,7 +10,7 @@ import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistSco
  * Functional component to manage all relevant playlist data and statistics
  */
 const PlaylistDataManagerService = () => {
-    const { retrievePlaylistsAndSongs } = SpotifyWebService();
+    const { retrievePlaylistsAndSongs, getPlaylistSongs } = SpotifyWebService();
     const { calculateSongTimeRangePercentage, calculateAverageSongDateAdded,
             calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
             calculateAverageSongReleaseDate, calculateAverageSongPopularity,
@@ -381,14 +381,43 @@ const PlaylistDataManagerService = () => {
                 const playlistScores = computePlaylistScores(playlists, playlistStats);
                 const metaStats = computeMetaStats(playlists, playlistSongs, savedSongs, playlistScores, userProfile);
 
-            return { playlists, playlistSongs, playlistStats, playlistScores, metaStats }
+            return { playlists, playlistSongs, playlistStats, playlistScores, metaStats, topSongs, savedSongs, recentlyPlayedSongs }
         } catch (error) {
             console.error("Error in service")
             throw error;
         }
     };
 
-    return { retrieveAllData }
+    /*
+     * refreshSinglePlaylist
+     * Refreshes songs, stats, and scores for a specific playlist only
+     */
+    const refreshSinglePlaylist = async (playlistId, topSongs, savedSongs, recentlyPlayedSongs) => {
+        try {
+            // getPlaylistSongs expects an array of playlist objects, so fetch just this one
+            const playlistSongsResult = await getPlaylistSongs([{ id: playlistId }]);
+            const refreshedSongs = playlistSongsResult[playlistId] || [];
+            
+            const enrichedSongs = refreshedSongs.map(song => ({
+                ...song,
+                isSaved: savedSongs.some(savedSong => savedSong.track.id === song.track.id),
+                isTopShortTerm: topSongs["short_term"].some(topSong => topSong.id === song.track.id),
+                isTopMediumTerm: topSongs["medium_term"].some(topSong => topSong.id === song.track.id),
+                isTopLongTerm: topSongs["long_term"].some(topSong => topSong.id === song.track.id)
+            }));
+            
+            const dates = getDates();
+            const playlistStats = computePlaylistStats([{ id: playlistId }], { [playlistId]: enrichedSongs }, topSongs, savedSongs, recentlyPlayedSongs, dates);
+            const playlistScores = computePlaylistScores([{ id: playlistId }], playlistStats);
+            
+            return { playlistId, songs: enrichedSongs, stats: playlistStats[playlistId], scores: playlistScores[playlistId] };
+        } catch (error) {
+            console.error(`Error refreshing playlist ${playlistId}:`, error);
+            throw error;
+        }
+    };
+
+    return { retrieveAllData, refreshSinglePlaylist }
 }
 
 export default PlaylistDataManagerService;
