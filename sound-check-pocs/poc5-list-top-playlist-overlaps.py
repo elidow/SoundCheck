@@ -40,6 +40,7 @@ def main():
     overlaps.sort(key=lambda x: -x[1])
 
     with open(output_file, 'w') as fout:
+        fout.write("Generated on 01/29/2026\n")
         for pair, count in overlaps:
             playlist1, playlist2 = pair
             fout.write(f"{count}: {playlist1} + {playlist2}\n")

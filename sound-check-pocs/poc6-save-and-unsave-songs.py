@@ -160,8 +160,7 @@
 #     if output_dir and not os.path.exists(output_dir):
 #         os.makedirs(output_dir)
     
-#     with open(OUTPUT_PATH, 'w') as f:
-#         f.write("=" * 80 + "\n")
+#     with open(OUTPUT_PATH, 'w') as f:#         f.write("Generated on 01/29/2026\\n")#         f.write("=" * 80 + "\n")
 #         f.write("SAVED SONGS\n")
 #         f.write("=" * 80 + "\n\n")
         

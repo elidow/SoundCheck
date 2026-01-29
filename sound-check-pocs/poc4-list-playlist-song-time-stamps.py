@@ -128,6 +128,7 @@ def main():
         padded_lines.append(line)
 
     with open(out_file_1, 'w', encoding='utf-8') as f:
+        f.write("Generated on 01/29/2026\n")
         f.writelines(padded_lines)
 
     print(f"Wrote {len(padded_lines)} lines to {out_file_1}")

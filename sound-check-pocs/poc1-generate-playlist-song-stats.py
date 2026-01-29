@@ -147,6 +147,7 @@ def main():
     sortedBySomewhatRecent = sorted(playlistStats, key=lambda playlist: playlist.somewhat_recent, reverse=True)
 
     with open(filePath + 'playlist-songs/basicPlaylistStats.txt', 'w') as file:
+        file.write("Generated on 01/29/2026\n")
         file.write("Playlists Ordered by # of Tracks:\n")
         for playlist in sortedByTracks:
             file.write(f"{playlist.title}: {playlist.tracks}\n")
@@ -169,6 +170,7 @@ def main():
     song_freq_list.sort(key=lambda x: (-x["count"], x["name"]))
 
     with open(filePath + 'playlist-songs/mostFrequentPlaylistSongs.txt', 'w') as file:
+        file.write("Generated on 01/29/2026\n")
         for entry in song_freq_list:
             playlists_str = ", ".join(sorted(entry["playlists"]))
             file.write(f"{entry['count']}: {entry['name']} | {entry['artist']} | {entry['id']} | Playlists: {playlists_str}\n")
@@ -179,6 +181,7 @@ def main():
     artist_freq_list.sort(key=lambda x: (-x["count"], x["name"]))
 
     with open(filePath + 'playlist-songs/mostFrequentPlaylistSongArtists.txt', 'w') as file:
+        file.write("Generated on 01/29/2026\n")
         for entry in artist_freq_list:
             playlists_str = ", ".join([f"{name} ({count})" for name, count in sorted(entry["playlists"].items(), key=lambda x: -x[1])])
             file.write(f"{entry['count']}: {entry['name']} | {entry['id']} | Playlists: {playlists_str}\n")
@@ -189,6 +192,7 @@ def main():
     album_freq_list.sort(key=lambda x: (-x["count"], x["name"]))
 
     with open(filePath + 'playlist-songs/mostFrequentPlaylistSongAlbums.txt', 'w') as file:
+        file.write("Generated on 01/29/2026\n")
         for entry in album_freq_list:
             playlists_str = ", ".join([f"{name} ({count})" for name, count in sorted(entry["playlists"].items(), key=lambda x: -x[1])])
             file.write(f"{entry['count']}: {entry['name']} | {entry['artist']} | {entry['id']} | Playlists: {playlists_str}\n")
