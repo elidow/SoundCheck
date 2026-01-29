@@ -41,6 +41,7 @@ def main():
     print("Processing saved songs...")
     saved_songs_dict = {}  # id -> full info
     saved_songs_list = []  # for maintaining order
+    saved_songs_name_artist_set = set()  # (name, artist) tuples for matching
     
     for song in saved_songs:
         track = song.get("track")
@@ -56,6 +57,7 @@ def main():
             "id": track_id
         }
         saved_songs_list.append(track_id)
+        saved_songs_name_artist_set.add((song_name, artist_name))
     
     # Process top songs
     print("Processing top songs...")
@@ -155,7 +157,10 @@ def main():
         file.write("Generated on 01/29/2026\n")
         for song_id in top_songs_list:
             if song_id not in saved_songs_dict and song_id in top_songs_dict:
-                file.write(format_song_line(top_songs_dict[song_id]) + "\n")
+                song_info = top_songs_dict[song_id]
+                name_artist_match = (song_info["name"], song_info["artist"]) in saved_songs_name_artist_set
+                prefix = "(R) " if name_artist_match else ""
+                file.write(prefix + format_song_line(song_info) + "\n")
     
     # Write savedSongsInPlaylists.txt (ordered by frequency in playlists, descending)
     print("Writing savedSongsInPlaylists.txt...")
