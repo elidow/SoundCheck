@@ -1,7 +1,8 @@
 # # Eli Dow
 # # January 2026
 # # SoundCheck POC - Save and unsave songs based on playlist and top tracks analysis
-# # NOT WORKING
+
+# # POSSIBLY WORKING, BUT WITH GREAT POWER COMES GREAT RESPONSIBILITY
 
 # import os
 # import time
@@ -124,35 +125,41 @@
 #         print(f"\nSaving {len(songs_to_save)} songs...")
 #         track_ids_to_save = list(songs_to_save.keys())
         
-#         try:
-#             save_result = api.save_songs(track_ids_to_save)
-#             saved_results["saved"] = save_result.get("saved", [])
-#             saved_results["already_saved"] = save_result.get("already_saved", [])
-#             saved_results["failed"] = save_result.get("failed", [])
-            
-#             print(f"  Successfully saved: {len(saved_results['saved'])} songs")
-#             print(f"  Already saved: {len(saved_results['already_saved'])} songs")
-#             if saved_results["failed"]:
-#                 print(f"  Failed to save: {len(saved_results['failed'])} songs")
-#         except Exception as e:
-#             print(f"Error saving songs: {e}")
+#         for track_id in track_ids_to_save:
+#             try:
+#                 save_result = api.save_songs([track_id])
+#                 if save_result.get("saved") and track_id in save_result["saved"]:
+#                     saved_results["saved"].append(track_id)
+#                     print(f"  Successfully saved: {songs_to_save[track_id][0]}")
+#                 elif save_result.get("already_saved") and track_id in save_result["already_saved"]:
+#                     saved_results["already_saved"].append(track_id)
+#                     print(f"  Already saved: {songs_to_save[track_id][0]}")
+#                 else:
+#                     saved_results["failed"].append(track_id)
+#                     print(f"  Failed to save: {songs_to_save[track_id][0]}")
+#             except Exception as e:
+#                 saved_results["failed"].append(track_id)
+#                 print(f"  Error saving {songs_to_save[track_id][0]}: {e}")
     
 #     if songs_to_unsave:
 #         print(f"\nUnsaving {len(songs_to_unsave)} songs...")
 #         track_ids_to_unsave = list(songs_to_unsave.keys())
         
-#         try:
-#             unsave_result = api.unsave_songs(track_ids_to_unsave)
-#             unsaved_results["unsaved"] = unsave_result.get("unsaved", [])
-#             unsaved_results["not_saved"] = unsave_result.get("not_saved", [])
-#             unsaved_results["failed"] = unsave_result.get("failed", [])
-            
-#             print(f"  Successfully unsaved: {len(unsaved_results['unsaved'])} songs")
-#             print(f"  Were not saved: {len(unsaved_results['not_saved'])} songs")
-#             if unsaved_results["failed"]:
-#                 print(f"  Failed to unsave: {len(unsaved_results['failed'])} songs")
-#         except Exception as e:
-#             print(f"Error unsaving songs: {e}")
+#         for track_id in track_ids_to_unsave:
+#             try:
+#                 unsave_result = api.unsave_songs([track_id])
+#                 if unsave_result.get("unsaved") and track_id in unsave_result["unsaved"]:
+#                     unsaved_results["unsaved"].append(track_id)
+#                     print(f"  Successfully unsaved: {songs_to_unsave[track_id][0]}")
+#                 elif unsave_result.get("not_saved") and track_id in unsave_result["not_saved"]:
+#                     unsaved_results["not_saved"].append(track_id)
+#                     print(f"  Was not saved: {songs_to_unsave[track_id][0]}")
+#                 else:
+#                     unsaved_results["failed"].append(track_id)
+#                     print(f"  Failed to unsave: {songs_to_unsave[track_id][0]}")
+#             except Exception as e:
+#                 unsaved_results["failed"].append(track_id)
+#                 print(f"  Error unsaving {songs_to_unsave[track_id][0]}: {e}")
     
 #     # Write results to file
 #     # Create directory if it doesn't exist
@@ -160,7 +167,8 @@
 #     if output_dir and not os.path.exists(output_dir):
 #         os.makedirs(output_dir)
     
-#     with open(OUTPUT_PATH, 'w') as f:#         f.write("Generated on 01/29/2026\\n")#         f.write("=" * 80 + "\n")
+#     with open(OUTPUT_PATH, 'w') as f:
+#         f.write("Generated on 01/29/2026\n")
 #         f.write("SAVED SONGS\n")
 #         f.write("=" * 80 + "\n\n")
         

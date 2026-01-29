@@ -134,7 +134,8 @@ class SpotifyWebApi:
         if not track_ids:
             return {"saved": [], "already_saved": [], "failed": []}
         
-        url = "https://api.spotify.com/v1/me/tracks"
+        save_url = "https://api.spotify.com/v1/me/tracks"
+        check_url = "https://api.spotify.com/v1/me/tracks/contains"
         headers = self._get_headers()
         
         result = {"saved": [], "already_saved": [], "failed": []}
@@ -148,7 +149,7 @@ class SpotifyWebApi:
             try:
                 # Check which songs are already saved
                 print(f"  Batch {batch_num}: Checking if {len(batch)} songs are already saved...")
-                check_response = requests.get(url, headers=headers, params={"ids": ",".join(batch)})
+                check_response = requests.get(check_url, headers=headers, params={"ids": ",".join(batch)})
                 if check_response.status_code != 200:
                     raise Exception(f"Failed to check saved songs: {check_response.status_code}, {check_response.text}")
                 
@@ -182,7 +183,7 @@ class SpotifyWebApi:
                 if tracks_to_save:
                     print(f"  Batch {batch_num}: Saving {len(tracks_to_save)} new songs...")
                     save_response = requests.put(
-                        url,
+                        save_url,
                         headers=headers,
                         json={"ids": tracks_to_save}
                     )
@@ -215,7 +216,8 @@ class SpotifyWebApi:
         if not track_ids:
             return {"unsaved": [], "not_saved": [], "failed": []}
         
-        url = "https://api.spotify.com/v1/me/tracks"
+        unsave_url = "https://api.spotify.com/v1/me/tracks"
+        check_url = "https://api.spotify.com/v1/me/tracks/contains"
         headers = self._get_headers()
         
         result = {"unsaved": [], "not_saved": [], "failed": []}
@@ -229,7 +231,7 @@ class SpotifyWebApi:
             try:
                 # Check which songs are saved
                 print(f"  Batch {batch_num}: Checking if {len(batch)} songs are saved...")
-                check_response = requests.get(url, headers=headers, params={"ids": ",".join(batch)})
+                check_response = requests.get(check_url, headers=headers, params={"ids": ",".join(batch)})
                 if check_response.status_code != 200:
                     raise Exception(f"Failed to check saved songs: {check_response.status_code}, {check_response.text}")
                 
@@ -263,7 +265,7 @@ class SpotifyWebApi:
                 if tracks_to_unsave:
                     print(f"  Batch {batch_num}: Unsaving {len(tracks_to_unsave)} songs...")
                     unsave_response = requests.delete(
-                        url,
+                        unsave_url,
                         headers=headers,
                         json={"ids": tracks_to_unsave}
                     )
