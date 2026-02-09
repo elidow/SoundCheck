@@ -4,6 +4,7 @@
 
 import os
 import time
+from datetime import datetime
 from dotenv import load_dotenv
 from spotify_web_api import SpotifyWebApi
 
@@ -39,6 +40,9 @@ def main():
     print("Fetching saved songs...")
     saved_songs = api.get_saved_songs()
     print(f"Found {len(saved_songs)} saved songs.")
+
+    # Human-friendly generated date for output files
+    current_date = datetime.now().strftime("%m/%d/%Y")
 
     # Data structures for analysis
     artist_freq = {}
@@ -134,7 +138,7 @@ def main():
     sorted_artists = sorted(artist_list, key=lambda x: (-x[1], x[0]))
     
     with open(filePath + 'saved-songs/mostFrequentArtistsInSavedSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for artist, count in sorted_artists:
             file.write(f"{count}: {artist}\n")
     
@@ -144,7 +148,7 @@ def main():
     sorted_albums = sorted(album_list, key=lambda x: (-x[2], x[0]))
     
     with open(filePath + 'saved-songs/mostFrequentAlbumsInSavedSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for album, album_artist, count in sorted_albums:
             if album_artist:
                 file.write(f"{count}: {album} — {album_artist}\n")
@@ -156,7 +160,7 @@ def main():
     sorted_by_popularity = sorted(songs_list, key=lambda x: (-x["popularity"], x["name"]))
     
     with open(filePath + 'saved-songs/songsOrderedByPopularity.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song in sorted_by_popularity:
             file.write(f"{song['popularity']}: {song['name']} - {song['artist']}\n")
     
@@ -165,7 +169,7 @@ def main():
     sorted_by_duration = sorted(songs_list, key=lambda x: (-x["duration_ms"], x["name"]))
     
     with open(filePath + 'saved-songs/songsOrderedByDuration.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song in sorted_by_duration:
             duration_formatted = format_duration_long(song["duration_ms"])
             file.write(f"{duration_formatted}: {song['name']} - {song['artist']}\n")
@@ -175,14 +179,14 @@ def main():
     sorted_by_release_date = sorted(songs_list, key=lambda x: (x["release_date"], x["name"]))
     
     with open(filePath + 'saved-songs/songsOrderedByReleaseDate.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song in sorted_by_release_date:
             file.write(f"{song['release_date']}: {song['name']} - {song['artist']}\n")
     
     # Write duplicates
     print("Writing duplicates...")
     with open(filePath + 'saved-songs/repeats.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         if duplicates:
             for dup in duplicates:
                 file.write(f"{dup['name']} — {dup['artist']} | ID: {dup['id']} | Type: {dup['duplicate_type']}\n")

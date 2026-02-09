@@ -4,6 +4,7 @@
 
 import os
 import time
+from datetime import datetime
 from dotenv import load_dotenv
 from spotify_web_api import SpotifyWebApi
 
@@ -36,6 +37,9 @@ def main():
     print("Fetching top songs (long_term)...")
     top_songs = api.get_top_songs(time_range="long_term")
     print(f"Found {len(top_songs)} top songs.")
+
+    # Human-friendly generated date for output files
+    current_date = datetime.now().strftime("%m/%d/%Y")
     
     # Process saved songs
     print("Processing saved songs...")
@@ -122,7 +126,7 @@ def main():
     # Write savedSongs.txt
     print("Writing savedSongs.txt...")
     with open(filePath + 'intersections/savedSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_id in saved_songs_list:
             if song_id in saved_songs_dict:
                 file.write(format_song_line(saved_songs_dict[song_id]) + "\n")
@@ -130,7 +134,7 @@ def main():
     # Write topSongs.txt
     print("Writing topSongs.txt...")
     with open(filePath + 'intersections/topSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_id in top_songs_list:
             if song_id in top_songs_dict:
                 file.write(format_song_line(top_songs_dict[song_id]) + "\n")
@@ -138,7 +142,7 @@ def main():
     # Write savedSongsInTopSongs.txt (in order of topSongs)
     print("Writing savedSongsInTopSongs.txt...")
     with open(filePath + 'intersections/savedSongsInTopSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_id in top_songs_list:
             if song_id in saved_songs_dict:
                 file.write(format_song_line(saved_songs_dict[song_id]) + "\n")
@@ -146,7 +150,7 @@ def main():
     # Write savedSongsNotInTopSongs.txt (in order of savedSongs)
     print("Writing savedSongsNotInTopSongs.txt...")
     with open(filePath + 'intersections/savedSongsNotInTopSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_id in saved_songs_list:
             if song_id not in top_songs_dict and song_id in saved_songs_dict:
                 file.write(format_song_line(saved_songs_dict[song_id]) + "\n")
@@ -154,7 +158,7 @@ def main():
     # Write topSongsNotInSavedSongs.txt (in order of topSongs)
     print("Writing topSongsNotInSavedSongs.txt...")
     with open(filePath + 'intersections/topSongsNotInSavedSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_id in top_songs_list:
             if song_id not in saved_songs_dict and song_id in top_songs_dict:
                 song_info = top_songs_dict[song_id]
@@ -173,7 +177,7 @@ def main():
     
     saved_in_playlists.sort(key=lambda x: (-x["count"], x["name"]))
     with open(filePath + 'intersections/savedSongsInPlaylists.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_info in saved_in_playlists:
             file.write(format_playlist_song_line(song_info) + "\n")
     
@@ -185,7 +189,7 @@ def main():
             saved_not_in_playlists.append(saved_songs_dict[song_id])
     
     with open(filePath + 'intersections/savedSongsNotInPlaylists.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_info in saved_not_in_playlists:
             file.write(format_song_line(song_info) + "\n")
     
@@ -198,7 +202,7 @@ def main():
     
     playlist_not_in_saved.sort(key=lambda x: (-x["count"], x["name"]))
     with open(filePath + 'intersections/playlistSongsNotInSavedSongs.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_info in playlist_not_in_saved:
             file.write(format_playlist_song_line(song_info) + "\n")
     
@@ -211,7 +215,7 @@ def main():
             not_in_top_or_playlists.append(saved_songs_dict[song_id])
     
     with open(filePath + 'intersections/remove-savedSongsNotInTopPlayedOrPlaylists.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_info in not_in_top_or_playlists:
             file.write(format_song_line(song_info) + "\n")
     
@@ -227,7 +231,7 @@ def main():
     
     not_in_top_but_in_playlists.sort(key=lambda x: (-x["count"], x["name"]))
     with open(filePath + 'intersections/savedSongsNotInTopSongsButInPlaylists.txt', 'w') as file:
-        file.write("Generated on 01/29/2026\n")
+        file.write(f"Generated on {current_date}\n")
         for song_info in not_in_top_but_in_playlists:
             file.write(format_playlist_song_line(song_info) + "\n")
     
