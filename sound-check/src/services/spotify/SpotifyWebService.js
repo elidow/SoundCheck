@@ -101,7 +101,7 @@ const SpotifyWebService = () => {
         if (cached && timestamp && isToday(timestamp)) {
             const parsedCache = JSON.parse(cached);
             // Check if any of the time periods have data
-            if (parsedCache.short_term?.length > 0 || parsedCache.medium_term?.length > 0 || parsedCache.long_term?.length > 0) {
+            if (parsedCache.short_term?.length > 0 && parsedCache.medium_term?.length > 0 && parsedCache.long_term?.length > 0) {
                 console.log('Using cached top songs (updated today)');
                 return parsedCache;
             }
