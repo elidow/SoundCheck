@@ -1,5 +1,6 @@
 /* PlaylistInsights */
 import { useEffect, useState, useMemo } from 'react';
+import { useSoundCheckContext } from '../../context/SoundCheckContext';
 import PageHeader from '../../components/common/PageHeader';
 import useRenderUtils from '../../util/RenderUtils';
 import { statMap } from '../../util/StatMaps'
@@ -12,6 +13,20 @@ import './PlaylistInsights.css';
 const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
     const [sortBy, setSortBy] = useState('trackNumber');
     const [isAscending, setIsAscending] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    
+    const { refreshPlaylistData } = useSoundCheckContext();
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            await refreshPlaylistData(playlist.id);
+        } catch (error) {
+            console.error('Failed to refresh playlist:', error);
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
 
     useEffect(() => {
         // scroll to top when detail view loads
@@ -162,11 +177,27 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
     return (
         <div className="insights">
             <PageHeader title="Playlist Insights" />
-            <button className="backToPlaylistButton" onClick={onBack}>Back to Playlists</button>
+            <button className="backToPlaylistButton" onClick={onBack}>- Back to Playlists</button>
+            <button 
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="refresh-button"
+                title="Refresh playlist data from Spotify"
+            >
+                {isRefreshing ? '⟳ Refreshing...' : '⟳ Refresh'}
+            </button>
             <header className="insights-header">
                 <p>
                     <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">{playlist.name}</a>
                 </p>
+                <p>
+                    {playlist.description}
+                </p>
+                <img 
+                    src={playlist.images[0]?.url} 
+                        alt={playlist.name} 
+                        style={{ width: "200px", height: "200px", objectFit: "cover", borderRadius: "8px" }}
+                />
             </header>
             <div className="insights-body">
                 <div className="insights-total-score">
