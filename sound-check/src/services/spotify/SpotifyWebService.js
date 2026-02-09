@@ -99,8 +99,12 @@ const SpotifyWebService = () => {
         const timestamp = localStorage.getItem(CACHE_KEYS.TOP_SONGS_TIMESTAMP);
         
         if (cached && timestamp && isToday(timestamp)) {
-            console.log('Using cached top songs (updated today)');
-            return JSON.parse(cached);
+            const parsedCache = JSON.parse(cached);
+            // Check if any of the time periods have data
+            if (parsedCache.short_term?.length > 0 && parsedCache.medium_term?.length > 0 && parsedCache.long_term?.length > 0) {
+                console.log('Using cached top songs (updated today)');
+                return parsedCache;
+            }
         }
 
         // Fetch fresh data
@@ -126,8 +130,11 @@ const SpotifyWebService = () => {
         const timestamp = await get(CACHE_KEYS.SAVED_SONGS_TIMESTAMP);
 
         if (cached && timestamp && isToday(timestamp)) {
-            console.log('Using cached saved songs (updated today)');
-            return cached;
+            // Check if cache is not empty
+            if (Array.isArray(cached) && cached.length > 0) {
+                console.log('Using cached saved songs (updated today)');
+                return cached;
+            }
         }
 
         console.log('Fetching fresh saved songs from API');
@@ -182,7 +189,7 @@ const SpotifyWebService = () => {
         }
     };
 
-    return { retrievePlaylistsAndSongs };
+    return { retrievePlaylistsAndSongs, getPlaylistSongs };
 };
 
 export default SpotifyWebService;

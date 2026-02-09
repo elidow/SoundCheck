@@ -16,6 +16,7 @@ Uses the project's SpotifyWebApi class (PKCE flow) for authentication.
 
 import os
 import time
+from datetime import datetime
 from dotenv import load_dotenv
 from spotify_web_api import SpotifyWebApi
 
@@ -127,7 +128,11 @@ def main():
         )
         padded_lines.append(line)
 
+    # Human-friendly generated date for output files
+    current_date = datetime.now().strftime("%m/%d/%Y")
+
     with open(out_file_1, 'w', encoding='utf-8') as f:
+        f.write(f"Generated on {current_date}\n")
         f.writelines(padded_lines)
 
     print(f"Wrote {len(padded_lines)} lines to {out_file_1}")
