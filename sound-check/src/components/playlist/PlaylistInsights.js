@@ -11,7 +11,7 @@ import './PlaylistInsights.css';
  * Component for rendering playlist insights including stats, scores, and song data
  */
 const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
-    const [sortBy, setSortBy] = useState('trackNumber');
+    const [sortBy, setSortBy] = useState('customOrder');
     const [isAscending, setIsAscending] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     
@@ -61,9 +61,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         return total;
     };
 
-    // memoized sorted songs
+    // memoized sorted songs (attach custom order then sort)
     const sortedSongs = useMemo(() => {
-        return [...playlistSongs].sort((a, b) => {
+        const songsWithOrder = playlistSongs.map((s, i) => ({ ...s, customOrder: i + 1 }));
+        return songsWithOrder.sort((a, b) => {
             let aVal, bVal;
 
             switch (sortBy) {
@@ -86,6 +87,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                 case 'release':
                     aVal = new Date(a.track.album.release_date).getTime();
                     bVal = new Date(b.track.album.release_date).getTime();
+                    break;
+                case 'customOrder':
+                    aVal = a.customOrder;
+                    bVal = b.customOrder;
                     break;
                 case 'length':
                     aVal = a.track.duration_ms;
@@ -216,6 +221,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                     <table>
                         <thead>
                             <tr>
+                                <th onClick={() => handleSort('customOrder')}># {renderSortArrow('customOrder', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('song')}>Song {renderSortArrow('song', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('artist')}>Artist {renderSortArrow('artist', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('album')}>Album {renderSortArrow('album', sortBy, isAscending)}</th>
@@ -230,6 +236,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                         <tbody>
                             {sortedSongs.map((song) => (
                                 <tr key={song.track.id}>
+                                    <td>{song.customOrder}</td>
                                     <td>{song.track.name}</td>
                                     <td>{song.track.artists[0].name}</td>
                                     <td>{song.track.album.name}</td>

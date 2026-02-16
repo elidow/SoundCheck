@@ -3,13 +3,57 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px;
+}
+
+.User-Page h2 {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    font-size: 1.8em;
+    color: #333;
 }
 
 .meta-stats-content {
-    text-align: center;
-    margin: 10px;
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    text-align: left;
+}
+
+.meta-stats-content > div {
+    padding: 15px 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #1DB954;
+}
+
+.meta-stats-content strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #1DB954;
 }
 
 .meta-stats-content img {
-    padding-left: 100px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.meta-stats-content ol {
+    margin: 10px 0 0 20px;
+    padding: 0;
+    line-height: 1.8;
+}
+
+.meta-stats-content li {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.meta-stats-content span {
+    color: #666;
+    font-size: 1em;
 }
