@@ -26,6 +26,14 @@ const UserPage = () => {
                                 alt="User profile" 
                                 style={{ width: '200px', height: 'auto', display: 'block' }} 
                             />
+                        ) : Array.isArray(value) && value.length > 0 && value[0].rank !== undefined ? (
+                            <ol>
+                                {value.map((item) => (
+                                    <li key={item.rank}>
+                                        {item.name} ({item.count})
+                                    </li>
+                                ))}
+                            </ol>
                         ) : (
                             <span>{value}</span>
                         )}
