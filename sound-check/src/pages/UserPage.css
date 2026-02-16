@@ -19,6 +19,7 @@
     flex-direction: column;
     gap: 25px;
     text-align: left;
+    margin-bottom: 10px;
 }
 
 .meta-stats-content > div {
