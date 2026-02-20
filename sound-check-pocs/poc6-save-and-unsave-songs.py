@@ -8,6 +8,7 @@ import os
 import time
 from dotenv import load_dotenv
 from spotify_web_api import SpotifyWebApi
+from datetime import datetime
 
 load_dotenv()
 
@@ -166,9 +167,10 @@ def main():
     output_dir = os.path.dirname(OUTPUT_PATH)
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    current_date = datetime.now().strftime("%m/%d/%Y")
     
     with open(OUTPUT_PATH, 'w') as f:
-        f.write("Generated on 01/29/2026\n")
+        f.write(f"Generated on {current_date}\n")
         f.write("SAVED SONGS\n")
         f.write("=" * 80 + "\n\n")
         
