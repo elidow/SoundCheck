@@ -10,7 +10,7 @@ import './PlaylistInsights.css';
  * PlaylistInsights
  * Component for rendering playlist insights including stats, scores, and song data
  */
-const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
+const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, playlistRank, onBack }) => {
     const [sortBy, setSortBy] = useState('customOrder');
     const [isAscending, setIsAscending] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -206,7 +206,12 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
             </header>
             <div className="insights-body">
                 <div className="insights-total-score">
-                    <p>{playlistScores.totalScore}</p>
+                    <span className="total-score-value">{playlistScores.totalScore}</span>
+                    {playlistRank && (
+                        <span className="playlist-rank-badge">
+                            {playlistRank === 1 ? '1st' : playlistRank === 2 ? '2nd' : playlistRank === 3 ? '3rd' : `${playlistRank}th`}
+                        </span>
+                    )}
                 </div>
                 <div className="playlist-stats-and-scores">
                     {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore)}

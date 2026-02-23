@@ -81,9 +81,38 @@
 .insights-total-score {
     min-width: 300px;
     flex-basis: calc(46% - 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
     text-align: center;
+    font-weight: bold;
+    margin: 10px 0px 10px 0px;
+}
+
+.total-score-value {
+    margin: 0;
     font-size: 40px;
     font-weight: bold;
+    font-size: 40px;
+}
+
+.playlist-rank-badge {
+    font-size: 20px;
+    color: #1976d2;
+    border: 2px solid #1976d2;
+    border-radius: 50%;
+    padding: 20px 10px;
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    text-align: center;
+    font-weight: 500;
+    background: #fff;
+    box-sizing: border-box;
 }
 
 .playlist-song-data {

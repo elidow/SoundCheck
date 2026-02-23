@@ -103,12 +103,17 @@ const PlaylistsPage = () =>  {
     if (error) return <p>Error: {error}</p>;
     if (selectedPlaylist) {
         const playlistId = selectedPlaylist.id;
+        const rankedPlaylists = [...playlists]
+            .filter(p => playlistScores[p.id]?.totalScore != null)
+            .sort((a, b) => (playlistScores[b.id].totalScore ?? -1) - (playlistScores[a.id].totalScore ?? -1));
+        const rank = rankedPlaylists.findIndex(p => p.id === playlistId) + 1;
         return (
             <PlaylistInsights
                 playlist={selectedPlaylist}
                 playlistSongs={playlistSongs[playlistId]}
                 playlistStats={playlistStats[playlistId]}
                 playlistScores={playlistScores[playlistId]}
+                playlistRank={rank > 0 ? rank : null}
                 onBack={() => setSelectedPlaylist(null)}
             />
         );
