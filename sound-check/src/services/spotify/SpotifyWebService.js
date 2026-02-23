@@ -110,9 +110,9 @@ const SpotifyWebService = () => {
         // Fetch fresh data
         console.log('Fetching fresh top songs from API');
         const topSongs = {};
-        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 4]);
-        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 6]);
-        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 10]);
+        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 5]);
+        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 10]);
+        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 15]);
         
         // Cache the data with timestamp
         localStorage.setItem(CACHE_KEYS.TOP_SONGS, JSON.stringify(topSongs));
