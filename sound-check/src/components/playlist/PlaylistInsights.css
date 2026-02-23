@@ -29,11 +29,20 @@
     background-color: #282c34
 }
 
-.stats-group h3 {
+.stats-group-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     text-align: center;
     font-size: 22px;
     margin: 20px 0 15px 0;
     color: white;
+    width: 100%;
+}
+
+.stats-group-title-label {
+    display: inline-block;
 }
 
 .stats-group-container {
