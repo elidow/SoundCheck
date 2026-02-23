@@ -152,16 +152,29 @@ const PlaylistInsights = ({
      * renderStatsGroup
      * Renders a stats group table given title, stats, and scores
      */
+    // Helper to render rank badge with correct ordinal suffix
+    const renderRankBadge = (rank) => {
+        if (!rank) return null;
+        // Handle 11-19 edge case
+        const lastTwo = rank % 100;
+        let suffix = 'th';
+        if (lastTwo < 11 || lastTwo > 19) {
+            const last = rank % 10;
+            if (last === 1) suffix = 'st';
+            else if (last === 2) suffix = 'nd';
+            else if (last === 3) suffix = 'rd';
+        }
+        return (
+            <span className="playlist-rank-badge">{`${rank}${suffix}`}</span>
+        );
+    };
+
     const renderStatsGroup = (title, playlistStats, playlistScores, totalScore, rank) => {
         return (
             <div className="stats-group">
                 <h3 className="stats-group-title">
                     <span className="stats-group-title-label">{title}: {totalScore}</span>
-                    {rank && (
-                        <span className="playlist-rank-badge">
-                            {rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`}
-                        </span>
-                    )}
+                    {renderRankBadge(rank)}
                 </h3>
                 <div className="stats-group-container">
                     {Object.entries(playlistStats).map(([key, value]) => {
@@ -226,11 +239,7 @@ const PlaylistInsights = ({
             <div className="insights-body">
                 <div className="insights-total-score">
                     <span className="total-score-value">{playlistScores.totalScore}</span>
-                    {playlistRank && (
-                        <span className="playlist-rank-badge">
-                            {playlistRank === 1 ? '1st' : playlistRank === 2 ? '2nd' : playlistRank === 3 ? '3rd' : `${playlistRank}th`}
-                        </span>
-                    )}
+                    {renderRankBadge(playlistRank)}
                 </div>
                 <div className="playlist-stats-and-scores">
                     {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore, maintenanceRank)}
