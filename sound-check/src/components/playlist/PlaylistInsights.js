@@ -10,7 +10,19 @@ import './PlaylistInsights.css';
  * PlaylistInsights
  * Component for rendering playlist insights including stats, scores, and song data
  */
-const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
+const PlaylistInsights = ({
+    playlist,
+    playlistSongs,
+    playlistStats,
+    playlistScores,
+    playlistRank,
+    maintenanceRank,
+    userRelevanceRank,
+    generalRelevanceRank,
+    artistDiversityRank,
+    songLikenessRank,
+    onBack
+}) => {
     const [sortBy, setSortBy] = useState('customOrder');
     const [isAscending, setIsAscending] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -140,10 +152,30 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
      * renderStatsGroup
      * Renders a stats group table given title, stats, and scores
      */
-    const renderStatsGroup = (title, playlistStats, playlistScores, totalScore) => {
+    // Helper to render rank badge with correct ordinal suffix
+    const renderRankBadge = (rank) => {
+        if (!rank) return null;
+        // Handle 11-19 edge case
+        const lastTwo = rank % 100;
+        let suffix = 'th';
+        if (lastTwo < 11 || lastTwo > 19) {
+            const last = rank % 10;
+            if (last === 1) suffix = 'st';
+            else if (last === 2) suffix = 'nd';
+            else if (last === 3) suffix = 'rd';
+        }
+        return (
+            <span className="playlist-rank-badge">{`${rank}${suffix}`}</span>
+        );
+    };
+
+    const renderStatsGroup = (title, playlistStats, playlistScores, totalScore, rank) => {
         return (
             <div className="stats-group">
-                <h3>{title}: {totalScore}</h3>
+                <h3 className="stats-group-title">
+                    <span className="stats-group-title-label">{title}: {totalScore}</span>
+                    {renderRankBadge(rank)}
+                </h3>
                 <div className="stats-group-container">
                     {Object.entries(playlistStats).map(([key, value]) => {
                         const scoreKey = `${key}Score`;
@@ -206,15 +238,16 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
             </header>
             <div className="insights-body">
                 <div className="insights-total-score">
-                    <p>{playlistScores.totalScore}</p>
+                    <span className="total-score-value">{playlistScores.totalScore}</span>
+                    {renderRankBadge(playlistRank)}
                 </div>
                 <div className="playlist-stats-and-scores">
-                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore)}
-                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores, playlistScores.userRelevanceScores.totalUserRelevanceScore)}
-                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores, playlistScores.generalRelevanceScores.totalGeneralRelevanceScore)}
-                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores, playlistScores.artistDiversityScores.totalArtistDiversityScore)}
+                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore, maintenanceRank)}
+                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores, playlistScores.userRelevanceScores.totalUserRelevanceScore, userRelevanceRank)}
+                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores, playlistScores.generalRelevanceScores.totalGeneralRelevanceScore, generalRelevanceRank)}
+                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores, playlistScores.artistDiversityScores.totalArtistDiversityScore, artistDiversityRank)}
                     {renderStatsGroup("Song Stats", { ...playlistStats.songStats, ...playlistStats.advancedSongStats },
-                        playlistScores.songLikenessScores, playlistScores.songLikenessScores.totalSongLikenessScore
+                        playlistScores.songLikenessScores, playlistScores.songLikenessScores.totalSongLikenessScore, songLikenessRank
                     )}
                 </div>
                 <div className="playlist-song-data">
