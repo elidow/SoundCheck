@@ -101,6 +101,37 @@ const PlaylistsPage = () =>  {
 
     if (loading) return <p>Spotify Playlist Data is loading...</p>;
     if (error) return <p>Error: {error}</p>;
+    // Shared function to calculate rank for a playlist in a given category
+    const getRank = (category, playlistId) => {
+        let getScore;
+        switch (category) {
+            case 'totalScore':
+                getScore = p => playlistScores[p.id]?.totalScore ?? -1;
+                break;
+            case 'maintenanceScore':
+                getScore = p => Number(playlistScores[p.id]?.maintenanceScores.totalMaintenanceScore) ?? -1;
+                break;
+            case 'userRelevanceScore':
+                getScore = p => Number(playlistScores[p.id]?.userRelevanceScores.totalUserRelevanceScore) ?? -1;
+                break;
+            case 'generalRelevanceScore':
+                getScore = p => Number(playlistScores[p.id]?.generalRelevanceScores.totalGeneralRelevanceScore) ?? -1;
+                break;
+            case 'artistDiversityScore':
+                getScore = p => Number(playlistScores[p.id]?.artistDiversityScores.totalArtistDiversityScore) ?? -1;
+                break;
+            case 'songLikenessScore':
+                getScore = p => Number(playlistScores[p.id]?.songLikenessScores.totalSongLikenessScore) ?? -1;
+                break;
+            default:
+                getScore = () => -1;
+        }
+        const filtered = playlists.filter(p => getScore(p) !== -1);
+        const sorted = [...filtered].sort((a, b) => getScore(b) - getScore(a));
+        const rank = sorted.findIndex(p => p.id === playlistId) + 1;
+        return rank > 0 ? rank : null;
+    };
+
     if (selectedPlaylist) {
         const playlistId = selectedPlaylist.id;
         return (
@@ -109,6 +140,12 @@ const PlaylistsPage = () =>  {
                 playlistSongs={playlistSongs[playlistId]}
                 playlistStats={playlistStats[playlistId]}
                 playlistScores={playlistScores[playlistId]}
+                playlistRank={getRank('totalScore', playlistId)}
+                maintenanceRank={getRank('maintenanceScore', playlistId)}
+                userRelevanceRank={getRank('userRelevanceScore', playlistId)}
+                generalRelevanceRank={getRank('generalRelevanceScore', playlistId)}
+                artistDiversityRank={getRank('artistDiversityScore', playlistId)}
+                songLikenessRank={getRank('songLikenessScore', playlistId)}
                 onBack={() => setSelectedPlaylist(null)}
             />
         );

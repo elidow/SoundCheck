@@ -10,8 +10,20 @@ import './PlaylistInsights.css';
  * PlaylistInsights
  * Component for rendering playlist insights including stats, scores, and song data
  */
-const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScores, onBack }) => {
-    const [sortBy, setSortBy] = useState('trackNumber');
+const PlaylistInsights = ({
+    playlist,
+    playlistSongs,
+    playlistStats,
+    playlistScores,
+    playlistRank,
+    maintenanceRank,
+    userRelevanceRank,
+    generalRelevanceRank,
+    artistDiversityRank,
+    songLikenessRank,
+    onBack
+}) => {
+    const [sortBy, setSortBy] = useState('customOrder');
     const [isAscending, setIsAscending] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     
@@ -61,9 +73,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
         return total;
     };
 
-    // memoized sorted songs
+    // memoized sorted songs (attach custom order then sort)
     const sortedSongs = useMemo(() => {
-        return [...playlistSongs].sort((a, b) => {
+        const songsWithOrder = playlistSongs.map((s, i) => ({ ...s, customOrder: i + 1 }));
+        return songsWithOrder.sort((a, b) => {
             let aVal, bVal;
 
             switch (sortBy) {
@@ -86,6 +99,10 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                 case 'release':
                     aVal = new Date(a.track.album.release_date).getTime();
                     bVal = new Date(b.track.album.release_date).getTime();
+                    break;
+                case 'customOrder':
+                    aVal = a.customOrder;
+                    bVal = b.customOrder;
                     break;
                 case 'length':
                     aVal = a.track.duration_ms;
@@ -135,10 +152,30 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
      * renderStatsGroup
      * Renders a stats group table given title, stats, and scores
      */
-    const renderStatsGroup = (title, playlistStats, playlistScores, totalScore) => {
+    // Helper to render rank badge with correct ordinal suffix
+    const renderRankBadge = (rank) => {
+        if (!rank) return null;
+        // Handle 11-19 edge case
+        const lastTwo = rank % 100;
+        let suffix = 'th';
+        if (lastTwo < 11 || lastTwo > 19) {
+            const last = rank % 10;
+            if (last === 1) suffix = 'st';
+            else if (last === 2) suffix = 'nd';
+            else if (last === 3) suffix = 'rd';
+        }
+        return (
+            <span className="playlist-rank-badge">{`${rank}${suffix}`}</span>
+        );
+    };
+
+    const renderStatsGroup = (title, playlistStats, playlistScores, totalScore, rank) => {
         return (
             <div className="stats-group">
-                <h3>{title}: {totalScore}</h3>
+                <h3 className="stats-group-title">
+                    <span className="stats-group-title-label">{title}: {totalScore}</span>
+                    {renderRankBadge(rank)}
+                </h3>
                 <div className="stats-group-container">
                     {Object.entries(playlistStats).map(([key, value]) => {
                         const scoreKey = `${key}Score`;
@@ -201,21 +238,23 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
             </header>
             <div className="insights-body">
                 <div className="insights-total-score">
-                    <p>{playlistScores.totalScore}</p>
+                    <span className="total-score-value">{playlistScores.totalScore}</span>
+                    {renderRankBadge(playlistRank)}
                 </div>
                 <div className="playlist-stats-and-scores">
-                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore)}
-                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores, playlistScores.userRelevanceScores.totalUserRelevanceScore)}
-                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores, playlistScores.generalRelevanceScores.totalGeneralRelevanceScore)}
-                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores, playlistScores.artistDiversityScores.totalArtistDiversityScore)}
+                    {renderStatsGroup("Maintenance", playlistStats.maintenance, playlistScores.maintenanceScores, playlistScores.maintenanceScores.totalMaintenanceScore, maintenanceRank)}
+                    {renderStatsGroup("User Relevance", playlistStats.userRelevance, playlistScores.userRelevanceScores, playlistScores.userRelevanceScores.totalUserRelevanceScore, userRelevanceRank)}
+                    {renderStatsGroup("General Relevance", playlistStats.generalRelevance, playlistScores.generalRelevanceScores, playlistScores.generalRelevanceScores.totalGeneralRelevanceScore, generalRelevanceRank)}
+                    {renderStatsGroup("Artist Stats", playlistStats.artistStats, playlistScores.artistDiversityScores, playlistScores.artistDiversityScores.totalArtistDiversityScore, artistDiversityRank)}
                     {renderStatsGroup("Song Stats", { ...playlistStats.songStats, ...playlistStats.advancedSongStats },
-                        playlistScores.songLikenessScores, playlistScores.songLikenessScores.totalSongLikenessScore
+                        playlistScores.songLikenessScores, playlistScores.songLikenessScores.totalSongLikenessScore, songLikenessRank
                     )}
                 </div>
                 <div className="playlist-song-data">
                     <table>
                         <thead>
                             <tr>
+                                <th onClick={() => handleSort('customOrder')}># {renderSortArrow('customOrder', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('song')}>Song {renderSortArrow('song', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('artist')}>Artist {renderSortArrow('artist', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('album')}>Album {renderSortArrow('album', sortBy, isAscending)}</th>
@@ -230,6 +269,7 @@ const PlaylistInsights = ({ playlist, playlistSongs, playlistStats, playlistScor
                         <tbody>
                             {sortedSongs.map((song) => (
                                 <tr key={song.track.id}>
+                                    <td>{song.customOrder}</td>
                                     <td>{song.track.name}</td>
                                     <td>{song.track.artists[0].name}</td>
                                     <td>{song.track.album.name}</td>

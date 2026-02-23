@@ -153,10 +153,8 @@ const Dashboard = ({ name, playlists, playlistStats, playlistScores, statDetails
             <div className="dashboard-header">
                 <div className="dashboard-header-left-items">{name}</div>
                 <div className="dashboard-header-right-group">
-                    <button className="dashboard-header-right-items">⭐</button>
                     <button className="dashboard-header-right-items" onClick={toggleSortOrder}>🔄</button>
                     <button className="dashboard-header-right-items" onClick={toggleExpandView}>{expandButtonIcon}</button>
-                    <button className="dashboard-header-right-items">✏️</button>
                 </div>
             </div>
             <div className="dashboard-items">

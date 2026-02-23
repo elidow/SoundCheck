@@ -122,7 +122,7 @@ const useSpotifyWebApi = () => {
             localStorage.removeItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
 
             // Redirect to app
-            window.history.replaceState({}, document.title, "/dashboard");
+            window.history.replaceState({}, document.title, "/playlists");
         } catch (err) {
             console.error("Failed to request user authentication:", err.response ? err.response.data : err.message);
         }

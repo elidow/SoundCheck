@@ -29,11 +29,20 @@
     background-color: #282c34
 }
 
-.stats-group h3 {
+.stats-group-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     text-align: center;
     font-size: 22px;
     margin: 20px 0 15px 0;
     color: white;
+    width: 100%;
+}
+
+.stats-group-title-label {
+    display: inline-block;
 }
 
 .stats-group-container {
@@ -81,9 +90,38 @@
 .insights-total-score {
     min-width: 300px;
     flex-basis: calc(46% - 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
     text-align: center;
+    font-weight: bold;
+    margin: 10px 0px 10px 0px;
+}
+
+.total-score-value {
+    margin: 0;
     font-size: 40px;
     font-weight: bold;
+    font-size: 40px;
+}
+
+.playlist-rank-badge {
+    font-size: 20px;
+    color: #1976d2;
+    border: 2px solid #1976d2;
+    border-radius: 50%;
+    padding: 20px 10px;
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    text-align: center;
+    font-weight: 500;
+    background: #fff;
+    box-sizing: border-box;
 }
 
 .playlist-song-data {
@@ -97,6 +135,55 @@
     border-collapse: separate;   /* allows spacing */
     border-spacing: 10px 10px;   /* horizontal | vertical spacing */
     /* background-color: #d0ffd6; */
+}
+
+/* Column sizing and no-wrap for date columns */
+.playlist-song-data th:nth-child(1),
+.playlist-song-data td:nth-child(1) {
+    width: 60px; /* Original # */
+}
+.playlist-song-data th:nth-child(2),
+.playlist-song-data td:nth-child(2) {
+    width: 24%; /* Song title */
+}
+.playlist-song-data th:nth-child(3),
+.playlist-song-data td:nth-child(3) {
+    width: 18%; /* Artist */
+}
+.playlist-song-data th:nth-child(4),
+.playlist-song-data td:nth-child(4) {
+    width: 18%; /* Album (allow wrap) */
+}
+.playlist-song-data th:nth-child(5),
+.playlist-song-data td:nth-child(5),
+.playlist-song-data th:nth-child(6),
+.playlist-song-data td:nth-child(6) {
+    width: 80px; /* Dates should have fixed width */
+    white-space: nowrap;
+}
+.playlist-song-data th:nth-child(7),
+.playlist-song-data td:nth-child(7) {
+    width: 80px; /* Length */
+}
+.playlist-song-data th:nth-child(8),
+.playlist-song-data td:nth-child(8) {
+    width: 80px; /* Popularity */
+}
+.playlist-song-data th:nth-child(9),
+.playlist-song-data td:nth-child(9) {
+    width: 60px; /* Top */
+}
+.playlist-song-data th:nth-child(10),
+.playlist-song-data td:nth-child(10) {
+    width: 60px; /* Saved */
+}
+
+/* Ensure table cells respect widths */
+.playlist-song-data table th,
+.playlist-song-data table td {
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .playlist-song-data th {

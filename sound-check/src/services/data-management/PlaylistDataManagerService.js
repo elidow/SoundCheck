@@ -269,43 +269,54 @@ const PlaylistDataManagerService = () => {
 
     /*
      * calculateMostPopularMedia
-     * Calculates most popular artist and song across all playlists
+     * Calculates top 10 most popular artists and songs across all playlists
      */
     const calculateMostPopularMedia = (playlists, playlistSongs) => {
         const artistCount = {};
+        const artistNames = {};
         const songCount = {};
+        const songNames = {};
 
         playlists.forEach((pl) => {
             const songs = playlistSongs[pl.id] || [];
             songs.forEach((song) => {
-                artistCount[song.track.artists[0].name] = (artistCount[song.track.artists[0].name] || 0) + 1;
-                songCount[song.track.name] = (songCount[song.track.name] || 0) + 1;
+                const artistId = song.track.artists[0].id;
+                const artistName = song.track.artists[0].name;
+                artistCount[artistId] = (artistCount[artistId] || 0) + 1;
+                if (!artistNames[artistId]) {
+                    artistNames[artistId] = artistName;
+                }
+
+                const songId = song.track.id;
+                const songName = song.track.name;
+                songCount[songId] = (songCount[songId] || 0) + 1;
+                if (!songNames[songId]) {
+                    songNames[songId] = songName;
+                }
             });
         });
 
-        let mostPopularArtist = null;
-        let highestArtistCount = -1;
-        let mostPopularSong = null;
-        let highestSongCount = -1;
+        const sortedArtists = Object.entries(artistCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
 
-        for (let artist in artistCount) {
-            if (artistCount[artist] > highestArtistCount) {
-                highestArtistCount = artistCount[artist];
-                mostPopularArtist = artist;
-            }
-        }
+        const sortedSongs = Object.entries(songCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
 
-        for (let song in songCount) {
-            if (songCount[song] > highestSongCount) {
-                highestSongCount = songCount[song];
-                mostPopularSong = song;
-            }
-        }
+        const topArtists = sortedArtists.map((entry, index) => ({
+            rank: index + 1,
+            name: artistNames[entry[0]] || "Unknown",
+            count: entry[1]
+        }));
 
-        let mostPopularArtistResult = `${mostPopularArtist}: ${highestArtistCount}`;
-        let mostPopularSongResult = `${mostPopularSong}: ${highestSongCount}`;
+        const topSongs = sortedSongs.map((entry, index) => ({
+            rank: index + 1,
+            name: songNames[entry[0]] || "Unknown",
+            count: entry[1]
+        }));
 
-        return { mostPopularArtistResult, mostPopularSongResult};
+        return { topArtists, topSongs };
     };
 
     /*
@@ -349,14 +360,14 @@ const PlaylistDataManagerService = () => {
      */
     const computeMetaStats = (playlists, playlistSongs, savedSongs, playlistScores, userProfile) => {
         const metaStats = {};
-        const { mostPopularArtistResult, mostPopularSongResult } = calculateMostPopularMedia(playlists, playlistSongs);
+        const { topArtists, topSongs } = calculateMostPopularMedia(playlists, playlistSongs);
 
         metaStats["Profile Pic"] = userProfile?.images?.length > 0 ? userProfile.images[0].url : null;
         metaStats["Username"] = userProfile?.display_name || "N/A";
         metaStats["Playlist Count"] = playlists.length;
         metaStats["Saved Song Count"] = savedSongs.length;
-        metaStats["Most Popular Artist"] = mostPopularArtistResult;
-        metaStats["Most Popular Song"] = mostPopularSongResult;
+        metaStats["Top Artists"] = topArtists;
+        metaStats["Top Songs"] = topSongs;
         metaStats["Highest Total Scoring Playlist"] = calculateHighestTotalScoringPlaylists(playlists, playlistScores);
         metaStats["Average Total Scoring Playlist"] = calculateAverageTotalPlaylistScore(playlists, playlistScores);
 
