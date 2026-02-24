@@ -16,8 +16,8 @@ load_dotenv()
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # File paths (relative to script location)
-PLAYLIST_SONGS_NOT_SAVED_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/playlistSongsNotInSavedSongs.txt")
-REMOVE_SAVED_SONGS_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/remove-savedSongsNotInTopPlayedOrPlaylists.txt")
+ADD_UNSAVED_TOP_MULTIPLE_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt")
+REMOVE_SAVED_SONGS_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/remove-savedSongsNotInTopSongsOrPlaylists.txt")
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, "personal_data/savedAndUnsavedSongs.txt")
 
 # Scope for Spotify API
@@ -27,7 +27,7 @@ def parse_song_line(line):
     """
     Parse a line from the song files.
     Format: count: Song | Artist | ID | Playlists: ... (for playlistSongsNotInSavedSongs)
-    Format: Song | Artist | ID (for remove-savedSongsNotInTopPlayedOrPlaylists)
+    Format: Song | Artist | ID (for remove-savedSongsNotInTopSongsOrPlaylists)
     Returns (song_name, artist, track_id) or None if parsing fails
     """
     parts = line.strip().split(" | ")
@@ -45,7 +45,7 @@ def parse_song_line(line):
         except (ValueError, IndexError):
             return None
     
-    # For remove-savedSongsNotInTopPlayedOrPlaylists.txt format: "Song | Artist | ID"
+    # For remove-savedSongsNotInTopSongsOrPlaylists.txt format: "Song | Artist | ID"
     elif len(parts) == 3:
         try:
             song = parts[0]
@@ -57,30 +57,26 @@ def parse_song_line(line):
     
     return None
 
-def read_playlist_songs_not_in_saved():
+
+def read_add_unsaved_top_multiple():
     """
-    Read playlistSongsNotInSavedSongs.txt and return a dict of track_id -> (song, artist, count)
-    Only returns songs that appear in 2 or more playlists.
+    Read add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt and return a dict of track_id -> (song, artist, count)
     """
     songs_to_save = {}
-    
-    if not os.path.exists(PLAYLIST_SONGS_NOT_SAVED_PATH):
-        print(f"Warning: {PLAYLIST_SONGS_NOT_SAVED_PATH} not found")
+    if not os.path.exists(ADD_UNSAVED_TOP_MULTIPLE_PATH):
+        print(f"Warning: {ADD_UNSAVED_TOP_MULTIPLE_PATH} not found")
         return songs_to_save
-    
-    with open(PLAYLIST_SONGS_NOT_SAVED_PATH, 'r') as f:
+    with open(ADD_UNSAVED_TOP_MULTIPLE_PATH, 'r') as f:
         for line in f:
             parsed = parse_song_line(line)
             if parsed and len(parsed) == 4:
                 song, artist, track_id, count = parsed
-                if count >= 2:  # Only songs in 2 or more playlists
-                    songs_to_save[track_id] = (song, artist, count)
-    
+                songs_to_save[track_id] = (song, artist, count)
     return songs_to_save
 
 def read_remove_saved_songs():
     """
-    Read remove-savedSongsNotInTopPlayedOrPlaylists.txt and return a dict of track_id -> (song, artist)
+    Read remove-savedSongsNotInTopSongsOrPlaylists.txt and return a dict of track_id -> (song, artist)
     """
     songs_to_unsave = {}
     
@@ -112,7 +108,7 @@ def main():
     
     # Read songs from files
     print("Reading song data...")
-    songs_to_save = read_playlist_songs_not_in_saved()
+    songs_to_save = read_add_unsaved_top_multiple()
     songs_to_unsave = read_remove_saved_songs()
     
     print(f"Found {len(songs_to_save)} songs to save (appear in 2+ playlists)")

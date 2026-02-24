@@ -206,15 +206,15 @@ def main():
         for song_info in playlist_not_in_saved:
             file.write(format_playlist_song_line(song_info) + "\n")
     
-    # Write remove-savedSongsNotInTopPlayedOrPlaylists.txt
+    # Write remove-savedSongsNotInTopSongsOrPlaylists.txt
     # (intersection of savedSongsNotInTopSongs and savedSongsNotInPlaylists)
-    print("Writing remove-savedSongsNotInTopPlayedOrPlaylists.txt...")
+    print("Writing remove-savedSongsNotInTopSongsOrPlaylists.txt...")
     not_in_top_or_playlists = []
     for song_id in saved_songs_list:
         if song_id not in top_songs_dict and song_id not in playlist_songs_dict and song_id in saved_songs_dict:
             not_in_top_or_playlists.append(saved_songs_dict[song_id])
     
-    with open(filePath + 'intersections/remove-savedSongsNotInTopPlayedOrPlaylists.txt', 'w') as file:
+    with open(filePath + 'intersections/remove-savedSongsNotInTopSongsOrPlaylists.txt', 'w') as file:
         file.write(f"Generated on {current_date}\n")
         for song_info in not_in_top_or_playlists:
             file.write(format_song_line(song_info) + "\n")
@@ -234,6 +234,66 @@ def main():
         file.write(f"Generated on {current_date}\n")
         for song_info in not_in_top_but_in_playlists:
             file.write(format_playlist_song_line(song_info) + "\n")
+
+    # Write savedSongsInTopSongsButNotInPlaylists.txt
+    print("Writing savedSongsInTopSongsButNotInPlaylists.txt...")
+    saved_in_top_not_playlists = []
+    for song_id in top_songs_list:
+        # Song must be saved, in top songs, and NOT in any playlist
+        if song_id in saved_songs_dict and song_id not in playlist_songs_dict:
+            saved_in_top_not_playlists.append(saved_songs_dict[song_id])
+
+    with open(filePath + 'intersections/savedSongsInTopSongsButNotInPlaylists.txt', 'w') as file:
+        file.write(f"Generated on {current_date}\n")
+        for song_info in saved_in_top_not_playlists:
+            file.write(format_song_line(song_info) + "\n")
+    print(f"Wrote {len(saved_in_top_not_playlists)} songs to savedSongsInTopSongsButNotInPlaylists.txt")
+
+    # Write add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt
+    print("Writing add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt...")
+    # Load topSongsNotInSavedSongs.txt ids, ignoring lines starting with (R)
+    top_songs_not_in_saved_ids = set()
+    try:
+        with open(filePath + 'intersections/topSongsNotInSavedSongs.txt', 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("Generated on"):
+                    continue
+                if line.startswith("(R)"):
+                    continue
+                parts = line.split("|")
+                if len(parts) >= 3:
+                    track_id = parts[2].strip()
+                    top_songs_not_in_saved_ids.add(track_id)
+    except Exception as e:
+        print(f"Error reading topSongsNotInSavedSongs.txt: {e}")
+
+    # Find playlistSongsNotInSavedSongs.txt songs in 2+ playlists and in topSongsNotInSavedSongs.txt
+    add_songs = []
+    try:
+        with open(filePath + 'intersections/playlistSongsNotInSavedSongs.txt', 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("Generated on"):
+                    continue
+                # Format: count: Song | Artist | ID | Playlists: ...
+                parts = line.split("|")
+                if len(parts) >= 3 and ":" in parts[0]:
+                    count_part = parts[0].split(":")[0].strip()
+                    try:
+                        count = int(count_part)
+                    except ValueError:
+                        continue
+                    track_id = parts[2].strip()
+                    if count >= 2 and track_id in top_songs_not_in_saved_ids:
+                        add_songs.append(line)
+    except Exception as e:
+        print(f"Error reading playlistSongsNotInSavedSongs.txt: {e}")
+
+    with open(filePath + 'intersections/add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt', 'w') as file:
+        file.write(f"Generated on {current_date}\n")
+        for song_line in add_songs:
+            file.write(song_line + "\n")
     
     end_time = time.time()
     total_time = end_time - start_time
@@ -247,8 +307,10 @@ def main():
     print(f"Wrote {len(saved_in_playlists)} songs to savedSongsInPlaylists.txt")
     print(f"Wrote {len(saved_not_in_playlists)} songs to savedSongsNotInPlaylists.txt")
     print(f"Wrote {len(playlist_not_in_saved)} songs to playlistSongsNotInSavedSongs.txt")
-    print(f"Wrote {len(not_in_top_or_playlists)} songs to remove-savedSongsNotInTopPlayedOrPlaylists.txt")
     print(f"Wrote {len(not_in_top_but_in_playlists)} songs to savedSongsNotInTopSongsButInPlaylists.txt")
+    print(f"Wrote {len(saved_in_top_not_playlists)} songs to savedSongsInTopSongsButNotInPlaylists.txt")
+    print(f"Wrote {len(add_songs)} songs to add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt")
+    print(f"Wrote {len(not_in_top_or_playlists)} songs to remove-savedSongsNotInTopSongsOrPlaylists.txt")
     print(f"Total time: {total_time:.2f} seconds")
 
 if __name__ == "__main__":
