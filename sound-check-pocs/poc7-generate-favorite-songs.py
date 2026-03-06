@@ -5,8 +5,7 @@ from pathlib import Path
 base_path = Path(__file__).parent / "personal_data"
 saved_songs_file = base_path / "intersections" / "savedSongs.txt"
 saved_in_top_songs_file = base_path / "intersections" / "savedSongsInTopSongs.txt"
-playlist_frequency_file = base_path / "playlist-songs" / "mostFrequentPlaylistSongs.txt"
-popularity_file = base_path / "saved-songs" / "songsOrderedByPopularity.txt"
+saved_in_playlists_file = base_path / "intersections" / "savedSongsInPlaylists.txt"
 top_100_file = base_path / "favorite-songs" / "my-top-100.txt"
 output_file = base_path / "favorite-songs" / "generated-favorite-songs.txt"
 
@@ -54,7 +53,7 @@ for song_id in songs:
         songs[song_id]['rank'] = default_rank
 
 # Parse playlist frequency
-with open(playlist_frequency_file, 'r', encoding='utf-8') as f:
+with open(saved_in_playlists_file, 'r', encoding='utf-8') as f:
     next(f)  # Skip generated date line
     for line in f:
         line = line.strip()
@@ -70,29 +69,6 @@ with open(playlist_frequency_file, 'r', encoding='utf-8') as f:
                 song_id = song_parts[2]
                 if song_id in songs:
                     songs[song_id]['playlist_count'] = count
-
-# Parse popularity
-with open(popularity_file, 'r', encoding='utf-8') as f:
-    next(f)  # Skip generated date line
-    for line in f:
-        line = line.strip()
-        if not line:
-            continue
-        # Format: "100: Song Name - Artist"
-        parts = line.split(': ', 1)
-        if len(parts) == 2:
-            popularity = int(parts[0])
-            song_info = parts[1]
-            # Split by last ' - ' to separate song and artist
-            song_artist_parts = song_info.rsplit(' - ', 1)
-            if len(song_artist_parts) == 2:
-                song_name, artist = song_artist_parts
-                # Find matching song by name and artist
-                for song_id in songs:
-                    if (songs[song_id]['name'].lower() == song_name.lower() and
-                        songs[song_id]['artist'].lower() == artist.lower()):
-                        songs[song_id]['popularity'] = popularity
-                        break
 
 # Parse top 100 songs (match by song name and artist)
 top_100_songs = {}  # Map of (song_name, artist) -> rank_position (1-based)
