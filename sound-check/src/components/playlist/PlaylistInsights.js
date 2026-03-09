@@ -155,17 +155,9 @@ const PlaylistInsights = ({
     // Helper to render rank badge with correct ordinal suffix
     const renderRankBadge = (rank) => {
         if (!rank) return null;
-        // Handle 11-19 edge case
-        const lastTwo = rank % 100;
-        let suffix = 'th';
-        if (lastTwo < 11 || lastTwo > 19) {
-            const last = rank % 10;
-            if (last === 1) suffix = 'st';
-            else if (last === 2) suffix = 'nd';
-            else if (last === 3) suffix = 'rd';
-        }
+        
         return (
-            <span className="playlist-rank-badge">{`${rank}${suffix}`}</span>
+            <span className="playlist-rank-badge">{`#${rank}`}</span>
         );
     };
 
@@ -193,14 +185,12 @@ const PlaylistInsights = ({
 
                         return (
                             <div className="stat-box" key={key}>
-                                <div className="stat-box-title">{displayName}</div>
-                                <div className="stat-box-content">
-                                    <div className="stat-box-value">{statValue}</div>
-                                    {score !== undefined ? (
-                                        <div className="stat-box-score">Score: {score}</div>
-                                    ) : <div className="stat-box-score">Score: N/A</div>
-                                    }
-                                </div>
+                                <div className="stat-box-title">{displayName}:</div>
+                                <div className="stat-box-value">{statValue}</div>
+                                {score !== undefined ? (
+                                    <div className="stat-box-score">{score}</div>
+                                ) : <div className="stat-box-score">N/A</div>
+                                }
                             </div>
                         );
                     })}
