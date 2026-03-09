@@ -14,6 +14,11 @@
     font-size: 25px;
 }
 
+a:link, a:visited, a:hover, a:active {
+  text-decoration: none;
+  color: inherit;
+}
+
 .playlist-stats-and-scores {
     display: flex;
     flex-wrap: wrap;
@@ -131,51 +136,67 @@
 }
 
 .playlist-song-data table {
-    /* Use base table styles for consistency (if needed, apply .base-table) */
-    border-collapse: separate;   /* allows spacing */
-    border-spacing: 10px 10px;   /* horizontal | vertical spacing */
-    /* background-color: #d0ffd6; */
+    border-collapse: collapse;
+}
+
+.playlist-song-data table th {
+    background-color: #e5e5e5;
+}
+
+/* Alternating row colors for song data table */
+.playlist-song-data table tbody tr:nth-child(odd) td {
+    background-color: #f9f9f9;
+}
+
+.playlist-song-data table tbody tr:nth-child(even) td {
+    background-color: #ffffff;
+}
+
+.playlist-song-data table tbody tr:hover td {
+    background-color: #e6f2ff;
 }
 
 /* Column sizing and no-wrap for date columns */
-.playlist-song-data th:nth-child(1),
+.playlist-song-data th:nth-child(1), /* Custom Order */
 .playlist-song-data td:nth-child(1) {
-    width: 60px; /* Original # */
+    width: 40px;
+    padding-left: 10px;
 }
-.playlist-song-data th:nth-child(2),
-.playlist-song-data td:nth-child(2) {
-    width: 24%; /* Song title */
+.playlist-song-data th:nth-child(2), /* Song title */
+.playlist-song-data td:nth-child(2) { 
+    width: 24%;
 }
-.playlist-song-data th:nth-child(3),
+.playlist-song-data th:nth-child(3), /* Artist */
 .playlist-song-data td:nth-child(3) {
-    width: 18%; /* Artist */
+    width: 14%;
 }
-.playlist-song-data th:nth-child(4),
+.playlist-song-data th:nth-child(4), /* Album */
 .playlist-song-data td:nth-child(4) {
-    width: 18%; /* Album (allow wrap) */
+    width: 18%;
 }
-.playlist-song-data th:nth-child(5),
+.playlist-song-data th:nth-child(5), /* Dates */
 .playlist-song-data td:nth-child(5),
 .playlist-song-data th:nth-child(6),
 .playlist-song-data td:nth-child(6) {
-    width: 80px; /* Dates should have fixed width */
+    width: 80px;
     white-space: nowrap;
 }
-.playlist-song-data th:nth-child(7),
+.playlist-song-data th:nth-child(5),
+.playlist-song-data th:nth-child(7), /* Duraction */
 .playlist-song-data td:nth-child(7) {
-    width: 80px; /* Length */
+    width: 80px;
 }
-.playlist-song-data th:nth-child(8),
+.playlist-song-data th:nth-child(8), /* Popularity */
 .playlist-song-data td:nth-child(8) {
-    width: 80px; /* Popularity */
+    width: 80px;
 }
-.playlist-song-data th:nth-child(9),
+.playlist-song-data th:nth-child(9), /* Top */
 .playlist-song-data td:nth-child(9) {
-    width: 60px; /* Top */
+    width: 60px;
 }
-.playlist-song-data th:nth-child(10),
+.playlist-song-data th:nth-child(10), /* Saved */
 .playlist-song-data td:nth-child(10) {
-    width: 60px; /* Saved */
+    width: 60px;
 }
 
 /* Ensure table cells respect widths */
@@ -184,6 +205,9 @@
     box-sizing: border-box;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 
 .playlist-song-data th {

@@ -5,6 +5,7 @@
     margin: 30px auto;
     border: 3px solid black;
     table-layout: fixed;      /* Evenly distribute column widths */
+    border-collapse: collapse;
 }
 
 .categoryName {
@@ -15,20 +16,27 @@
 
 /* Header cells */
 .big-table th {
-    border-bottom: 2px solid black;
     padding: 10px;
     text-align: center;
     font-weight: bold;
-    background-color: #f5f5f5;
+    background-color: #e5e5e5;
 
     white-space: normal;      /* allow wrapping in headers */
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
-/* Table rows */
-.big-table tr {
-    border-bottom: 1px solid black;
+/* Alternating row colors */
+.big-table tbody tr:nth-child(odd) td {
+    background-color: #f9f9f9;
+}
+
+.big-table tbody tr:nth-child(even) td {
+    background-color: #ffffff;
+}
+
+.big-table tbody tr:hover td {
+    background-color: #e6f2ff;
 }
 
 /* Data cells */

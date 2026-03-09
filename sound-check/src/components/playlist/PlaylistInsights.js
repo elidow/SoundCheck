@@ -258,9 +258,9 @@ const PlaylistInsights = ({
                                 <th onClick={() => handleSort('song')}>Song {renderSortArrow('song', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('artist')}>Artist {renderSortArrow('artist', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('album')}>Album {renderSortArrow('album', sortBy, isAscending)}</th>
-                                <th onClick={() => handleSort('added')}>Song Added Date {renderSortArrow('added', sortBy, isAscending)}</th>
-                                <th onClick={() => handleSort('release')}>Song Release Date {renderSortArrow('release', sortBy, isAscending)}</th>
-                                <th onClick={() => handleSort('length')}>Length {renderSortArrow('length', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('added')}>Song Added {renderSortArrow('added', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('release')}>Song Release {renderSortArrow('release', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('length')}>Duration {renderSortArrow('length', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('popularity')}>Popularity {renderSortArrow('popularity', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('top')}>Top {renderSortArrow('top', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('saved')}>Saved {renderSortArrow('saved', sortBy, isAscending)}</th>
@@ -270,7 +270,7 @@ const PlaylistInsights = ({
                             {sortedSongs.map((song) => (
                                 <tr key={song.track.id}>
                                     <td>{song.customOrder}</td>
-                                    <td>{song.track.name}</td>
+                                    <td><a href={song.track.external_urls.spotify} target="_blank" rel="noopener noreferrer">{song.track.name}</a></td>
                                     <td>{song.track.artists[0].name}</td>
                                     <td>{song.track.album.name}</td>
                                     <td>{song.added_at?.substring(0, 10)}</td>
