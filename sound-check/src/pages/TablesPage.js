@@ -24,6 +24,12 @@ const TablesPage = () => {
         return acc;
     }, {});
 
+    // Combine songStats and advancedSongStats into songStats
+    if (groupedStats['songStats'] && groupedStats['advancedSongStats']) {
+        groupedStats['songStats'] = [...groupedStats['songStats'], ...groupedStats['advancedSongStats']];
+        delete groupedStats['advancedSongStats'];
+    }
+
     // Default to first category if none selected yet
     const categoryNames = Object.keys(groupedStats);
     if (!selectedCategory && categoryNames.length > 0) {
@@ -45,8 +51,6 @@ const TablesPage = () => {
             return "Artist Stats";
         } else if (categoryName === "songStats") {
             return "Song Stats";
-        } else if (categoryName === "advancedSongStats") {
-            return "Advanced Song Stats";
         }
         return categoryName; // fallback to developer name if not found
     };

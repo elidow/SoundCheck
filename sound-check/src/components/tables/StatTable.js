@@ -52,6 +52,10 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                 const statKey = stat?.[1]?.statKey;
                 let aInputVal = playlistStats[a.id]?.[categoryName]?.[statKey];
                 let bInputVal = playlistStats[b.id]?.[categoryName]?.[statKey];
+                if (categoryName === 'songStats' && (!aInputVal || !bInputVal)) {
+                    aInputVal = aInputVal || playlistStats[a.id]?.['advancedSongStats']?.[statKey];
+                    bInputVal = bInputVal || playlistStats[b.id]?.['advancedSongStats']?.[statKey];
+                }
 
                 ({ aVal, bVal } = getComparableValuesForSort(type, aInputVal, bInputVal));
             }
@@ -87,7 +91,10 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                                 </a>
                             </td>
                             {statColumns.map(([key, value]) => {
-                                const val = playlistStats[playlist.id]?.[categoryName]?.[value.statKey];
+                                let val = playlistStats[playlist.id]?.[categoryName]?.[value.statKey];
+                                if (categoryName === 'songStats' && !val) {
+                                    val = playlistStats[playlist.id]?.['advancedSongStats']?.[value.statKey];
+                                }
                                 const type = value.type;
                                 return (
                                     <td key={key}>
