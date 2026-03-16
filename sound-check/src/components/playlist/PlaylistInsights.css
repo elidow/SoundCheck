@@ -11,8 +11,16 @@
 
 .insights-header {
     text-align: center;
-    font-size: 25px;
     margin: auto;
+}
+
+.insights-header-playlist-name {
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.insights-header-playlist-description {
+    font-size: 24px;
 }
 
 a:link, a:visited, a:hover, a:active {
@@ -41,7 +49,7 @@ a:link, a:visited, a:hover, a:active {
     justify-content: center;
     gap: 8px;
     text-align: center;
-    font-size: 22px;
+    font-size: 26px;
     margin: 20px 0 15px 0;
     color: black;
     width: 100%;
@@ -75,16 +83,16 @@ a:link, a:visited, a:hover, a:active {
 .stat-box-title {
     color: black;
     font-weight: bold;
-    font-size: 16px;
-    flex-basis: 150px;
+    font-size: 18px;
+    flex-basis: 125px;
     flex-shrink: 0;
 }
 
 .stat-box-value {
     color: black;
     font-weight: bold;
-    font-size: 16px;
-    flex-basis: 100px;
+    font-size: 18px;
+    flex-basis: 125px;
     flex-shrink: 0;
 }
 
@@ -97,7 +105,7 @@ a:link, a:visited, a:hover, a:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     flex-basis: 50px;
     flex-shrink: 0;
@@ -167,6 +175,19 @@ a:link, a:visited, a:hover, a:active {
     background-color: #e6f2ff;
 }
 
+/* Ensure table cells respect widths */
+.playlist-song-data table th,
+.playlist-song-data table td {
+    box-sizing: border-box;
+    font-size: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.playlist-song-data th {
+    text-align: left;
+}
+
 /* Column sizing and no-wrap for date columns */
 .playlist-song-data th:nth-child(1), /* Custom Order */
 .playlist-song-data td:nth-child(1) {
@@ -193,7 +214,7 @@ a:link, a:visited, a:hover, a:active {
     white-space: nowrap;
 }
 .playlist-song-data th:nth-child(5),
-.playlist-song-data th:nth-child(7), /* Duraction */
+.playlist-song-data th:nth-child(7), /* Duration */
 .playlist-song-data td:nth-child(7) {
     width: 80px;
 }
@@ -208,70 +229,6 @@ a:link, a:visited, a:hover, a:active {
 .playlist-song-data th:nth-child(10), /* Saved */
 .playlist-song-data td:nth-child(10) {
     width: 60px;
-}
-
-/* Ensure table cells respect widths */
-.playlist-song-data table th,
-.playlist-song-data table td {
-    box-sizing: border-box;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 16px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-}
-
-/* Column sizing and no-wrap for date columns */
-.playlist-song-data th:nth-child(1),
-.playlist-song-data td:nth-child(1) {
-    width: 60px; /* Original # */
-}
-.playlist-song-data th:nth-child(2),
-.playlist-song-data td:nth-child(2) {
-    width: 24%; /* Song title */
-}
-.playlist-song-data th:nth-child(3),
-.playlist-song-data td:nth-child(3) {
-    width: 18%; /* Artist */
-}
-.playlist-song-data th:nth-child(4),
-.playlist-song-data td:nth-child(4) {
-    width: 18%; /* Album (allow wrap) */
-}
-.playlist-song-data th:nth-child(5),
-.playlist-song-data td:nth-child(5),
-.playlist-song-data th:nth-child(6),
-.playlist-song-data td:nth-child(6) {
-    width: 80px; /* Dates should have fixed width */
-    white-space: nowrap;
-}
-.playlist-song-data th:nth-child(7),
-.playlist-song-data td:nth-child(7) {
-    width: 80px; /* Length */
-}
-.playlist-song-data th:nth-child(8),
-.playlist-song-data td:nth-child(8) {
-    width: 80px; /* Popularity */
-}
-.playlist-song-data th:nth-child(9),
-.playlist-song-data td:nth-child(9) {
-    width: 60px; /* Top */
-}
-.playlist-song-data th:nth-child(10),
-.playlist-song-data td:nth-child(10) {
-    width: 60px; /* Saved */
-}
-
-/* Ensure table cells respect widths */
-.playlist-song-data table th,
-.playlist-song-data table td {
-    box-sizing: border-box;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.playlist-song-data th {
-    text-align: left;
 }
 
 .refresh-button {

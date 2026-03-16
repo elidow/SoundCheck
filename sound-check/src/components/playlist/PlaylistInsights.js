@@ -214,16 +214,16 @@ const PlaylistInsights = ({
                 {isRefreshing ? '⟳ Refreshing...' : '⟳ Refresh'}
             </button>
             <header className="insights-header">
-                <p>
+                <p className="insights-header-playlist-name">
                     <a href={playlist.external_urls.spotify} target="_blank" rel="noopener noreferrer">{playlist.name}</a>
                 </p>
-                <p>
+                <p className="insights-header-playlist-description">
                     {playlist.description}
                 </p>
                 <img 
                     src={playlist.images[0]?.url} 
                         alt={playlist.name} 
-                        style={{ width: "200px", height: "200px", objectFit: "cover", borderRadius: "8px" }}
+                        style={{ width: "250px", height: "250px", objectFit: "cover", borderRadius: "8px" }}
                 />
             </header>
             <div className="insights-body">
