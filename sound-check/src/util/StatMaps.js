@@ -103,5 +103,4 @@ export const categoryDisplayNames = {
     generalRelevance: "General Relevance",
     artistStats: "Artist Stats",
     songStats: "Song Stats",
-    advancedSongStats: "Advanced Song Stats",
 };
