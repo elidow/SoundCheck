@@ -292,8 +292,8 @@ def main():
         print("Writing saved artists ordered by popularity...")
         with open(os.path.join(base_output_dir, 'artists', 'savedArtistsOrderedByPopularity.txt'), 'w') as file:
             file.write(f"Generated on {current_date}\n")
-            for artist in sorted(artist_stats, key=lambda x: (-x["popularity"], x["name"])):
-                file.write(f"{artist['popularity']} | {artist['name']} | {artist['saved_count']} saved | {artist['followers']} followers | {artist['id']}\n")
+            for artist in sorted(artist_stats, key=lambda x: (-x["popularity"], -x["followers"])):
+                file.write(f"{artist['popularity']} | {artist['followers']:,} followers | {artist['name']} | {artist['saved_count']} saved | {artist['id']}\n")
 
     end_time = time.time()
     total_time = end_time - start_time
