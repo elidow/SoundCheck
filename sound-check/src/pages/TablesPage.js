@@ -14,7 +14,7 @@ const TablesPage = () => {
     const { playlists, playlistStats, loading, error } = useSoundCheckContext();
     const [selectedCategory, setSelectedCategory] = useState(null);
 
-    if (loading) return <Loading message="Spotify Playlist Data is loading..." />;
+    if (loading) return <Loading message={loading} />;
     if (error) return <p>Error: {error}</p>;
 
     // Group stats by category

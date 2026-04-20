@@ -16,7 +16,7 @@ const DashboardsPage = () => {
     const statObjects = Object.entries(statMap);
     const { playlists, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
 
-    if (loading) return <Loading message="Spotify Playlist Data is loading..." />
+    if (loading) return <Loading message={loading} />
     if (error) return <p>Error: {error}</p>;
 
     return (

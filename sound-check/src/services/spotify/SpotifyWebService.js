@@ -168,15 +168,24 @@ const SpotifyWebService = () => {
      * retrievePlaylistsAndSongs
      * Retrieves all data from Spotify API or cache
      */
-    const retrievePlaylistsAndSongs = async () => {
+    const retrievePlaylistsAndSongs = async (setLoadingMessage) => {
         try {
             let start = Date.now();
 
+            setLoadingMessage && setLoadingMessage("Fetching User's Playlists...");
             const playlists = await getPlaylists();
             const playlistSongs = await getPlaylistSongs(playlists);
+            
+            setLoadingMessage && setLoadingMessage("Fetching User's Top Songs...");
             const topSongs = await getTopsSongs();  // Now uses cache if available
+            
+            setLoadingMessage && setLoadingMessage("Fetching User's Saved Songs...");
             const savedSongs = await getSavedSongs();  // Now uses cache if available
+            
+            setLoadingMessage && setLoadingMessage("Fetching User's Recently Played Songs...");
             const recentlyPlayedSongs = await getRecentlyPlayedSongs();
+            
+            setLoadingMessage && setLoadingMessage("Fetching User's Profile...");
             const userProfile = await getUserProfile();
 
             let end = Date.now() - start;

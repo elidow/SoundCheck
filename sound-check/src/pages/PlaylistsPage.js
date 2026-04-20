@@ -100,7 +100,7 @@ const PlaylistsPage = () =>  {
         });
     }, [playlists, playlistScores, sortBy, isAscending]);
 
-    if (loading) return <Loading message="Spotify Playlist Data is loading..." />;
+    if (loading) return <Loading message={loading} />;
     if (error) return <p>Error: {error}</p>;
     // Shared function to calculate rank for a playlist in a given category
     const getRank = (category, playlistId) => {

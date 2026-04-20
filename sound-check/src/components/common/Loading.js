@@ -6,7 +6,7 @@ import './Loading.css';
  * Loading
  * Component to display a spinning gear icon during loading states
  */
-const Loading = ({ message = "Loading..." }) => {
+const Loading = ({ message }) => {
     return (
         <div className="loading-container">
             <FaCog className="loading-gear" />

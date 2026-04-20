@@ -380,14 +380,15 @@ const PlaylistDataManagerService = () => {
      * retrievePlaylistsWithStats
      * Custom react hook used to interact with Spotify Web API client and calculate playlist statistics
      */
-    const retrieveAllData = async () => {
+    const retrieveAllData = async (setLoadingMessage) => {
         try {
-                const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, userProfile } = await retrievePlaylistsAndSongs();
+                const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, userProfile } = await retrievePlaylistsAndSongs(setLoadingMessage);
                 addSavedSongs(playlistSongs, savedSongs);
                 addTopSongs(playlistSongs, topSongs);
 
                 const dates = getDates();
 
+                setLoadingMessage && setLoadingMessage("Calculating playlist statistics...");
                 const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates);
                 const playlistScores = computePlaylistScores(playlists, playlistStats);
                 const metaStats = computeMetaStats(playlists, playlistSongs, savedSongs, playlistScores, userProfile);
