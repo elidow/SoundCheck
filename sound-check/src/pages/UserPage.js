@@ -1,5 +1,6 @@
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
+import Loading from '../components/common/Loading';
 import './UserPage.css';
 
 /*
@@ -9,7 +10,7 @@ import './UserPage.css';
 const UserPage = () => {
     const { playlists, playlistStats, metaStats, loading, error } = useSoundCheckContext();
 
-    if (loading) return <p>Spotify Playlist Data is loading...</p>;
+    if (loading) return <Loading message="Spotify Playlist Data is loading..." />;
     if (error) return <p>Error: {error}</p>;
 
     return (

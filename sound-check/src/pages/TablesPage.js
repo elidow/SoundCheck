@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
+import Loading from '../components/common/Loading';
 import StatTable from '../components/tables/StatTable';
 import { statMap, categoryDisplayNames } from '../util/StatMaps';
 import './TablesPage.css';
@@ -13,7 +14,7 @@ const TablesPage = () => {
     const { playlists, playlistStats, loading, error } = useSoundCheckContext();
     const [selectedCategory, setSelectedCategory] = useState(null);
 
-    if (loading) return <p>Spotify Playlist Data is loading...</p>;
+    if (loading) return <Loading message="Spotify Playlist Data is loading..." />;
     if (error) return <p>Error: {error}</p>;
 
     // Group stats by category
