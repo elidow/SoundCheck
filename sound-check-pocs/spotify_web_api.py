@@ -121,6 +121,38 @@ class SpotifyWebApi:
             i += 1
         return top_songs
 
+    def get_albums(self, album_ids):
+        """Retrieve one or more album objects by Spotify album IDs."""
+        if not album_ids:
+            return []
+        albums = []
+        for i in range(0, len(album_ids), 20):
+            batch = album_ids[i:i + 20]
+            url = "https://api.spotify.com/v1/albums"
+            params = {"ids": ",".join(batch)}
+            response = requests.get(url, headers=self._get_headers(), params=params)
+            if response.status_code != 200:
+                raise Exception(f"Failed to get albums: {response.status_code}, {response.text}")
+            data = response.json()
+            albums.extend(data.get('albums', []))
+        return albums
+
+    def get_artists(self, artist_ids):
+        """Retrieve one or more artist objects by Spotify artist IDs."""
+        if not artist_ids:
+            return []
+        artists = []
+        for i in range(0, len(artist_ids), 50):
+            batch = artist_ids[i:i + 50]
+            url = "https://api.spotify.com/v1/artists"
+            params = {"ids": ",".join(batch)}
+            response = requests.get(url, headers=self._get_headers(), params=params)
+            if response.status_code != 200:
+                raise Exception(f"Failed to get artists: {response.status_code}, {response.text}")
+            data = response.json()
+            artists.extend(data.get('artists', []))
+        return artists
+
     def save_songs(self, track_ids):
         """
         Save a list of songs to the user's library.
