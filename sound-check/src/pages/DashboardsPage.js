@@ -2,6 +2,7 @@
 import React from 'react';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
+import Loading from '../components/common/Loading';
 import Dashboard from '../components/dashboard/Dashboard';
 import { statMap } from '../util/StatMaps'
 import './DashboardsPage.css'
@@ -15,7 +16,7 @@ const DashboardsPage = () => {
     const statObjects = Object.entries(statMap);
     const { playlists, playlistStats, playlistScores, loading, error } = useSoundCheckContext();
 
-    if (loading) return <p>Spotify Playlist Data is loading...</p>
+    if (loading) return <Loading message={loading} />
     if (error) return <p>Error: {error}</p>;
 
     return (

@@ -1,0 +1,24 @@
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px; /* Adjust as needed */
+}
+
+.loading-gear {
+    font-size: 50px; /* Match the font-size in other components, like 22px in tables, but larger for icon */
+    color: var(--brand-green); /* Use the brand green color */
+    animation: spin 2s linear infinite;
+}
+
+.loading-container p {
+    margin-top: 10px;
+    font-size: 22px;
+    color: var(--app-text);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

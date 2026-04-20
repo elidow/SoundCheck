@@ -12,7 +12,7 @@ export const SoundCheckProvider = ({ children }) => {
     const [topSongs, setTopSongs] = useState(null);
     const [savedSongs, setSavedSongs] = useState([]);
     const [recentlyPlayedSongs, setRecentlyPlayedSongs] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState('Fetching data...');
     const [error, setError] = useState(null);
 
     const { retrieveAllData, refreshSinglePlaylist } = PlaylistDataManagerService();
@@ -20,7 +20,7 @@ export const SoundCheckProvider = ({ children }) => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const data = await retrieveAllData();
+                const data = await retrieveAllData(setLoading);
                 setPlaylists(data.playlists);
                 setPlaylistSongs(data.playlistSongs);
                 setPlaylistStats(data.playlistStats);

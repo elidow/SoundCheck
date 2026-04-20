@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
+import Loading from '../components/common/Loading';
 import StatTable from '../components/tables/StatTable';
 import { statMap, categoryDisplayNames } from '../util/StatMaps';
 import './TablesPage.css';
@@ -13,7 +14,7 @@ const TablesPage = () => {
     const { playlists, playlistStats, loading, error } = useSoundCheckContext();
     const [selectedCategory, setSelectedCategory] = useState(null);
 
-    if (loading) return <p>Spotify Playlist Data is loading...</p>;
+    if (loading) return <Loading message={loading} />;
     if (error) return <p>Error: {error}</p>;
 
     // Group stats by category
@@ -35,25 +36,6 @@ const TablesPage = () => {
     if (!selectedCategory && categoryNames.length > 0) {
         setSelectedCategory(categoryNames[0]);
     }
-
-    /*
-     * getDisplayName
-     * Looks up the display name from statMap using the statKey
-     */
-    const getDisplayName = (categoryName) => {
-        if (categoryName === "maintenance") {
-            return "Maintenance";
-        } else if (categoryName === "userRelevance") {
-            return "User Relevance";
-        } else if (categoryName === "generalRelevance") {
-            return "General Relevance";
-        } else if (categoryName === "artistStats") {
-            return "Artist Stats";
-        } else if (categoryName === "songStats") {
-            return "Song Stats";
-        }
-        return categoryName; // fallback to developer name if not found
-    };
 
     return (
         <div className="Tables-Page">

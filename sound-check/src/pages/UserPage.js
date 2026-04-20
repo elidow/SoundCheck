@@ -1,5 +1,6 @@
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
+import Loading from '../components/common/Loading';
 import './UserPage.css';
 
 /*
@@ -7,9 +8,9 @@ import './UserPage.css';
  * Functional Component to render user meta stats
  */
 const UserPage = () => {
-    const { playlists, playlistStats, metaStats, loading, error } = useSoundCheckContext();
+    const { metaStats, loading, error } = useSoundCheckContext();
 
-    if (loading) return <p>Spotify Playlist Data is loading...</p>;
+    if (loading) return <Loading message={loading} />;
     if (error) return <p>Error: {error}</p>;
 
     return (
