@@ -1,6 +1,5 @@
 /* PlaylistDataManagerService */
 
-import { useMemo } from 'react';
 import SpotifyWebService from '../spotify/SpotifyWebService';
 import useCalculatePlaylistStatsService from '../analytics/CalculatePlaylistStatsService';
 import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistScoresService';

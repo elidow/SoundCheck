@@ -8,7 +8,7 @@ import './UserPage.css';
  * Functional Component to render user meta stats
  */
 const UserPage = () => {
-    const { playlists, playlistStats, metaStats, loading, error } = useSoundCheckContext();
+    const { metaStats, loading, error } = useSoundCheckContext();
 
     if (loading) return <Loading message={loading} />;
     if (error) return <p>Error: {error}</p>;

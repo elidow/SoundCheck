@@ -37,25 +37,6 @@ const TablesPage = () => {
         setSelectedCategory(categoryNames[0]);
     }
 
-    /*
-     * getDisplayName
-     * Looks up the display name from statMap using the statKey
-     */
-    const getDisplayName = (categoryName) => {
-        if (categoryName === "maintenance") {
-            return "Maintenance";
-        } else if (categoryName === "userRelevance") {
-            return "User Relevance";
-        } else if (categoryName === "generalRelevance") {
-            return "General Relevance";
-        } else if (categoryName === "artistStats") {
-            return "Artist Stats";
-        } else if (categoryName === "songStats") {
-            return "Song Stats";
-        }
-        return categoryName; // fallback to developer name if not found
-    };
-
     return (
         <div className="Tables-Page">
             <PageHeader title="Tables" />
