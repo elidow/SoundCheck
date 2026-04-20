@@ -71,29 +71,24 @@ Spotify Web API
 - Dashboard graphics fixed
 - Tables in groups
 
-# What is Coming Soon? (Next Quarter)
-- Page Layout Consistency
-- Header Consistency
-- Footer Consistency
+2025 Q4
 - Update Name to Sound Check
-- Fix Grid Layout
-- Nav Bar Spread Out
+- Page Layout, Header, Footer, Nav Bar Consistency
+- Fix Dashboard Grid Layout
 - Refactor Score Functions
 - Common Mapping Functionality
-
-- Variance Stats/Scores, fix Artist
-- Saved Song Accuracy
-- Playlist Name links to page/shows
-- Playlist Page Fix Rank
-- Add Ranks
-- Add Ranks to UI
+- Variance Stats/Scores, fix artist dashboard/view
 - Common Table Functionality
+- Users Page
 
-- Major Styling Update to Stats/Scores
-- Major Styling Update for Song Table
-- Playlist Page Add symbols for top/bottom by rank
+2025 Q1
+- Callback/Authentication Update
+- Local Caching for Saved Songs/Recently Played Songs
+- Refresh a single playlist
+- Numbers/Ranks fixed across playlists/insights tables
+- Styling/Formatting Upgrades across all pages
+- Minor bug fixes: Window sizing break points, url in window on load
+- New POC files for advanced stats for playlists, saved data, intersections
 
-- Table Collapse Functionality
-- Make list of all playlist Songs 
-- Settings/User Page Start
-- Settings/User Page End
+2025 Q2
+- ?
