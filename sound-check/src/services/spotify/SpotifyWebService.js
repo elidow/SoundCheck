@@ -95,28 +95,28 @@ const SpotifyWebService = () => {
      */
     const getTopsSongs = async() => {
         // Check for cached data
-        // const cached = localStorage.getItem(CACHE_KEYS.TOP_SONGS);
-        // const timestamp = localStorage.getItem(CACHE_KEYS.TOP_SONGS_TIMESTAMP);
+        const cached = localStorage.getItem(CACHE_KEYS.TOP_SONGS);
+        const timestamp = localStorage.getItem(CACHE_KEYS.TOP_SONGS_TIMESTAMP);
         
-        // if (cached && timestamp && isToday(timestamp)) {
-        //     const parsedCache = JSON.parse(cached);
-        //     // Check if any of the time periods have data
-        //     if (parsedCache.short_term?.length > 0 && parsedCache.medium_term?.length > 0 && parsedCache.long_term?.length > 0) {
-        //         console.log('Using cached top songs (updated today)');
-        //         return parsedCache;
-        //     }
-        // }
+        if (cached && timestamp && isToday(timestamp)) {
+            const parsedCache = JSON.parse(cached);
+            // Check if any of the time periods have data
+            if (parsedCache.short_term?.length > 0 && parsedCache.medium_term?.length > 0 && parsedCache.long_term?.length > 0) {
+                console.log('Using cached top songs (updated today)');
+                return parsedCache;
+            }
+        }
 
         // Fetch fresh data
         console.log('Fetching fresh top songs from API');
         const topSongs = {};
-        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 5]);
-        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 10]);
-        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 15]);
+        topSongs["short_term"] = await runLimited(fetchTopSongs, ["short_term", 4]);
+        topSongs["medium_term"] = await runLimited(fetchTopSongs, ["medium_term", 8]);
+        topSongs["long_term"] = await runLimited(fetchTopSongs, ["long_term", 12]);
         
         // Cache the data with timestamp
-        // localStorage.setItem(CACHE_KEYS.TOP_SONGS, JSON.stringify(topSongs));
-        // localStorage.setItem(CACHE_KEYS.TOP_SONGS_TIMESTAMP, Date.now().toString());
+        localStorage.setItem(CACHE_KEYS.TOP_SONGS, JSON.stringify(topSongs));
+        localStorage.setItem(CACHE_KEYS.TOP_SONGS_TIMESTAMP, Date.now().toString());
         
         return topSongs;
     };
@@ -126,22 +126,22 @@ const SpotifyWebService = () => {
      * Fetches all saved songs from API or cache
      */
     const getSavedSongs = async () => {
-        // const cached = await get(CACHE_KEYS.SAVED_SONGS);
-        // const timestamp = await get(CACHE_KEYS.SAVED_SONGS_TIMESTAMP);
+        const cached = await get(CACHE_KEYS.SAVED_SONGS);
+        const timestamp = await get(CACHE_KEYS.SAVED_SONGS_TIMESTAMP);
 
-        // if (cached && timestamp && isToday(timestamp)) {
-        //     // Check if cache is not empty
-        //     if (Array.isArray(cached) && cached.length > 0) {
-        //         console.log('Using cached saved songs (updated today)');
-        //         return cached;
-        //     }
-        // }
+        if (cached && timestamp && isToday(timestamp)) {
+            // Check if cache is not empty
+            if (Array.isArray(cached) && cached.length > 0) {
+                console.log('Using cached saved songs (updated today)');
+                return cached;
+            }
+        }
 
         console.log('Fetching fresh saved songs from API');
         const savedSongs = await runLimited(fetchSavedSongs);
 
-        // await set(CACHE_KEYS.SAVED_SONGS, savedSongs);
-        // await set(CACHE_KEYS.SAVED_SONGS_TIMESTAMP, Date.now());
+        await set(CACHE_KEYS.SAVED_SONGS, savedSongs);
+        await set(CACHE_KEYS.SAVED_SONGS_TIMESTAMP, Date.now());
 
         return savedSongs;
     };
@@ -185,7 +185,7 @@ const SpotifyWebService = () => {
             setLoadingMessage && setLoadingMessage("Fetching User's Recently Played Songs...");
             const recentlyPlayedSongs = await getRecentlyPlayedSongs();
             
-            setLoadingMessage && setLoadingMessage("Fetching User's Profile...");
+            // setLoadingMessage && setLoadingMessage("Fetching User's Profile...");
             const userProfile = await getUserProfile();
 
             let end = Date.now() - start;
