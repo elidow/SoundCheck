@@ -58,7 +58,8 @@ def main():
         saved_songs_dict[track_id] = {
             "name": song_name,
             "artist": artist_name,
-            "id": track_id
+            "id": track_id,
+            "added_at": song.get("added_at", "")[:10]
         }
         saved_songs_list.append(track_id)
         saved_songs_name_artist_set.add((song_name, artist_name))
@@ -217,7 +218,7 @@ def main():
     with open(filePath + 'intersections/remove-savedSongsNotInTopSongsOrPlaylists.txt', 'w') as file:
         file.write(f"Generated on {current_date}\n")
         for song_info in not_in_top_or_playlists:
-            file.write(format_song_line(song_info) + "\n")
+            file.write(f"{song_info['name']} | {song_info['artist']} | {song_info['added_at']} | {song_info['id']}\n")
     
     # Write savedSongsNotInTopSongsButInPlaylists.txt
     # (saved songs not in top songs but in playlists)
