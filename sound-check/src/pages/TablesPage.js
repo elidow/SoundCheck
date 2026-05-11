@@ -18,10 +18,10 @@ const TablesPage = () => {
     if (error) return <p>Error: {error}</p>;
 
     // Group stats by category
-    const groupedStats = Object.entries(statMap).reduce((acc, [key, value]) => {
-        const category = value.category || 'Uncategorized';
+    const groupedStats = Object.entries(statMap).reduce((acc, [statKey, config]) => {
+        const category = config.category || 'Uncategorized';
         if (!acc[category]) acc[category] = [];
-        acc[category].push([key, value]);
+        acc[category].push([statKey, config]);
         return acc;
     }, {});
 

@@ -1,12 +1,35 @@
 import { useCallback } from 'react';
 
 const useRenderUtils = () => {
+    const formatDateTimeString = (val) => {
+        const date = new Date(val);
+        if (Number.isNaN(date.getTime())) return '-';
+
+        const monthNames = [
+            'Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.',
+            'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'
+        ];
+
+        const day = date.getDate();
+        const suffix = (d) => {
+            const remainder = d % 10;
+            const remainderHundred = d % 100;
+            if (remainderHundred >= 11 && remainderHundred <= 13) return 'th';
+            if (remainder === 1) return 'st';
+            if (remainder === 2) return 'nd';
+            if (remainder === 3) return 'rd';
+            return 'th';
+        };
+
+        return `${monthNames[date.getMonth()]} ${day}${suffix(day)}, ${date.getFullYear()}`;
+    };
+
     /*
      * renderFormattedStatValue
      * Renders a stat value based on its type
      */
     const renderFormattedStatValue = useCallback((val, statType) => {
-        if (statType === 'dateTime') return val ? val.substring(0, 10) : '-';
+        if (statType === 'dateTime') return val ? formatDateTimeString(val) : '-';
         if (statType.includes('artist') && statType.includes('number')) {
             return `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}`;
         }
@@ -26,7 +49,7 @@ const useRenderUtils = () => {
         return isAscending ? '▲' : '▼';
     }, []);
 
-    return { renderFormattedStatValue, renderSortArrow };
+    return { formatDateTimeString, renderFormattedStatValue, renderSortArrow };
 };
 
 export default useRenderUtils;

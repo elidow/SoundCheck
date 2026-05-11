@@ -155,7 +155,7 @@ a:link, a:visited, a:hover, a:active {
 
 .playlist-song-data table {
     border-collapse: collapse;
-    min-width: 1300px;
+    min-width: 1350px;
 }
 
 .playlist-song-data table th {
@@ -210,7 +210,7 @@ a:link, a:visited, a:hover, a:active {
 .playlist-song-data td:nth-child(5),
 .playlist-song-data th:nth-child(6),
 .playlist-song-data td:nth-child(6) {
-    width: 80px;
+    width: 140px;
     white-space: nowrap;
 }
 .playlist-song-data th:nth-child(5),
@@ -220,11 +220,11 @@ a:link, a:visited, a:hover, a:active {
 }
 .playlist-song-data th:nth-child(8), /* Popularity */
 .playlist-song-data td:nth-child(8) {
-    width: 80px;
+    width: 90px;
 }
 .playlist-song-data th:nth-child(9), /* Top */
 .playlist-song-data td:nth-child(9) {
-    width: 60px;
+    width: 50px;
 }
 .playlist-song-data th:nth-child(10), /* Saved */
 .playlist-song-data td:nth-child(10) {

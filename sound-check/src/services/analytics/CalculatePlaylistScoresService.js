@@ -138,11 +138,11 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how well maintained the playlist is
      * Calculation: %
      */
-    const calculateTotalMaintenanceScore = useCallback((songCountScore, twoYearOldPercentageScore, avgSongAddedDateScore, lastSongAddedDateScore) => {
-        let temp = (songCountScore * (10/35)) 
-            + (twoYearOldPercentageScore * (10/35)) 
-            + (avgSongAddedDateScore * (10/35)) 
-            + (lastSongAddedDateScore * (5/35));
+    const calculateTotalMaintenanceScore = useCallback((totalSongsScore, oldSongsPercentageScore, averageAddedDateScore, lastAddedDateScore) => {
+        let temp = (totalSongsScore * (10/35)) 
+            + (oldSongsPercentageScore * (10/35)) 
+            + (averageAddedDateScore * (10/35)) 
+            + (lastAddedDateScore * (5/35));
         
         return Number(temp).toFixed(1);
     }, []);
@@ -205,13 +205,13 @@ const useCalculatePlaylistScoresService = () => {
      * calculateTotalUserRelevanceScore
      * Calculates score 0-100 on how relevant the playlist is the user's activity
      */
-    const calculateTotalUserRelevanceScore = useCallback((shortTermMostPlayedPercentageScore, mediumTermMostPlayedPercentageScore,
-                                            longTermMostPlayedPercentageScore, savedSongPercentageScore, timesRecentlyPlayedScore) => {
-        let temp = (shortTermMostPlayedPercentageScore * (10/35)) 
-            + (mediumTermMostPlayedPercentageScore * (10/35)) 
-            + (longTermMostPlayedPercentageScore * (5/35))
+    const calculateTotalUserRelevanceScore = useCallback((topSongsShortTermPercentageScore, topSongsMediumTermPercentageScore,
+                                            topSongsLongTermPercentageScore, savedSongPercentageScore, recentlyPlayedCountScore) => {
+        let temp = (topSongsShortTermPercentageScore * (10/35)) 
+            + (topSongsMediumTermPercentageScore * (10/35)) 
+            + (topSongsLongTermPercentageScore * (5/35))
             + (savedSongPercentageScore * (5/35)) 
-            + (timesRecentlyPlayedScore * (5/35));
+            + (recentlyPlayedCountScore * (5/35));
         
         return Number(temp).toFixed(1);
     }, []);
@@ -246,8 +246,8 @@ const useCalculatePlaylistScoresService = () => {
      * calculateTotalGeneralRelevanceScore
      * Calculates score 0-100 on how relevant the playlist is the based on popularity and recency
      */
-    const calculateTotalGeneralRelevanceScore = useCallback((avgSongReleaseDateScore, avgSongPopularityScore) => {
-        let temp = (avgSongReleaseDateScore * (1/3)) 
+    const calculateTotalGeneralRelevanceScore = useCallback((averageReleaseDateScore, avgSongPopularityScore) => {
+        let temp = (averageReleaseDateScore * (1/3)) 
             + (avgSongPopularityScore * (2/3))
         
         return Number(temp).toFixed(1);
@@ -296,9 +296,9 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how simiar the songs are
      * May add more but just song duration variance for now
      */
-    const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore, songReleaseDateVariance) => {        
+    const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore, releaseDaqteVariance) => {        
         let temp = (songDurationVarianceScore * (1/2)) 
-            + (songReleaseDateVariance * (1/2))
+            + (releaseDaqteVariance * (1/2))
         
         return Number(temp).toFixed(1);
     }, []);
