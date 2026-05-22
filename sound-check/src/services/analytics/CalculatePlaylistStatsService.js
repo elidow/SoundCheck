@@ -15,7 +15,7 @@ const useCalculatePlaylistStatsService = () => {
         let outdated = 0;
 
         for (const key in playlistSongs) {
-            if (startDate < playlistSongs[key].added_at && playlistSongs[key].added_at < endDate) {
+            if (startDate <= playlistSongs[key].added_at && playlistSongs[key].added_at <= endDate) {
                 outdated += 1;
             }
         }
@@ -134,7 +134,7 @@ const useCalculatePlaylistStatsService = () => {
      */
     const calculateMostFrequentArtist = useCallback((playlistSongs, byCount) => {
         let artistFrequency = {};
-        let mostFrequentArtistByCount = {
+        let topArtistSongCount = {
             "artistName": 'No Artists',
             "artistCount": 0
         };
@@ -147,17 +147,17 @@ const useCalculatePlaylistStatsService = () => {
                 artistFrequency[artist] = 1;
             }
 
-            if(artistFrequency[artist] >= mostFrequentArtistByCount["artistCount"]) {
-                mostFrequentArtistByCount["artistName"] = artist;
-                mostFrequentArtistByCount["artistCount"] = artistFrequency[artist];
+            if(artistFrequency[artist] >= topArtistSongCount["artistCount"]) {
+                topArtistSongCount["artistName"] = artist;
+                topArtistSongCount["artistCount"] = artistFrequency[artist];
             }
         }
 
         if (!byCount) {
-            mostFrequentArtistByCount["artistCount"] = ((mostFrequentArtistByCount["artistCount"] / playlistSongs.length) * 100).toFixed(1)
+            topArtistSongCount["artistCount"] = ((topArtistSongCount["artistCount"] / playlistSongs.length) * 100).toFixed(1)
         }
         
-        return mostFrequentArtistByCount
+        return topArtistSongCount
     }, []);
 
     // TODO: need to confirm accurracy
@@ -200,10 +200,10 @@ const useCalculatePlaylistStatsService = () => {
     const calculateAverageSongDuration = useCallback((playlistSongs) => {
 
         const songDurations = playlistSongs.map(playlistSong => playlistSong.track.duration_ms);
-        const avgSongDuration = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
+        const averageSongLength = songDurations.reduce((sum, sd) => sum + sd, 0) / songDurations.length;
 
-        const minutes = Math.floor((avgSongDuration / 1000) / 60);
-        const seconds = Math.floor((avgSongDuration / 1000) % 60).toString().padStart(2, '0');
+        const minutes = Math.floor((averageSongLength / 1000) / 60);
+        const seconds = Math.floor((averageSongLength / 1000) % 60).toString().padStart(2, '0');
         
         return `${minutes}:${seconds}`;
     }, []);

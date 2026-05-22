@@ -28,14 +28,14 @@ const DashboardsPage = () => {
                     <div>Number of Playlists: {playlists.length}</div>
                 </div>
                 <div className="dashboards">
-                    {statObjects.map(([key, value]) => (
+                    {statObjects.map(([statKey, config]) => (
                         <Dashboard
-                            key={key}
-                            name={key}
+                            key={statKey}
+                            name={config.displayName}
                             playlists={playlists}
                             playlistStats={playlistStats}
                             playlistScores={playlistScores}
-                            statDetails={value}
+                            statDetails={config}
                             expandedDashboard={expandedDashboard}
                             setExpandedDashboard={setExpandedDashboard}
                         />
