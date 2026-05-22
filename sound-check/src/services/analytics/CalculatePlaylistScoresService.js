@@ -296,9 +296,9 @@ const useCalculatePlaylistScoresService = () => {
      * Calculates score 0-100 on how simiar the songs are
      * May add more but just song duration variance for now
      */
-    const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore, releaseDaqteVariance) => {        
+    const calculateTotalSongLikenessScore = useCallback((songDurationVarianceScore, releaseDateVariance) => {        
         let temp = (songDurationVarianceScore * (1/2)) 
-            + (releaseDaqteVariance * (1/2))
+            + (releaseDateVariance * (1/2))
         
         return Number(temp).toFixed(1);
     }, []);

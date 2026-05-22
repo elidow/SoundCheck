@@ -3,6 +3,8 @@ const percentage = "percentage";
 const dateTime = "dateTime";
 const artist = "artist";
 const time = "time";
+const squaredMinutes = "squaredMinutes"
+const squaredDays = "squaredDays"
 
 export const statMap = {
     totalSongs: {
@@ -122,14 +124,14 @@ export const statMap = {
         displayName: "Song Length Consistency",
         description: "Measures how similar song lengths are throughout the playlist",
         statKey: "songDurationVariance",
-        type: number,
+        type: number + ", " + squaredMinutes,
     },
-    releaseDaqteVariance: {
+    releaseDateVariance: {
         category: "advancedSongStats",
         displayName: "Release Date Consistency",
         description: "Measures how similar release dates are throughout the playlist",
-        statKey: "releaseDaqteVariance",
-        type: number,
+        statKey: "releaseDateVariance",
+        type: number + ", " + squaredDays,
     },
 };
 

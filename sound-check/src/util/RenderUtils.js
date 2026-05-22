@@ -1,5 +1,13 @@
 import { useCallback } from 'react';
 
+const number = "number";
+const percentage = "percentage";
+const dateTime = "dateTime";
+const artist = "artist";
+const time = "time";
+const squaredMinutes = "squaredMinutes"
+const squaredDays = "squaredDays"
+
 const useRenderUtils = () => {
     const formatDateTimeString = (val) => {
         const date = new Date(val);
@@ -29,14 +37,20 @@ const useRenderUtils = () => {
      * Renders a stat value based on its type
      */
     const renderFormattedStatValue = useCallback((val, statType) => {
-        if (statType === 'dateTime') return val ? formatDateTimeString(val) : '-';
-        if (statType.includes('artist') && statType.includes('number')) {
+        if (statType === dateTime) return val ? formatDateTimeString(val) : '-';
+        if (statType.includes(artist) && statType.includes(number)) {
             return `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}`;
         }
-        if (statType.includes('artist') && statType.includes('percentage')) {
+        if (statType.includes(artist) && statType.includes(percentage)) {
             return `${val?.artistName ?? '-'}: ${val?.artistCount ?? '-'}%`;
         }
-        if (statType === 'number' || statType === 'time') return val ?? '-';
+        if (statType.includes(number) && statType.includes(squaredMinutes)) {
+            return `${val ?? '-'} minutes\u00b2`
+        }
+        if (statType.includes(number) && statType.includes(squaredDays)) {
+            return `${val ?? '-'} days\u00b2`
+        }
+        if (statType === number || statType === time) return val ?? '-';
         return `${val ?? '-'}%`;
     }, []);
 

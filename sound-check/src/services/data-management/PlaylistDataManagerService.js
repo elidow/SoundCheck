@@ -129,7 +129,7 @@ const PlaylistDataManagerService = () => {
                 },
                 advancedSongStats: {
                     songDurationVariance: withSongs(songs, calculateSongDurationVariance),
-                    releaseDaqteVariance: withSongs(songs, calculateSongReleaseDateVariance)
+                    releaseDateVariance: withSongs(songs, calculateSongReleaseDateVariance)
                 },
             };
         });
@@ -213,12 +213,12 @@ const PlaylistDataManagerService = () => {
                 playlistStats[playlistId]["advancedSongStats"]["songDurationVariance"]
             );
 
-            const releaseDaqteVarianceScore = calculateSongReleaseDateVarianceScore(
-                playlistStats[playlistId]["advancedSongStats"]["releaseDaqteVariance"]
+            const releaseDateVarianceScore = calculateSongReleaseDateVarianceScore(
+                playlistStats[playlistId]["advancedSongStats"]["releaseDateVariance"]
             );
 
             const totalSongLikenessScore = calculateTotalSongLikenessScore(
-                songDurationVarianceScore, releaseDaqteVarianceScore
+                songDurationVarianceScore, releaseDateVarianceScore
             );
 
             // --- Assign Scores Object ---
@@ -249,7 +249,7 @@ const PlaylistDataManagerService = () => {
                 },
                 songLikenessScores: {
                     songDurationVarianceScore,
-                    releaseDaqteVarianceScore,
+                    releaseDateVarianceScore,
                     totalSongLikenessScore
                 },
                 totalScore: calculateTotalScore(
