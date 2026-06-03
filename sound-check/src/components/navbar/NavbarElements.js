@@ -24,14 +24,48 @@ export const NavLink = styled(Link)`
     &.active {
         color: rgb(96, 56, 56);
     }
+
+    @media screen and (max-width: 768px) {
+        padding: 1rem 0;
+        height: auto;
+        display: block;
+        color: #ffffff;
+        &.active {
+            color: rgb(96, 56, 56);
+        }
+    }
 `;
 
 export const NavMenu = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem; /* more space between tabs */
-    flex: 1 1 auto; /* allow center area to grow */
+    gap: 2rem;
+    flex: 1 1 auto;
+
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 80px;
+        left: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: #63d471;
+        border-bottom: 2px solid black;
+        padding: 0;
+        gap: 0;
+
+        ${props =>
+            props.isOpen &&
+            `
+            max-height: 500px;
+            padding: 1.5rem 0;
+            transition: max-height 0.3s ease;
+            z-index: 1;
+        `}
+    }
 `;
 
 export const Brand = styled.div`
@@ -55,4 +89,29 @@ export const ExternalLink = styled.a`
         background: rgba(255,255,255,0.08);
         color: #000;
     }
+
+    @media screen and (max-width: 768px) {
+        display: none;
+    }
 `;
+
+export const HamburgerIcon = styled.div`
+    display: none;
+    color: #ffffff;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    @media screen and (max-width: 768px) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+    }
+`;
+
+export const NavMenuDropdown = styled.div``;
