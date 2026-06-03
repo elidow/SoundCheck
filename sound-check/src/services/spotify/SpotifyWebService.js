@@ -23,6 +23,23 @@ const SpotifyWebService = () => {
     // Allow maximum 6 concurrent requests max
     const limit = pLimit(6);
 
+    /*
+     * decodeHtmlEntities
+     * Convert HTML character references into actual characters.
+     */
+    const decodeHtmlEntities = (input) => {
+        if (input === null || input === undefined) return input;
+        if (typeof input !== 'string') return input;
+
+        try {
+            const txt = document.createElement('textarea');
+            txt.innerHTML = input;
+            return txt.value;
+        } catch (e) {
+            return input;
+        }
+    };
+
     // Check if local storage timestamp is today
     const isToday = (timestamp) => {
         const today = new Date().toDateString();
@@ -69,6 +86,14 @@ const SpotifyWebService = () => {
     const getPlaylists = async() => {
         const playlists = await runLimited(fetchPlaylists);
         if (!playlists) throw new Error("Failed to fetch playlists");
+        // Decode any HTML character references in playlist descriptions
+        try {
+            playlists.forEach(p => {
+                if (p && p.description) p.description = decodeHtmlEntities(p.description);
+            });
+        } catch (e) {
+            console.warn('Failed to decode playlist descriptions', e);
+        }
         return playlists;
     };
 
