@@ -24,7 +24,9 @@ const Navbar = () => {
     return (
         <>
             <Nav>
-                <Brand>SoundCheck</Brand>
+                <Brand>
+                    <a href="https://github.com/elidow/SoundCheck" target="_blank" rel="noopener noreferrer">SoundCheck</a>
+                </Brand>
                 <NavMenu isOpen={isMenuOpen}>
                     <NavLink to="/playlists" onClick={closeMenu}>
                         Playlists
