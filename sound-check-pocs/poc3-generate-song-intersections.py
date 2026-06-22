@@ -49,10 +49,12 @@ def main():
         track_id = track["id"]
         song_name = track.get("name", "Unknown")
         artist_name = track["artists"][0]["name"] if track.get("artists") else "Unknown"
+        album_name = track.get("album", {}).get("name", "Unknown")
         
         saved_songs_dict[track_id] = {
             "name": song_name,
             "artist": artist_name,
+            "album": album_name,
             "id": track_id,
             "added_at": song.get("added_at", "")[:10]
         }
@@ -69,11 +71,13 @@ def main():
             continue
         track_id = track["id"]
         song_name = track.get("name", "Unknown")
-        artist_name = track["artists"][0]["name"] if track.get("artists") else "Unknown"
+        artist_name = track.get("artists")[0]["name"] if track.get("artists") else "Unknown"
+        album_name = track.get("album", {}).get("name", "Unknown")
         
         top_songs_dict[track_id] = {
             "name": song_name,
             "artist": artist_name,
+            "album": album_name,
             "id": track_id
         }
         top_songs_list.append(track_id)
@@ -96,11 +100,13 @@ def main():
             song_name = track.get("name", "Unknown")
             artist_name = track["artists"][0]["name"] if track.get("artists") else "Unknown"
             
+            album_name = track.get("album", {}).get("name", "Unknown")
             if track_id not in playlist_songs_dict:
                 playlist_songs_dict[track_id] = {
                     "count": 0,
                     "name": song_name,
                     "artist": artist_name,
+                    "album": album_name,
                     "id": track_id,
                     "playlists": {}
                 }
@@ -112,12 +118,12 @@ def main():
     
     # Helper function to format song line
     def format_song_line(song_info):
-        return f"{song_info['name']} | {song_info['artist']} | {song_info['id']}"
+        return f"{song_info['name']} | {song_info['artist']} | {song_info.get('album', 'Unknown')} | {song_info['id']}"
     
     # Helper function to format playlist song line
     def format_playlist_song_line(song_info):
         playlists_str = ", ".join(sorted(song_info["playlists"].keys()))
-        return f"{song_info['count']}: {song_info['name']} | {song_info['artist']} | {song_info['id']} | Playlists: {playlists_str}"
+        return f"{song_info['count']}: {song_info['name']} | {song_info['artist']} | {song_info.get('album', 'Unknown')} | {song_info['id']} | Playlists: {playlists_str}"
     
     # Write savedSongs.txt
     print("Writing savedSongs.txt...")
@@ -213,7 +219,7 @@ def main():
     with open(filePath + 'intersections/2-REMOVE-savedSongsNotInTopSongsOrPlaylists.txt', 'w') as file:
         file.write(f"Generated on {current_date}\n")
         for song_info in not_in_top_or_playlists:
-            file.write(f"{song_info['name']} | {song_info['artist']} | {song_info['added_at']} | {song_info['id']}\n")
+            file.write(f"{song_info['name']} | {song_info['artist']} | {song_info.get('album', 'Unknown')} | {song_info['added_at']} | {song_info['id']}\n")
     
     # Write savedSongsNotInTopSongsButInPlaylists.txt
     # (saved songs not in top songs but in playlists)
@@ -257,10 +263,14 @@ def main():
                     continue
                 if line.startswith("(R)"):
                     continue
-                parts = line.split("|")
-                if len(parts) >= 3:
-                    track_id = parts[2].strip()
-                    top_songs_not_in_saved_ids.add(track_id)
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 4:
+                    track_id = parts[3]
+                elif len(parts) >= 3:
+                    track_id = parts[2]
+                else:
+                    continue
+                top_songs_not_in_saved_ids.add(track_id)
     except Exception as e:
         print(f"Error reading topSongsNotInSavedSongs.txt: {e}")
 
@@ -273,14 +283,14 @@ def main():
                 if not line or line.startswith("Generated on"):
                     continue
                 # Format: count: Song | Artist | ID | Playlists: ...
-                parts = line.split("|")
-                if len(parts) >= 3 and ":" in parts[0]:
+                parts = [p.strip() for p in line.split("|")]
+                if len(parts) >= 4 and ":" in parts[0]:
                     count_part = parts[0].split(":")[0].strip()
                     try:
                         count = int(count_part)
                     except ValueError:
                         continue
-                    track_id = parts[2].strip()
+                    track_id = parts[3]
                     if count >= 2 and track_id in top_songs_not_in_saved_ids:
                         add_songs.append(line)
     except Exception as e:
