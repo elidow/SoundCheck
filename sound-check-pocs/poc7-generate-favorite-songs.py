@@ -6,8 +6,8 @@ base_path = Path(__file__).parent / "personal_data"
 saved_songs_file = base_path / "intersections" / "savedSongs.txt"
 saved_in_top_songs_file = base_path / "intersections" / "savedSongsInTopSongs.txt"
 saved_in_playlists_file = base_path / "intersections" / "savedSongsInPlaylists.txt"
-top_100_file = base_path / "favorite-songs" / "my-top-100.txt"
-output_file = base_path / "favorite-songs" / "generated-favorite-songs.txt"
+top_100_file = base_path / "favorites" / "my-top-100-songs.txt"
+output_file = base_path / "favorites" / "generated-favorite-songs.txt"
 
 # Parse saved songs
 songs = {}
@@ -82,8 +82,8 @@ with open(top_100_file, 'r', encoding='utf-8') as f:
             continue
         # Format: "#) Song Name | ARTIST"
         # Split by ") " to separate rank from song info
-        if ') ' in line:
-            rank_part, song_info = line.split(') ', 1)
+        if ')' in line:
+            rank_part, song_info = line.split(')', 1)
             try:
                 rank_position = int(rank_part)
             except ValueError:
@@ -161,6 +161,122 @@ with open(output_file, 'w', encoding='utf-8') as f:
     for song in scored_songs:
         line = f"{song['score']}: {song['name']} | {song['artist']} | {song['id']} | {song['rank_score']} | {song['playlist_score']} | MT{song['top_100_score']}\n"
         f.write(line)
+
+# Generate top 40 artists from saved songs
+print("Generating top 40 artists file...")
+saved_data_artists_file = base_path / "saved-data" / "artists" / "mostFrequentArtistsInSavedSongs.txt"
+top_40_artists_file = base_path / "favorites" / "my-top-40-artists.txt"
+
+# First, build a lookup of artists -> counts from saved data
+artist_counts = {}
+if saved_data_artists_file.exists():
+    with open(saved_data_artists_file, 'r', encoding='utf-8') as f:
+        next(f)  # Skip header with date
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            # Format: "count | Artist | ID"
+            try:
+                parts = line.split(' | ')
+                if len(parts) >= 2:
+                    count = int(parts[0])
+                    artist_name = parts[1].strip()
+                    artist_counts[artist_name] = count
+            except (ValueError, IndexError):
+                continue
+
+# Now read existing file and update counts while preserving order
+existing_entries = []
+if top_40_artists_file.exists():
+    with open(top_40_artists_file, 'r', encoding='utf-8') as f:
+        next(f)  # Skip header
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('Top'):
+                continue
+            try:
+                # Format: "rank) Artist | count" or "rank)Artist | count"
+                rank_part, rest = line.split(')', 1)
+                rank = int(rank_part)
+                rest = rest.strip()
+                parts = rest.split(' | ')
+                if len(parts) >= 1:
+                    artist_name = parts[0].strip()
+                    count = artist_counts.get(artist_name, "?")
+                    existing_entries.append((rank, artist_name, count))
+            except (ValueError, IndexError):
+                continue
+
+# Write back with preserved order
+with open(top_40_artists_file, 'w', encoding='utf-8') as f:
+    current_date = datetime.now().strftime("%m/%d/%Y")
+    f.write(f"Top 40 Favorite Artists: {current_date}\n")
+    for rank, artist, count in existing_entries:
+        f.write(f"{rank}) {artist} | {count}\n")
+print(f"Generated top 40 artists file: {top_40_artists_file}")
+
+# Generate top 60 albums from saved songs
+print("Generating top 60 albums file...")
+saved_data_albums_file = base_path / "saved-data" / "albums" / "mostFrequentAlbumsInSavedSongs.txt"
+top_60_albums_file = base_path / "favorites" / "my-top-60-albums.txt"
+
+# First, build a lookup of albums -> artist and counts from saved data
+album_data = {}
+if saved_data_albums_file.exists():
+    with open(saved_data_albums_file, 'r', encoding='utf-8') as f:
+        next(f)  # Skip header with date
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            # Format: "count | Album | Artist | ID"
+            try:
+                parts = line.split(' | ')
+                if len(parts) >= 3:
+                    count = int(parts[0])
+                    album_name = parts[1].strip()
+                    album_artist = parts[2].strip()
+                    album_data[(album_name.lower(), album_artist.lower())] = {
+                        'count': count
+                    }
+            except (ValueError, IndexError):
+                continue
+
+# Now read existing file and update album counts while preserving order
+existing_album_entries = []
+if top_60_albums_file.exists():
+    with open(top_60_albums_file, 'r', encoding='utf-8') as f:
+        next(f)  # Skip header
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('Top'):
+                continue
+            try:
+                # Format: "rank) Album | Artist | count" or "rank)Album | Artist | count"
+                rank_part, rest = line.split(')', 1)
+                rank = int(rank_part)
+                rest = rest.strip()
+                parts = rest.split(' | ')
+                if len(parts) >= 2:
+                    album_name = parts[0].strip()
+                    artist_name = parts[1].strip()
+                    key = (album_name.lower(), artist_name.lower())
+                    if key in album_data:
+                        count = album_data[key]['count']
+                    else:
+                        count = "?"
+                    existing_album_entries.append((rank, album_name, artist_name, count))
+            except (ValueError, IndexError):
+                continue
+
+# Write back with preserved order
+with open(top_60_albums_file, 'w', encoding='utf-8') as f:
+    current_date = datetime.now().strftime("%m/%d/%Y")
+    f.write(f"Top 60 Favorite Albums: {current_date}\n")
+    for rank, album, artist, count in existing_album_entries:
+        f.write(f"{rank}) {album} | {artist} | {count}\n")
+print(f"Generated top 60 albums file: {top_60_albums_file}")
 
 print(f"Generated favorite songs file: {output_file}")
 print(f"Total songs processed: {len(scored_songs)}")
