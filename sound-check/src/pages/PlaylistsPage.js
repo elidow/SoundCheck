@@ -3,7 +3,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSoundCheckContext } from '../context/SoundCheckContext';
 import PageHeader from '../components/common/PageHeader';
-import Loading from '../components/common/Loading';
 import PlaylistInsights from '../components/playlist/PlaylistInsights';
 import './PlaylistsPage.css';
 
@@ -100,7 +99,7 @@ const PlaylistsPage = () =>  {
         });
     }, [playlists, playlistScores, sortBy, isAscending]);
 
-    if (loading) return <Loading message={loading} />;
+    if (loading) return <p>Spotify Playlist Data is loading...</p>;
     if (error) return <p>Error: {error}</p>;
     // Shared function to calculate rank for a playlist in a given category
     const getRank = (category, playlistId) => {

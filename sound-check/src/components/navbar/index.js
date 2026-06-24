@@ -1,50 +1,32 @@
-import React, { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import React from "react";
 import {
     Nav,
     NavLink,
     NavMenu,
     Brand,
     ExternalLink,
-    HamburgerIcon,
-    NavMenuDropdown,
 } from "./NavbarElements";
 
 const Navbar = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
-
-    const closeMenu = () => {
-        setIsMenuOpen(false);
-    };
-
     return (
         <>
             <Nav>
-                <Brand>
-                    <a href="https://github.com/elidow/SoundCheck" target="_blank" rel="noopener noreferrer">SoundCheck</a>
-                </Brand>
-                <NavMenu isOpen={isMenuOpen}>
-                    <NavLink to="/playlists" onClick={closeMenu}>
+                <Brand>SoundCheck</Brand>
+                <NavMenu>
+                    <NavLink to="/playlists" >
                         Playlists
                     </NavLink>
-                    <NavLink to="/dashboards" activestyle="true" onClick={closeMenu}>
+                    <NavLink to="/dashboards" activestyle="true">
                         Dashboards
                     </NavLink>
-                    <NavLink to="/tables" activestyle="true" onClick={closeMenu}>
+                    <NavLink to="/tables" activestyle="true">
                         Tables
                     </NavLink>
-                    <NavLink to="/user" activestyle="true" onClick={closeMenu}>
+                    <NavLink to="/user" activestyle="true">
                         User
                     </NavLink>
                 </NavMenu>
                 <ExternalLink href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">Go to Spotify</ExternalLink>
-                <HamburgerIcon onClick={toggleMenu}>
-                    {isMenuOpen ? <FaTimes /> : <FaBars />}
-                </HamburgerIcon>
             </Nav>
         </>
     );

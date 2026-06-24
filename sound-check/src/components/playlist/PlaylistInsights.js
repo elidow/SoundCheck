@@ -140,7 +140,12 @@ const PlaylistInsights = ({
      * Looks up the display name from statMap using the statKey
      */
     const getDisplayName = (statKey) => {
-        return statMap[statKey]?.displayName || statKey;
+        for (const [displayName, config] of Object.entries(statMap)) {
+            if (config.statKey === statKey) {
+                return displayName;
+            }
+        }
+        return statKey; // fallback to developer name if not found
     };
 
     /*
@@ -168,12 +173,19 @@ const PlaylistInsights = ({
                         const scoreKey = `${key}Score`;
                         const score = playlistScores && playlistScores[scoreKey];
                         const displayName = getDisplayName(key);
-                        const statType = statMap[key]?.type;
-                        const statValue = renderFormattedStatValue(value, statType);
+                        
+                        let statValue;
+                        if (key.includes("mostFrequentArtistBy")) {
+                            statValue = `${value?.artistName}: ${value?.artistCount}`;
+                        } else if (displayName && statMap[displayName]?.type === "dateTime") {
+                            statValue = String(value)?.substring(0, 10) || String(value);
+                        } else {
+                            statValue = String(value);
+                        }
 
                         return (
                             <div className="stat-box" key={key}>
-                                <div className="stat-box-title" title={statMap[key]?.description}>{displayName}:</div>
+                                <div className="stat-box-title">{displayName}:</div>
                                 <div className="stat-box-value">{statValue}</div>
                                 {score !== undefined ? (
                                     <div className="stat-box-score">{score}</div>
@@ -187,7 +199,7 @@ const PlaylistInsights = ({
         );
     };
 
-    const { formatDateTimeString, renderFormattedStatValue, renderSortArrow } = useRenderUtils();
+    const { renderSortArrow } = useRenderUtils();
 
     return (
         <div className="insights">
@@ -238,7 +250,7 @@ const PlaylistInsights = ({
                                 <th onClick={() => handleSort('album')}>Album {renderSortArrow('album', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('added')}>Song Added {renderSortArrow('added', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('release')}>Song Release {renderSortArrow('release', sortBy, isAscending)}</th>
-                                <th onClick={() => handleSort('length')}>Length {renderSortArrow('length', sortBy, isAscending)}</th>
+                                <th onClick={() => handleSort('length')}>Duration {renderSortArrow('length', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('popularity')}>Popularity {renderSortArrow('popularity', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('top')}>Top {renderSortArrow('top', sortBy, isAscending)}</th>
                                 <th onClick={() => handleSort('saved')}>Saved {renderSortArrow('saved', sortBy, isAscending)}</th>
@@ -251,8 +263,8 @@ const PlaylistInsights = ({
                                     <td><a href={song.track.external_urls.spotify} target="_blank" rel="noopener noreferrer">{song.track.name}</a></td>
                                     <td>{song.track.artists[0].name}</td>
                                     <td>{song.track.album.name}</td>
-                                    <td>{formatDateTimeString(song.added_at)}</td>
-                                    <td>{formatDateTimeString(song.track.album.release_date)}</td>
+                                    <td>{song.added_at?.substring(0, 10)}</td>
+                                    <td>{song.track.album.release_date}</td>
                                     <td>
                                         {Math.floor((song.track.duration_ms / 1000) / 60)}:
                                         {Math.floor((song.track.duration_ms / 1000) % 60)

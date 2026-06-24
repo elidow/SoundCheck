@@ -16,8 +16,8 @@ load_dotenv()
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # File paths (relative to script location)
-ADD_UNSAVED_TOP_MULTIPLE_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/1-ADD-unsavedSongsInTopSongsAndInMultiplePlaylists.txt")
-REMOVE_SAVED_SONGS_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/2-savedSongsNotInTopSongsOrPlaylists.txt")
+ADD_UNSAVED_TOP_MULTIPLE_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt")
+REMOVE_SAVED_SONGS_PATH = os.path.join(SCRIPT_DIR, "personal_data/intersections/remove-savedSongsNotInTopSongsOrPlaylists.txt")
 OUTPUT_PATH = os.path.join(SCRIPT_DIR, "personal_data/savedAndUnsavedSongs.txt")
 
 # Scope for Spotify API
@@ -27,7 +27,7 @@ def parse_song_line(line):
     """
     Parse a line from the song files.
     Format: count: Song | Artist | ID | Playlists: ... (for playlistSongsNotInSavedSongs)
-    Format: Song | Artist | ID (for 2-REMOVE-savedSongsNotInTopSongsOrPlaylists)
+    Format: Song | Artist | ID (for remove-savedSongsNotInTopSongsOrPlaylists)
     Returns (song_name, artist, track_id) or None if parsing fails
     """
     parts = line.strip().split(" | ")
@@ -45,7 +45,7 @@ def parse_song_line(line):
         except (ValueError, IndexError):
             return None
     
-    # For 2-REMOVE-savedSongsNotInTopSongsOrPlaylists.txt format: "Song | Artist | ID"
+    # For remove-savedSongsNotInTopSongsOrPlaylists.txt format: "Song | Artist | ID"
     elif len(parts) == 3:
         try:
             song = parts[0]
@@ -60,7 +60,7 @@ def parse_song_line(line):
 
 def read_add_unsaved_top_multiple():
     """
-    Read 1-ADD-unsavedSongsInTopSongsAndInMultiplePlaylists.txt and return a dict of track_id -> (song, artist, count)
+    Read add-unsavedSongsInTopSongsAndInMultiplePlaylists.txt and return a dict of track_id -> (song, artist, count)
     """
     songs_to_save = {}
     if not os.path.exists(ADD_UNSAVED_TOP_MULTIPLE_PATH):
@@ -76,7 +76,7 @@ def read_add_unsaved_top_multiple():
 
 def read_remove_saved_songs():
     """
-    Read 2-REMOVE-savedSongsNotInTopSongsOrPlaylists.txt and return a dict of track_id -> (song, artist)
+    Read remove-savedSongsNotInTopSongsOrPlaylists.txt and return a dict of track_id -> (song, artist)
     """
     songs_to_unsave = {}
     
@@ -98,7 +98,13 @@ def main():
     
     # Initialize Spotify API
     api = SpotifyWebApi(scope=SCOPE)
-    api.authorize_with_pkce()
+    code_verifier = api.generate_code_verifier()
+    code_challenge = api.generate_code_challenge(code_verifier)
+    authorization_url = api.get_authorization_url(code_challenge)
+    
+    print("Go to this URL and authorize the app:\n", authorization_url)
+    authorization_code = input("Enter the code from the redirect URL: ").strip()
+    api.get_token_pkce(authorization_code, code_verifier)
     
     # Read songs from files
     print("Reading song data...")

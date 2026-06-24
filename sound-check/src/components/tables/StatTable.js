@@ -75,9 +75,9 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                         <th onClick={() => handleSort('name')}>
                             Playlist Name {renderSortArrow('name', sortBy, isAscending)}
                         </th>
-                        {statColumns.map(([statKey, config]) => (
-                            <th key={statKey} title={config.description} onClick={() => handleSort(statKey)}>
-                                {config.displayName} {renderSortArrow(statKey, sortBy, isAscending)}
+                        {statColumns.map(([key]) => (
+                            <th key={key} onClick={() => handleSort(key)}>
+                                {key} {renderSortArrow(key, sortBy, isAscending)}
                             </th>
                         ))}
                     </tr>
@@ -90,14 +90,14 @@ const StatTable = ({ categoryName, statColumns, playlists, playlistStats }) => {
                                     {playlist.name}
                                 </a>
                             </td>
-                            {statColumns.map(([statKey, config]) => {
-                                let val = playlistStats[playlist.id]?.[categoryName]?.[config.statKey];
+                            {statColumns.map(([key, value]) => {
+                                let val = playlistStats[playlist.id]?.[categoryName]?.[value.statKey];
                                 if (categoryName === 'songStats' && !val) {
-                                    val = playlistStats[playlist.id]?.['advancedSongStats']?.[config.statKey];
+                                    val = playlistStats[playlist.id]?.['advancedSongStats']?.[value.statKey];
                                 }
-                                const type = config.type;
+                                const type = value.type;
                                 return (
-                                    <td key={statKey}>
+                                    <td key={key}>
                                         {renderFormattedStatValue(val, type)}
                                     </td>
                                 );

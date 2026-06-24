@@ -39,7 +39,12 @@ def main():
 
     scope = "playlist-read-private playlist-read-collaborative"
     api = SpotifyWebApi(scope=scope)
-    api.authorize_with_pkce()
+    code_verifier = api.generate_code_verifier()
+    code_challenge = api.generate_code_challenge(code_verifier)
+    authorization_url = api.get_authorization_url(code_challenge)
+    print("Go to this URL and authorize the app:\n", authorization_url)
+    authorization_code = input("Enter the code from the redirect URL: ").strip()
+    api.get_token_pkce(authorization_code, code_verifier)
 
     print(f"Fetching playlist {PLAYLIST_ID}...")
     playlist = api.get_playlist(PLAYLIST_ID)

@@ -1,31 +1,19 @@
 import os
-import json
 import requests
 import urllib.parse
 import base64
 import hashlib
 import secrets
-import threading
-import time
-import webbrowser
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from dotenv import load_dotenv
 
 class SpotifyWebApi:
-    def __init__(self, client_id=None, redirect_uri=None, scope=None, token_filepath=None):
+    def __init__(self, client_id=None, redirect_uri=None, scope=None):
         load_dotenv()
         self.client_id = client_id or os.getenv("CLIENT_ID")
         self.redirect_uri = redirect_uri or os.getenv("REDIRECT_URI")
         self.scope = scope
         self.access_token = None
         self.refresh_token = None
-        # Set token filepath to script directory if not provided
-        if token_filepath is None:
-            script_dir = os.path.dirname(os.path.abspath(__file__))
-            token_filepath = os.path.join(script_dir, ".spotify_tokens")
-        self.token_filepath = token_filepath
-        # Try to load stored tokens on initialization
-        self.load_tokens()
 
     @staticmethod
     def generate_code_verifier():
@@ -62,178 +50,7 @@ class SpotifyWebApi:
         tokens = token_response.json()
         self.access_token = tokens["access_token"]
         self.refresh_token = tokens.get("refresh_token")
-        # Save tokens to file for persistence
-        self.save_tokens()
         return tokens
-
-    def authorize_with_pkce(self, timeout_seconds=120):
-        """Automatically handle PKCE OAuth flow with callback server.
-        
-        Opens the authorization URL in the browser and automatically captures
-        the authorization code from the redirect. Requires redirect_uri to be
-        http://127.0.0.1:3000/callback.html or similar localhost address.
-        
-        Args:
-            timeout_seconds: Maximum time to wait for authorization (default 120s)
-            
-        Raises:
-            Exception: If authorization fails or times out
-        """
-        captured_code = None
-        captured_error = None
-        
-        class CallbackHandler(BaseHTTPRequestHandler):
-            def do_GET(self):
-                nonlocal captured_code, captured_error
-                query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
-                captured_code = query.get('code', [None])[0]
-                captured_error = query.get('error', [None])[0]
-                
-                # Send response to browser
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-                if captured_code:
-                    self.wfile.write(b"<h1>Authorization successful!</h1><p>You can close this window and return to the terminal.</p>")
-                else:
-                    self.wfile.write(b"<h1>Authorization failed!</h1><p>Check the terminal for error details.</p>")
-            
-            def log_message(self, format, *args):
-                pass  # Suppress server logs
-        
-        # Generate PKCE parameters
-        code_verifier = self.generate_code_verifier()
-        code_challenge = self.generate_code_challenge(code_verifier)
-        authorization_url = self.get_authorization_url(code_challenge)
-        
-        # Parse redirect URI to get host and port
-        parsed_uri = urllib.parse.urlparse(self.redirect_uri)
-        host = parsed_uri.hostname or "127.0.0.1"
-        port = parsed_uri.port or 3000
-        
-        # Start callback server
-        print("Starting authorization server...")
-        server = HTTPServer((host, port), CallbackHandler)
-        server_thread = threading.Thread(target=server.serve_forever)
-        server_thread.daemon = True
-        server_thread.start()
-        
-        try:
-            # Open authorization URL in browser
-            print(f"Opening authorization URL in browser...")
-            print(f"If browser doesn't open, visit: {authorization_url}")
-            webbrowser.open(authorization_url)
-            
-            # Wait for callback with timeout
-            start_time = time.time()
-            while captured_code is None and captured_error is None:
-                if time.time() - start_time > timeout_seconds:
-                    raise Exception(f"Authorization timeout: no response within {timeout_seconds} seconds")
-                time.sleep(0.1)
-            
-            # Check for errors
-            if captured_error:
-                raise Exception(f"Authorization denied: {captured_error}")
-            
-            if not captured_code:
-                raise Exception("Failed to capture authorization code")
-            
-            print("Authorization successful! Exchanging code for tokens...")
-            # Exchange code for tokens
-            result = self.get_token_pkce(captured_code, code_verifier)
-            return result
-        
-        finally:
-            # Close the server (non-blocking)
-            try:
-                server.server_close()
-            except Exception as e:
-                pass  # Ignore errors during cleanup
-
-    def save_tokens(self, filepath=None):
-        """Save access and refresh tokens to a file for persistence."""
-        if filepath is None:
-            filepath = self.token_filepath
-        try:
-            with open(filepath, "w") as f:
-                json.dump({
-                    "access_token": self.access_token,
-                    "refresh_token": self.refresh_token
-                }, f)
-        except Exception as e:
-            print(f"Warning: Failed to save tokens to {filepath}: {e}")
-
-    def load_tokens(self, filepath=None):
-        """Load access and refresh tokens from a file if they exist."""
-        if filepath is None:
-            filepath = self.token_filepath
-        try:
-            if os.path.exists(filepath):
-                with open(filepath, "r") as f:
-                    tokens = json.load(f)
-                    self.access_token = tokens.get("access_token")
-                    self.refresh_token = tokens.get("refresh_token")
-                    if self.access_token:
-                        print(f"Loaded tokens from {filepath}")
-                    return True
-        except Exception as e:
-            print(f"Warning: Failed to load tokens from {filepath}: {e}")
-        return False
-
-    def refresh_access_token(self):
-        """Refresh the access token using the refresh token.
-        
-        Raises:
-            Exception: If refresh token is not available or has expired.
-        """
-        if not self.refresh_token:
-            raise Exception("No refresh token available. Must authenticate first.")
-        
-        url = "https://accounts.spotify.com/api/token"
-        data = {
-            "client_id": self.client_id,
-            "grant_type": "refresh_token",
-            "refresh_token": self.refresh_token
-        }
-        response = requests.post(url, data=data)
-        
-        if response.status_code == 400:
-            error_data = response.json()
-            if error_data.get("error") == "invalid_grant":
-                # Token expired (6+ months old) - must reauthorize
-                self.refresh_token = None
-                self.access_token = None
-                self.save_tokens()  # Clear saved tokens
-                raise Exception("Refresh token expired (older than 6 months). Please reauthorize the app.")
-        
-        if response.status_code != 200:
-            raise Exception(f"Failed to refresh token: {response.status_code}, {response.text}")
-        
-        tokens = response.json()
-        self.access_token = tokens["access_token"]
-        # Refresh tokens are only returned if they are being rotated
-        if "refresh_token" in tokens:
-            self.refresh_token = tokens["refresh_token"]
-        # Save updated tokens
-        self.save_tokens()
-        return tokens
-
-    def _handle_token_error(self, response):
-        """Check if response indicates token has expired and handle accordingly.
-        
-        Returns:
-            True if token was refreshed and can retry, False otherwise.
-        """
-        if response.status_code == 401:
-            # Token might be expired, try to refresh
-            try:
-                self.refresh_access_token()
-                return True
-            except Exception as e:
-                if "expired" in str(e).lower():
-                    raise Exception(f"Session expired. Please run the script again to reauthorize.")
-                raise
-        return False
 
     def _get_headers(self):
         if not self.access_token:
@@ -246,10 +63,6 @@ class SpotifyWebApi:
         params = {"limit": 50, "offset": 0}
         while url:
             response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
             if response.status_code != 200:
                 raise Exception(f"Failed to get playlists: {response.status_code}, {response.text}")
             data = response.json()
@@ -263,10 +76,6 @@ class SpotifyWebApi:
     def get_playlist(self, playlist_id):
         url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
         response = requests.get(url, headers=self._get_headers())
-        if response.status_code == 401:
-            # Try to refresh token and retry
-            self.refresh_access_token()
-            response = requests.get(url, headers=self._get_headers())
         if response.status_code != 200:
             raise Exception(f"Failed to get playlist: {response.status_code}, {response.text}")
         playlist_data = response.json()
@@ -276,10 +85,6 @@ class SpotifyWebApi:
         next_url = tracks.get("next")
         while next_url:
             track_response = requests.get(next_url, headers=self._get_headers())
-            if track_response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                track_response = requests.get(next_url, headers=self._get_headers())
             if track_response.status_code != 200:
                 raise Exception(f"Failed to get playlist tracks: {track_response.status_code}, {track_response.text}")
             track_data = track_response.json()
@@ -294,10 +99,6 @@ class SpotifyWebApi:
         params = {"market": "ES", "limit": 50, "offset": 0}
         while url:
             response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
             if response.status_code != 200:
                 raise Exception(f"Failed to get saved songs: {response.status_code}, {response.text}")
             data = response.json()
@@ -312,10 +113,6 @@ class SpotifyWebApi:
         i = 0
         while url and i < 100:
             response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
             if response.status_code != 200:
                 raise Exception(f"Failed to get top songs: {response.status_code}, {response.text}")
             data = response.json()
@@ -334,10 +131,6 @@ class SpotifyWebApi:
             url = "https://api.spotify.com/v1/albums"
             params = {"ids": ",".join(batch)}
             response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
             if response.status_code != 200:
                 raise Exception(f"Failed to get albums: {response.status_code}, {response.text}")
             data = response.json()
@@ -354,10 +147,6 @@ class SpotifyWebApi:
             url = "https://api.spotify.com/v1/artists"
             params = {"ids": ",".join(batch)}
             response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
             if response.status_code != 200:
                 raise Exception(f"Failed to get artists: {response.status_code}, {response.text}")
             data = response.json()
@@ -393,11 +182,6 @@ class SpotifyWebApi:
                 # Check which songs are already saved
                 print(f"  Batch {batch_num}: Checking if {len(batch)} songs are already saved...")
                 check_response = requests.get(check_url, headers=headers, params={"ids": ",".join(batch)})
-                if check_response.status_code == 401:
-                    # Try to refresh token and retry
-                    self.refresh_access_token()
-                    headers = self._get_headers()
-                    check_response = requests.get(check_url, headers=headers, params={"ids": ",".join(batch)})
                 if check_response.status_code != 200:
                     raise Exception(f"Failed to check saved songs: {check_response.status_code}, {check_response.text}")
                 
@@ -435,15 +219,6 @@ class SpotifyWebApi:
                         headers=headers,
                         json={"ids": tracks_to_save}
                     )
-                    if save_response.status_code == 401:
-                        # Try to refresh token and retry
-                        self.refresh_access_token()
-                        headers = self._get_headers()
-                        save_response = requests.put(
-                            save_url,
-                            headers=headers,
-                            json={"ids": tracks_to_save}
-                        )
                     if save_response.status_code == 200:
                         result["saved"].extend(tracks_to_save)
                         print(f"  Batch {batch_num}: Successfully saved {len(tracks_to_save)} songs")
@@ -489,11 +264,6 @@ class SpotifyWebApi:
                 # Check which songs are saved
                 print(f"  Batch {batch_num}: Checking if {len(batch)} songs are saved...")
                 check_response = requests.get(check_url, headers=headers, params={"ids": ",".join(batch)})
-                if check_response.status_code == 401:
-                    # Try to refresh token and retry
-                    self.refresh_access_token()
-                    headers = self._get_headers()
-                    check_response = requests.get(check_url, headers=headers, params={"ids": ",".join(batch)})
                 if check_response.status_code != 200:
                     raise Exception(f"Failed to check saved songs: {check_response.status_code}, {check_response.text}")
                 
@@ -531,15 +301,6 @@ class SpotifyWebApi:
                         headers=headers,
                         json={"ids": tracks_to_unsave}
                     )
-                    if unsave_response.status_code == 401:
-                        # Try to refresh token and retry
-                        self.refresh_access_token()
-                        headers = self._get_headers()
-                        unsave_response = requests.delete(
-                            unsave_url,
-                            headers=headers,
-                            json={"ids": tracks_to_unsave}
-                        )
                     if unsave_response.status_code == 200:
                         result["unsaved"].extend(tracks_to_unsave)
                         print(f"  Batch {batch_num}: Successfully unsaved {len(tracks_to_unsave)} songs")
