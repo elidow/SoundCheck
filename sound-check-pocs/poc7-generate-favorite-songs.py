@@ -127,6 +127,23 @@ for song_id in songs:
     else:
         songs[song_id]['top_100_score'] = 0
 
+# Favorite songs scoring and output format
+# - rank_score: 50% weight. Calculated from savedSongsInTopSongs position.
+#   Formula: ((default_rank - rank) / (default_rank - 1)) * 100
+#   Top-ranked saved song => near 100, missing from top list => 0.
+# - playlist_score: 30% weight. Based on how many playlists the saved song appears in.
+#   0 => 0, 1 => 20, 2 => 40, 3 => 60, 4 => 80, 5+ => 100.
+# - top_100_score: 20% weight. Based on the my-top-100-songs list.
+#   Rank <= 50 => 100, rank 51-100 => 50, not present => 0.
+# - final score = rank_score * 0.5 + playlist_score * 0.3 + top_100_score * 0.2
+# Output row order:
+#   Generated on MM/DD/YYYY
+#   <score>: <song name> | <artist> | <id> | <rank_score> | <playlist_score> | MT<top_100_score>
+#     - score: weighted total used for sorting.
+#     - MT prefix indicates My Top 100 score contribution.
+#     - id is the Spotify track ID.
+#     - rank_score and playlist_score are the normalized sub-scores.
+
 # Calculate scores
 scored_songs = []
 for song_id, song_data in songs.items():
@@ -258,6 +275,21 @@ playlist_albums_file = base_path / "playlist-songs" / "mostFrequentPlaylistSongA
 saved_album_percentage_file = base_path / "saved-data" / "albums" / "savedAlbumsOrderedBySavedTracks.txt"
 saved_top_songs_file = base_path / "intersections" / "savedSongsInTopSongs.txt"
 
+# Favorite albums scoring and output format
+# - top_song_score: 40% weight. Based on how many saved songs from this album are in savedSongsInTopSongs.
+#   Formula: min(top_song_count * 10 + 2, 100)
+# - playlist_song_score: 10% weight. Based on how often this album appears across playlists.
+#   Formula: min(playlist_count * 5, 100)
+# - track_number_score: 15% weight. Based on the total saved track count for the album.
+#   Formula: min(saved_track_count * 10 + 2, 100)
+# - saved_track_pct_score: 15% weight. Taken directly from savedAlbumsOrderedBySavedTracks percent values.
+# - my_top_list_score: 20% weight. Based on my-top-60-albums rank.
+#   <= 30 => 100, <= 60 => 50, missing => 0.
+# - total_score = (top_song_score * 0.4) + (playlist_song_score * 0.1) + (track_number_score * 0.15) + (saved_track_pct_score * 0.15) + (my_top_list_score * 0.2)
+# Output row order:
+#   Generated on MM/DD/YYYY
+#   <total_score>: <album> | <artist> | <id> | <top_song_score> | <playlist_song_score> | <track_number_score> | <saved_track_pct_score> | MT<my_top_list_score>
+
 # Parse saved albums percentage data
 saved_album_percentage = {}
 if saved_album_percentage_file.exists():
@@ -381,6 +413,20 @@ saved_data_artists_file = base_path / "saved-data" / "artists" / "mostFrequentAr
 playlist_artists_file = base_path / "playlist-songs" / "mostFrequentPlaylistSongArtists.txt"
 top_40_artists_file = base_path / "favorites" / "my-top-40-artists.txt"
 saved_top_songs_file = base_path / "intersections" / "savedSongsInTopSongs.txt"
+
+# Favorite artists scoring and output format
+# - top_song_score: 40% weight. Based on the number of saved top songs attributed to the artist.
+#   Formula: min(top_count * 2 + 2, 100)
+# - playlist_score: 20% weight. Based on playlist occurrence count for the artist.
+#   Formula: min(playlist_count * 2, 100)
+# - saved_score: 20% weight. Based on the saved songs count for the artist.
+#   Formula: min(saved_count * 2, 100)
+# - my_top_score: 20% weight. Based on my-top-40-artists rank.
+#   <= 20 => 100, <= 40 => 50, missing => 0.
+# - total_score = (top_song_score * 0.4) + (playlist_score * 0.2) + (saved_score * 0.2) + (my_top_score * 0.2)
+# Output row order:
+#   Generated on MM/DD/YYYY
+#   <total_score>: <artist> | <id> | <top_song_score> | <playlist_score> | <saved_score> | MT<my_top_score>
 
 # Refine top 40 artists file from saved-data (preserve existing order)
 print(f"Refining top 40 artists file...")
@@ -512,7 +558,7 @@ for name_lower, info in artist_data.items():
         continue
 
     top_count = top_song_artist_counts.get(name_lower, 0)
-    top_song_score = min(top_count * 5 + 2, 100)
+    top_song_score = min(top_count * 2 + 2, 100)
 
     playlist_count = playlist_artist_counts.get(name_lower, 0)
     playlist_score = min(playlist_count * 2, 100)
