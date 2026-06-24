@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import PlaylistDataManagerService from '../services/data-management/PlaylistDataManagerService';
 
+let hasLoadedOnce = false; // flag so duplicated load is prevented in strict mode
 const SoundCheckContext = createContext();
 
 export const SoundCheckProvider = ({ children }) => {
@@ -12,15 +13,19 @@ export const SoundCheckProvider = ({ children }) => {
     const [topSongs, setTopSongs] = useState(null);
     const [savedSongs, setSavedSongs] = useState([]);
     const [recentlyPlayedSongs, setRecentlyPlayedSongs] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState('Fetching data...');
     const [error, setError] = useState(null);
+    const loadedRef = useRef(false);
 
     const { retrieveAllData, refreshSinglePlaylist } = PlaylistDataManagerService();
 
     useEffect(() => {
+        if (hasLoadedOnce || loadedRef.current) return;
+
         const loadData = async () => {
+            loadedRef.current = true;
             try {
-                const data = await retrieveAllData();
+                const data = await retrieveAllData(setLoading);
                 setPlaylists(data.playlists);
                 setPlaylistSongs(data.playlistSongs);
                 setPlaylistStats(data.playlistStats);
@@ -31,6 +36,7 @@ export const SoundCheckProvider = ({ children }) => {
                 data.savedSongs && setSavedSongs(data.savedSongs);
                 data.recentlyPlayedSongs && setRecentlyPlayedSongs(data.recentlyPlayedSongs);
                 setError(null);
+                hasLoadedOnce = true;
             } catch (err) {
                 setError(err.message);
             } finally {

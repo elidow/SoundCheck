@@ -3,97 +3,135 @@ const percentage = "percentage";
 const dateTime = "dateTime";
 const artist = "artist";
 const time = "time";
+const squaredMinutes = "squaredMinutes"
+const squaredDays = "squaredDays"
 
 export const statMap = {
-    "Song Count": {
+    totalSongs: {
         category: "maintenance",
-        statKey: "songCount",
+        displayName: "Total Songs",
+        description: "The total number of songs in this playlist",
+        statKey: "totalSongs",
         type: number,
     },
-    "% Songs >2 Years Old": {
+    oldSongsPercentage: {
         category: "maintenance",
-        statKey: "twoYearOldPercentage",
+        displayName: "Old Songs (>2 Years)",
+        description: "The percentage of songs added to this playlist more than 2 years ago",
+        statKey: "oldSongsPercentage",
         type: percentage,
     },
-    "% Songs <6 Months Old": {
+    newSongsPercentage: {
         category: "maintenance",
-        statKey: "sixMonthNewPercentage",
+        displayName: "New Songs (<6 Months)",
+        description: "The percentage of songs added to this playlist less than 6 months ago",
+        statKey: "newSongsPercentage",
         type: percentage,
     },
-    "Average Song Added Date": {
+    averageAddedDate: {
         category: "maintenance",
-        statKey: "avgSongAddedDate",
+        displayName: "Average Added Date",
+        description: "The average date songs were added to a playlist",
+        statKey: "averageAddedDate",
         type: dateTime,
     },
-    "Last Song Added Date": {
+    lastAddedDate: {
         category: "maintenance",
-        statKey: "lastSongAddedDate",
+        displayName: "Last Added Date",
+        description: "The date the newest song was added to the playlist",
+        statKey: "lastAddedDate",
         type: dateTime,
     },
-    "% Songs in Most Played Short Term": {
+    topSongsShortTermPercentage: {
         category: "userRelevance",
-        statKey: "shortTermMostPlayedPercentage",
+        displayName: "Top Songs (Last 4 Weeks)",
+        description: "The percentage of songs in this playlist that also appear in your most-played songs from the last 4 weeks",
+        statKey: "topSongsShortTermPercentage",
         type: percentage,
     },
-    "% Songs in Most Played Medium Term": {
+    topSongsMediumTermPercentage: {
         category: "userRelevance",
-        statKey: "mediumTermMostPlayedPercentage",
+        displayName: "Top Songs (Last 6 Months)",
+        description: "The percentage of songs in this playlist that also appear in your most-played songs from the last 6 months",
+        statKey: "topSongsMediumTermPercentage",
         type: percentage,
     },
-    "% Songs in Most Played Long Term": {
+    topSongsLongTermPercentage: {
         category: "userRelevance",
-        statKey: "longTermMostPlayedPercentage",
+        displayName: "Top Songs (Last Year)",
+        description: "The percentage of songs in this playlist that also appear in your most-played songs from the last year",
+        statKey: "topSongsLongTermPercentage",
         type: percentage,
     },
-    "% Songs in Saved Songs": {
+    savedSongPercentage: {
         category: "userRelevance",
+        displayName: "Saved Songs",
+        description: "The percentage of songs in this playlist that also appear in your saved songs",
         statKey: "savedSongPercentage",
         type: percentage,
     },
-    "Times Recently Played": {
+    recentlyPlayedCount: {
         category: "userRelevance",
-        statKey: "timesRecentlyPlayed",
+        displayName: "Recent Plays",
+        description: "An estimate of how often you have listened to this playlist recently. A “play” is counted when 4 or more songs from the playlist appear consecutively in your recent listening history",
+        statKey: "recentlyPlayedCount",
         type: number,
     },
-    "Average Song Release Date": {
+    averageReleaseDate: {
         category: "generalRelevance",
-        statKey: "avgSongReleaseDate",
+        displayName: "Average Release Date",
+        description: "The average release date of songs in the playlist",
+        statKey: "averageReleaseDate",
         type: dateTime,
     },
-    "Average Song Popularity": {
+    avgSongPopularity: {
         category: "generalRelevance",
+        displayName: "Average Song Popularity",
+        description: "The average Spotify popularity score of songs in the playlist from 0 to 100",
         statKey: "avgSongPopularity",
         type: number,
     },
-    "Artist Diversity": {
+    artistDiversity: {
         category: "artistStats",
+        displayName: "Artist Diversity",
+        description: "Measures how diverse the playlist’s artists are on a scale from 0 to 100",
         statKey: "artistDiversity",
         type: number,
     },
-    "Most Frequent Artist By Percentage": {
+    topArtistSongCount: {
         category: "artistStats",
-        statKey: "mostFrequentArtistByPercentage",
-        type: artist + ", " + percentage,
-    },
-    "Most Frequent Artist By Count": {
-        category: "artistStats",
-        statKey: "mostFrequentArtistByCount",
+        displayName: "Top Artist By Count",
+        description: "The number of songs contributed by the playlist’s most common artist",
+        statKey: "topArtistSongCount",
         type: artist + ", " + number,
     },
-    "Average Song Duration": {
+    topArtistPercentage: {
+        category: "artistStats",
+        displayName: "Top Artist By Percentage",
+        description: "The percentage of the playlist made up by its most common artist",
+        statKey: "topArtistPercentage",
+        type: artist + ", " + percentage,
+    },
+    averageSongLength: {
         category: "songStats",
-        statKey: "avgSongDuration",
+        displayName: "Average Song Length",
+        description: "The average duration of songs in the playlist",
+        statKey: "averageSongLength",
         type: time,
     },
-    "Song Duration Variance": {
+    songDurationVariance: {
         category: "advancedSongStats",
+        displayName: "Song Length Consistency",
+        description: "Measures how similar song lengths are throughout the playlist",
         statKey: "songDurationVariance",
-        type: number,
+        type: number + ", " + squaredMinutes,
     },
-    "Song Release Date Variance": {
+    releaseDateVariance: {
         category: "advancedSongStats",
-        statKey: "songReleaseDateVariance",
-        type: number,
+        displayName: "Release Date Consistency",
+        description: "Measures how similar release dates are throughout the playlist",
+        statKey: "releaseDateVariance",
+        type: number + ", " + squaredDays,
     },
 };
 

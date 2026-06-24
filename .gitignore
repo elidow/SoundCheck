@@ -13,6 +13,9 @@ node_modules
 sound-check-pocs/personal_data/
 sound-check-pocs/__pycache__/
 
+# auth
+.spotify_tokens
+
 # other
 .DS_Store
 build/
