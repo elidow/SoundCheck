@@ -15,12 +15,35 @@ const LOCAL_STORAGE_KEYS = {
     CODE_VERIFIER: "spotify_code_verifier",
 };
 
+let authRedirectPending = false;
+let authExchangeInProgress = false;
+
 const clearStoredSpotifyAuth = (setAccessTokenFn = null) => {
     Object.values(LOCAL_STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
     if (typeof setAccessTokenFn === "function") {
         setAccessTokenFn(null);
     }
 };
+
+const setAuthRedirectPending = () => {
+    authRedirectPending = true;
+};
+
+const clearAuthRedirectPending = () => {
+    authRedirectPending = false;
+};
+
+const isAuthRedirectPending = () => authRedirectPending;
+
+const setAuthExchangeInProgress = () => {
+    authExchangeInProgress = true;
+};
+
+const clearAuthExchangeInProgress = () => {
+    authExchangeInProgress = false;
+};
+
+const isAuthExchangeInProgress = () => authExchangeInProgress;
 
 const isInvalidGrantError = (err) => {
     const error = err?.response?.data?.error || err?.response?.data?.error_description || err?.message || "";
@@ -82,6 +105,11 @@ const useSpotifyWebApi = () => {
      * Requests user authorization and retrieves authroization code
      */
     const initiateUserAuthorization = async() => {
+        if (isAuthRedirectPending() || isAuthExchangeInProgress() || window.location.pathname === "/callback.html") {
+            console.warn("Spotify authorization already in progress; skipping duplicate redirect.");
+            return;
+        }
+
         // Generate code verifier and code challenge
         const codeVerifier = generateCodeVerifier(64);
         localStorage.setItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
@@ -97,8 +125,9 @@ const useSpotifyWebApi = () => {
         authUrl.searchParams.append("code_challenge_method", "S256");
         authUrl.searchParams.append("code_challenge", codeChallenge);
 
+        setAuthRedirectPending();
         console.log("Redirecting to Spotify for authorization:", authUrl.toString());
-        window.location.href = authUrl.toString();
+        window.location.assign(authUrl.toString());
     };
 
     /*
@@ -106,11 +135,20 @@ const useSpotifyWebApi = () => {
      * Given authorization code, fetch valid access token
      */
     const fetchAccessToken = useCallback(async (code) => {
+        if (isAuthExchangeInProgress()) {
+            console.warn("Spotify token exchange already in progress; skipping duplicate callback handling.");
+            return;
+        }
+
+        setAuthExchangeInProgress();
+
         // Retrieve and confirm code verifier
         const codeVerifier = localStorage.getItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
         if (!codeVerifier) {
             console.warn("No code verifier found in localStorage");
             clearStoredSpotifyAuth(() => setAccessToken(null));
+            clearAuthExchangeInProgress();
+            clearAuthRedirectPending();
             return initiateUserAuthorization();
         }
 
@@ -133,6 +171,8 @@ const useSpotifyWebApi = () => {
 
             // Remove code verifier now that it's used
             localStorage.removeItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
+            clearAuthRedirectPending();
+            clearAuthExchangeInProgress();
 
             // Redirect to app
             window.history.replaceState({}, document.title, "/playlists");
@@ -140,9 +180,12 @@ const useSpotifyWebApi = () => {
             if (isInvalidGrantError(err)) {
                 console.warn("Invalid grant error during token exchange; clearing stored auth and reauthorizing.");
                 clearStoredSpotifyAuth(() => setAccessToken(null));
+                clearAuthRedirectPending();
+                clearAuthExchangeInProgress();
                 return initiateUserAuthorization();
             }
             console.error("Failed to request user authentication:", err.response ? err.response.data : err.message);
+            clearAuthExchangeInProgress();
         }
     }, []);
 
@@ -156,6 +199,8 @@ const useSpotifyWebApi = () => {
         if (!refreshToken) {
             console.warn("No refresh token found in local storage");
             clearStoredSpotifyAuth(() => setAccessToken(null));
+            clearAuthRedirectPending();
+            clearAuthExchangeInProgress();
             return initiateUserAuthorization();
         }
 
@@ -175,6 +220,8 @@ const useSpotifyWebApi = () => {
         } catch (err) {
             console.warn("Failed to refresh token, logging in again...", err);
             clearStoredSpotifyAuth(() => setAccessToken(null));
+            clearAuthRedirectPending();
+            clearAuthExchangeInProgress();
             return initiateUserAuthorization();
         }
     }, []);
@@ -201,7 +248,15 @@ const useSpotifyWebApi = () => {
         const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
         const accessToken = localStorage.getItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN);
-    
+
+        if (window.location.pathname === "/callback.html") {
+            clearAuthRedirectPending();
+        }
+
+        if (isAuthRedirectPending() || isAuthExchangeInProgress()) {
+            return;
+        }
+
         // if code exists, fetch access token. If code does not exist or the token expired
         if (code) {
             fetchAccessToken(code);
@@ -223,32 +278,50 @@ const useSpotifyWebApi = () => {
             return [];
         }
 
-        try {
-            // Fetch playlists with pagination
-            let playlists = []
-            let nextUrl = "https://api.spotify.com/v1/me/playlists";
+        const maxRetries = 3;
 
-            while (nextUrl) {
-                const response = await axios.get(nextUrl, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    params: {limit: "50", offset: "0"}
-                });
+        for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+            try {
+                // Fetch playlists with pagination
+                let playlists = [];
+                let nextUrl = "https://api.spotify.com/v1/me/playlists";
 
-                playlists = [...playlists, // spread operator (...) expands an array into individual elements and makes shallow copies
-                    ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" &&
-                        !item.name.includes("On Repeat 🎧"))];
-                nextUrl = response.data.next;
+                while (nextUrl) {
+                    const response = await axios.get(nextUrl, {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                        params: { limit: "50", offset: "0" }
+                    });
+
+                    playlists = [...playlists,
+                        ...response.data.items.filter(item => item.owner.display_name === "eliasjohnsondow" &&
+                            !item.name.includes("On Repeat 🎧"))];
+                    nextUrl = response.data.next;
+                }
+                console.log("SpotifyWebApi: Playlists: ", playlists);
+                return playlists;
+            } catch (err) {
+                const status = err?.response?.status;
+                const shouldRetry = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+
+                if (status === 401) {
+                    console.warn("Access token expired. Refreshing access token");
+                    await refreshAccessToken();
+                    continue;
+                }
+
+                if (shouldRetry && attempt < maxRetries - 1) {
+                    const delayMs = 1000 * (attempt + 1);
+                    console.warn(`Spotify playlists request failed with ${status}; retrying in ${delayMs}ms...`, err);
+                    await new Promise((resolve) => setTimeout(resolve, delayMs));
+                    continue;
+                }
+
+                console.error("Spotify Web Api failed to fetch playlists:", err);
+                throw err;
             }
-            console.log("SpotifyWebApi: Playlists: ", playlists);
-            return playlists;
-        } catch (err) {
-            console.error("Spotify Web Api failed to fetch playlists:", err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
-            }
-            return [];
         }
+
+        return [];
     }, [accessToken, refreshAccessToken]);
 
     /*
@@ -262,33 +335,48 @@ const useSpotifyWebApi = () => {
             return [];
         }
 
-        try {
-            // Fetch playlist songs with pagination
-            let playlistSongs = []
-            let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
+        const maxRetries = 3;
 
-            while (nextUrl) {
-                const response = await axios.get(nextUrl, {
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                });
+        for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+            try {
+                // Fetch playlist songs with pagination
+                let playlistSongs = [];
+                let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
 
-                playlistSongs = [...playlistSongs, ...response.data.items];
-                nextUrl = response.data.next;
-            }
+                while (nextUrl) {
+                    const response = await axios.get(nextUrl, {
+                        headers: { Authorization: `Bearer ${accessToken}` }
+                    });
 
-            console.log(`SpotifyWebApi: Playlist Songs for ${playlistId}:`, playlistSongs)
-            return playlistSongs
-        } catch (err) {
-            console.error(`Spotify Web Api failed to fetch playlists songs for ${playlistId}:`, err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
-            } else if (err.response && err.response.status === 429) {
-                console.warn("Client request limit exceeded");
+                    playlistSongs = [...playlistSongs, ...response.data.items];
+                    nextUrl = response.data.next;
+                }
+
+                console.log(`SpotifyWebApi: Playlist Songs for ${playlistId}:`, playlistSongs);
+                return playlistSongs;
+            } catch (err) {
+                const status = err?.response?.status;
+                const shouldRetry = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+
+                if (status === 401) {
+                    console.warn("Access token expired. Refreshing access token");
+                    await refreshAccessToken();
+                    continue;
+                }
+
+                if (shouldRetry && attempt < maxRetries - 1) {
+                    const delayMs = 1000 * (attempt + 1);
+                    console.warn(`Spotify playlist songs request failed with ${status}; retrying in ${delayMs}ms...`, err);
+                    await new Promise((resolve) => setTimeout(resolve, delayMs));
+                    continue;
+                }
+
+                console.error(`Spotify Web Api failed to fetch playlists songs for ${playlistId}:`, err);
                 throw err;
             }
-            return [];
         }
+
+        return [];
     }, [accessToken, refreshAccessToken]);
 
     /*
@@ -303,33 +391,51 @@ const useSpotifyWebApi = () => {
             return [];
         }
 
-        try {
-            // Fetch playlist songs with pagination
-            let topSongs = []
-            let nextUrl = `https://api.spotify.com/v1/me/top/tracks`;
-            let i = 0
+        const maxRetries = 3;
 
-            while (nextUrl && i < pages) {
-                const response = await axios.get(nextUrl, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    params: {time_range: timeRange, limit: "50", offset: "0"}
-                });
+        for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+            try {
+                // Fetch playlist songs with pagination
+                let topSongs = [];
+                let nextUrl = `https://api.spotify.com/v1/me/top/tracks`;
+                let i = 0;
 
-                topSongs = [...topSongs, ...response.data.items];
-                nextUrl = response.data.next;
-                i += 1;
+                while (nextUrl && i < pages) {
+                    const response = await axios.get(nextUrl, {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                        params: { time_range: timeRange, limit: "50", offset: "0" }
+                    });
+
+                    topSongs = [...topSongs, ...response.data.items];
+                    nextUrl = response.data.next;
+                    i += 1;
+                }
+
+                console.log(`SpotifyWebApi: Top Songs for ${timeRange} tracks:`, topSongs);
+                return topSongs;
+            } catch (err) {
+                const status = err?.response?.status;
+                const shouldRetry = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+
+                if (status === 401) {
+                    console.warn("Access token expired. Refreshing access token");
+                    await refreshAccessToken();
+                    continue;
+                }
+
+                if (shouldRetry && attempt < maxRetries - 1) {
+                    const delayMs = 1000 * (attempt + 1);
+                    console.warn(`Spotify top-songs request failed with ${status}; retrying in ${delayMs}ms...`, err);
+                    await new Promise((resolve) => setTimeout(resolve, delayMs));
+                    continue;
+                }
+
+                console.error(`Spotify Web Api failed to fetch top songs for ${timeRange} tracks:`, err);
+                throw err;
             }
-
-            console.log(`SpotifyWebApi: Top Songs for ${timeRange} tracks:`, topSongs)
-            return topSongs
-        } catch (err) {
-            console.error(`Spotify Web Api failed to fetch playlists songs for ${timeRange} tracks:`, err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
-            }
-            return [];
         }
+
+        return [];
     }, [accessToken, refreshAccessToken]);
 
     /*
@@ -344,33 +450,51 @@ const useSpotifyWebApi = () => {
             return [];
         }
 
-        try {
-            // Fetch saved songs with pagination
-            let savedSongs = []
-            let nextUrl = `https://api.spotify.com/v1/me/tracks`;
-            let i = 0
+        const maxRetries = 3;
 
-            while (nextUrl && i < maxPages) {
-                const response = await axios.get(nextUrl, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    params: {market: "ES", limit: "50", offset: "0"}
-                });
+        for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+            try {
+                // Fetch saved songs with pagination
+                let savedSongs = [];
+                let nextUrl = `https://api.spotify.com/v1/me/tracks`;
+                let i = 0;
 
-                savedSongs = [...savedSongs, ...response.data.items];
-                nextUrl = response.data.next;
-                i += 1;
+                while (nextUrl && i < maxPages) {
+                    const response = await axios.get(nextUrl, {
+                        headers: { Authorization: `Bearer ${accessToken}` },
+                        params: { limit: "50", offset: "0" }
+                    });
+
+                    savedSongs = [...savedSongs, ...response.data.items];
+                    nextUrl = response.data.next;
+                    i += 1;
+                }
+
+                console.log(`SpotifyWebApi: Saved Songs:`, savedSongs);
+                return savedSongs;
+            } catch (err) {
+                const status = err?.response?.status;
+                const shouldRetry = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+
+                if (status === 401) {
+                    console.warn("Access token expired. Refreshing access token");
+                    await refreshAccessToken();
+                    continue;
+                }
+
+                if (shouldRetry && attempt < maxRetries - 1) {
+                    const delayMs = 1000 * (attempt + 1);
+                    console.warn(`Spotify saved-songs request failed with ${status}; retrying in ${delayMs}ms...`, err);
+                    await new Promise((resolve) => setTimeout(resolve, delayMs));
+                    continue;
+                }
+
+                console.error(`Spotify Web Api failed to fetch saved songs:`, err);
+                throw err;
             }
-
-            console.log(`SpotifyWebApi: Saved Songs:`, savedSongs)
-            return savedSongs
-        } catch (err) {
-            console.error(`Spotify Web Api failed to fetch saved songs:`, err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
-            }
-            return [];
         }
+
+        return [];
     }, [accessToken, refreshAccessToken]);
 
     /*
@@ -384,28 +508,46 @@ const useSpotifyWebApi = () => {
             return [];
         }
 
-        try {
-            // Fetch recently played songs with pagination
-            let recentlyPlayedSongs = []
-            let url = `https://api.spotify.com/v1/me/player/recently-played`;
+        const maxRetries = 3;
 
-            const response = await axios.get(url, {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                params: {limit: "50"}
-            });
-    
-            recentlyPlayedSongs = [...recentlyPlayedSongs, ...response.data.items];
-            
-            console.log(`SpotifyWebApi: Recently Played Songs:`, recentlyPlayedSongs)
-            return recentlyPlayedSongs
-        } catch (err) {
-            console.error(`Spotify Web Api failed to fetch recently played songs:`, err);
-            if (err.response && err.response.status === 401) {
-                console.warn("Access token expired. Refreshing access token");
-                await refreshAccessToken();
+        for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+            try {
+                // Fetch recently played songs with pagination
+                let recentlyPlayedSongs = [];
+                let url = `https://api.spotify.com/v1/me/player/recently-played`;
+
+                const response = await axios.get(url, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    params: { limit: "50" }
+                });
+
+                recentlyPlayedSongs = [...recentlyPlayedSongs, ...response.data.items];
+
+                console.log(`SpotifyWebApi: Recently Played Songs:`, recentlyPlayedSongs);
+                return recentlyPlayedSongs;
+            } catch (err) {
+                const status = err?.response?.status;
+                const shouldRetry = status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+
+                if (status === 401) {
+                    console.warn("Access token expired. Refreshing access token");
+                    await refreshAccessToken();
+                    continue;
+                }
+
+                if (shouldRetry && attempt < maxRetries - 1) {
+                    const delayMs = 1000 * (attempt + 1);
+                    console.warn(`Spotify recently-played request failed with ${status}; retrying in ${delayMs}ms...`, err);
+                    await new Promise((resolve) => setTimeout(resolve, delayMs));
+                    continue;
+                }
+
+                console.error(`Spotify Web Api failed to fetch recently played songs:`, err);
+                throw err;
             }
-            return [];
         }
+
+        return [];
     }, [accessToken, refreshAccessToken]);
 
     /*

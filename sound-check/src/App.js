@@ -20,8 +20,8 @@ function App() {
                         <Route path="/dashboards" element={<DashboardsPage />}></Route>
                         <Route path="/tables" element={<TablesPage />}></Route>
                         <Route path="/user" element={<UserPage />}></Route>
-                        <Route path="*" element={<Navigate to="/playlists" replace />} />
                         <Route path="/callback.html" element={<CallbackPage />} />
+                        <Route path="*" element={<Navigate to="/playlists" replace />} />
                     </Routes>
                 </div>
                 <PageFooter />

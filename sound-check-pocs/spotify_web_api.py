@@ -244,84 +244,180 @@ class SpotifyWebApi:
         playlists = []
         url = "https://api.spotify.com/v1/me/playlists"
         params = {"limit": 50, "offset": 0}
+        max_retries = 3
+
         while url:
-            response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code != 200:
-                raise Exception(f"Failed to get playlists: {response.status_code}, {response.text}")
-            data = response.json()
-            items = data['items']
-            # Only include playlists owned by 'eliasjohnsondow' and not named 'On Repeat 🎧'
-            items = [pl for pl in items if pl['owner']['display_name'] == 'eliasjohnsondow' and pl['name'] != 'On Repeat 🎧']
-            playlists.extend(items)
-            url = data.get('next')
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+                except requests.RequestException as exc:
+                    if attempt == max_retries - 1:
+                        raise Exception(f"Failed to get playlists: {exc}") from exc
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code == 401:
+                    self.refresh_access_token()
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+
+                if response.status_code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code != 200:
+                    raise Exception(f"Failed to get playlists: {response.status_code}, {response.text}")
+
+                data = response.json()
+                items = data['items']
+                items = [pl for pl in items if pl['owner']['display_name'] == 'eliasjohnsondow' and pl['name'] != 'On Repeat 🎧']
+                playlists.extend(items)
+                url = data.get('next')
+                break
+            else:
+                raise Exception("Failed to get playlists after retries")
+
         return playlists
 
     def get_playlist(self, playlist_id):
         url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
-        response = requests.get(url, headers=self._get_headers())
-        if response.status_code == 401:
-            # Try to refresh token and retry
-            self.refresh_access_token()
-            response = requests.get(url, headers=self._get_headers())
-        if response.status_code != 200:
-            raise Exception(f"Failed to get playlist: {response.status_code}, {response.text}")
-        playlist_data = response.json()
-        # Handle pagination for tracks
-        tracks = playlist_data["tracks"]
-        all_items = tracks["items"][:]
-        next_url = tracks.get("next")
-        while next_url:
-            track_response = requests.get(next_url, headers=self._get_headers())
-            if track_response.status_code == 401:
-                # Try to refresh token and retry
+        max_retries = 3
+
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, headers=self._get_headers())
+            except requests.RequestException as exc:
+                if attempt == max_retries - 1:
+                    raise Exception(f"Failed to get playlist: {exc}") from exc
+                time.sleep(1 * (attempt + 1))
+                continue
+
+            if response.status_code == 401:
                 self.refresh_access_token()
-                track_response = requests.get(next_url, headers=self._get_headers())
-            if track_response.status_code != 200:
-                raise Exception(f"Failed to get playlist tracks: {track_response.status_code}, {track_response.text}")
-            track_data = track_response.json()
-            all_items.extend(track_data["items"])
-            next_url = track_data.get("next")
-        playlist_data["tracks"]["items"] = all_items
-        return playlist_data
+                response = requests.get(url, headers=self._get_headers())
+
+            if response.status_code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
+                time.sleep(1 * (attempt + 1))
+                continue
+
+            if response.status_code != 200:
+                raise Exception(f"Failed to get playlist: {response.status_code}, {response.text}")
+
+            playlist_data = response.json()
+            tracks = playlist_data["tracks"]
+            all_items = tracks["items"][:]
+            next_url = tracks.get("next")
+
+            while next_url:
+                for track_attempt in range(max_retries):
+                    try:
+                        track_response = requests.get(next_url, headers=self._get_headers())
+                    except requests.RequestException as exc:
+                        if track_attempt == max_retries - 1:
+                            raise Exception(f"Failed to get playlist tracks: {exc}") from exc
+                        time.sleep(1 * (track_attempt + 1))
+                        continue
+
+                    if track_response.status_code == 401:
+                        self.refresh_access_token()
+                        track_response = requests.get(next_url, headers=self._get_headers())
+
+                    if track_response.status_code in {429, 500, 502, 503, 504} and track_attempt < max_retries - 1:
+                        time.sleep(1 * (track_attempt + 1))
+                        continue
+
+                    if track_response.status_code != 200:
+                        raise Exception(f"Failed to get playlist tracks: {track_response.status_code}, {track_response.text}")
+
+                    track_data = track_response.json()
+                    all_items.extend(track_data["items"])
+                    next_url = track_data.get("next")
+                    break
+                else:
+                    raise Exception("Failed to get playlist tracks after retries")
+
+            playlist_data["tracks"]["items"] = all_items
+            return playlist_data
+
+        raise Exception("Failed to get playlist after retries")
 
     def get_saved_songs(self):
         saved_songs = []
         url = "https://api.spotify.com/v1/me/tracks"
-        params = {"market": "ES", "limit": 50, "offset": 0}
+        params = {"limit": 50, "offset": 0}
+        max_retries = 3
+
         while url:
-            response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code != 200:
-                raise Exception(f"Failed to get saved songs: {response.status_code}, {response.text}")
-            data = response.json()
-            saved_songs.extend(data['items'])
-            url = data.get('next')
+            last_error = None
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+                except requests.RequestException as exc:
+                    last_error = exc
+                    if attempt == max_retries - 1:
+                        raise Exception(f"Failed to get saved songs: {exc}") from exc
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code == 401:
+                    # Try to refresh token and retry once
+                    self.refresh_access_token()
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+
+                if response.status_code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code != 200:
+                    raise Exception(f"Failed to get saved songs: {response.status_code}, {response.text}")
+
+                data = response.json()
+                saved_songs.extend(data['items'])
+                url = data.get('next')
+                break
+            else:
+                if last_error is not None:
+                    raise Exception(f"Failed to get saved songs after retries: {last_error}") from last_error
+                raise Exception("Failed to get saved songs after retries")
+
         return saved_songs
 
     def get_top_songs(self, time_range="medium_term"):  # time_range: short_term, medium_term, long_term
         top_songs = []
         url = "https://api.spotify.com/v1/me/top/tracks"
         params = {"time_range": time_range, "limit": 50, "offset": 0}
+        max_retries = 3
         i = 0
+
         while url and i < 100:
-            response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code != 200:
-                raise Exception(f"Failed to get top songs: {response.status_code}, {response.text}")
-            data = response.json()
-            top_songs.extend(data['items'])
-            url = data.get('next')
-            i += 1
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+                except requests.RequestException as exc:
+                    if attempt == max_retries - 1:
+                        raise Exception(f"Failed to get top songs: {exc}") from exc
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code == 401:
+                    # Try to refresh token and retry
+                    self.refresh_access_token()
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+
+                if response.status_code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code != 200:
+                    raise Exception(f"Failed to get top songs: {response.status_code}, {response.text}")
+
+                data = response.json()
+                top_songs.extend(data['items'])
+                url = data.get('next')
+                i += 1
+                break
+            else:
+                raise Exception("Failed to get top songs after retries")
+
         return top_songs
 
     def get_albums(self, album_ids):
@@ -329,19 +425,39 @@ class SpotifyWebApi:
         if not album_ids:
             return []
         albums = []
+        max_retries = 3
+
         for i in range(0, len(album_ids), 20):
             batch = album_ids[i:i + 20]
             url = "https://api.spotify.com/v1/albums"
             params = {"ids": ",".join(batch)}
-            response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code != 200:
-                raise Exception(f"Failed to get albums: {response.status_code}, {response.text}")
-            data = response.json()
-            albums.extend(data.get('albums', []))
+
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+                except requests.RequestException as exc:
+                    if attempt == max_retries - 1:
+                        raise Exception(f"Failed to get albums: {exc}") from exc
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code == 401:
+                    self.refresh_access_token()
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+
+                if response.status_code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code != 200:
+                    raise Exception(f"Failed to get albums: {response.status_code}, {response.text}")
+
+                data = response.json()
+                albums.extend(data.get('albums', []))
+                break
+            else:
+                raise Exception("Failed to get albums after retries")
+
         return albums
 
     def get_artists(self, artist_ids):
@@ -349,19 +465,39 @@ class SpotifyWebApi:
         if not artist_ids:
             return []
         artists = []
+        max_retries = 3
+
         for i in range(0, len(artist_ids), 50):
             batch = artist_ids[i:i + 50]
             url = "https://api.spotify.com/v1/artists"
             params = {"ids": ",".join(batch)}
-            response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code == 401:
-                # Try to refresh token and retry
-                self.refresh_access_token()
-                response = requests.get(url, headers=self._get_headers(), params=params)
-            if response.status_code != 200:
-                raise Exception(f"Failed to get artists: {response.status_code}, {response.text}")
-            data = response.json()
-            artists.extend(data.get('artists', []))
+
+            for attempt in range(max_retries):
+                try:
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+                except requests.RequestException as exc:
+                    if attempt == max_retries - 1:
+                        raise Exception(f"Failed to get artists: {exc}") from exc
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code == 401:
+                    self.refresh_access_token()
+                    response = requests.get(url, headers=self._get_headers(), params=params)
+
+                if response.status_code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
+                    time.sleep(1 * (attempt + 1))
+                    continue
+
+                if response.status_code != 200:
+                    raise Exception(f"Failed to get artists: {response.status_code}, {response.text}")
+
+                data = response.json()
+                artists.extend(data.get('artists', []))
+                break
+            else:
+                raise Exception("Failed to get artists after retries")
+
         return artists
 
     def save_songs(self, track_ids):
