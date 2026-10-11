@@ -72,33 +72,25 @@ const useCalculatePlaylistStatsService = () => {
         return Number(((savedSongCount / playlistSongs.length) * 100).toFixed(1))
     }, []);
 
-    // TODO: need to confirm accurracy
     /*
-     * calculateTimesRecentlyPlayed
+     * calculateLastPlayedDate
      * Given a playlist's songs and user's recently played songs,
-     * Calculates the times a playlist has been recently played
-     * A play of a playlist is considered 4 songs from it in any order
+     * Returns today's date when 5 consecutive songs are from the playlist
      */
-    const calculateTimesRecentlyPlayed = useCallback((playlistSongs, recentlyPlayedSongs) => {
-        let playlistSongIds = playlistSongs.map(song => song.track.id);
-        let count = 0;
+    const calculateLastPlayedDate = useCallback((playlistSongs, recentlyPlayedSongs) => {
+        const playlistSongIds = new Set(playlistSongs.map(song => song.track.id));
         let streak = 0;
-        let inPlay = false;
 
         for (let i = 0; i < recentlyPlayedSongs.length; i++) {
-            if (playlistSongIds.includes(recentlyPlayedSongs[i].track.id)) {
+            if (playlistSongIds.has(recentlyPlayedSongs[i]?.track?.id)) {
                 streak++;
-                if (streak >= 4 && !inPlay) {
-                    count++;
-                    inPlay = true; // already counted this play
-                }
+                if (streak === 5) return new Date().toISOString();
             } else {
-                streak = 0; // reset streak
-                inPlay = false; // ready to detect next play
+                streak = 0;
             }
         }
 
-        return count;
+        return null;
     }, []);
 
     /*
@@ -253,7 +245,7 @@ const useCalculatePlaylistStatsService = () => {
 
 
     return { calculateSongTimeRangePercentage, calculateAverageSongDateAdded,
-            calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
+            calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateLastPlayedDate,
             calculateAverageSongReleaseDate, calculateAverageSongPopularity,
             calculateMostFrequentArtist, calculateArtistDiversity,
             calculateAverageSongDuration,

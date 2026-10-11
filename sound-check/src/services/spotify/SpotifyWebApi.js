@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const CLIENT_ID = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-const REDIRECT_URI = process.env.REACT_APP_SPOTIFY_REDIRECT_URI;
 const SCOPES = "user-read-private user-read-email playlist-read-private user-top-read user-library-read user-read-recently-played";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
@@ -13,6 +12,15 @@ const LOCAL_STORAGE_KEYS = {
     REFRESH_TOKEN: "spotify_refresh_token",
     TOKEN_TIMESTAMP: "spotify_token_timestamp",
     CODE_VERIFIER: "spotify_code_verifier",
+    AUTH_STATE: "spotify_auth_state",
+};
+
+const getRedirectUri = () => {
+    if (typeof window !== "undefined") {
+        return new URL("/callback.html", window.location.origin).toString();
+    }
+
+    return process.env.REACT_APP_SPOTIFY_REDIRECT_URI || "http://localhost:3000/callback.html";
 };
 
 let authRedirectPending = false;
@@ -50,6 +58,17 @@ const isInvalidGrantError = (err) => {
     return typeof error === "string" && /invalid_grant/i.test(error);
 };
 
+const isInsufficientScopeError = (err) => {
+    const error = [
+        err?.response?.data?.error?.message,
+        err?.response?.data?.error_description,
+        err?.response?.data?.error,
+        err?.message,
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    return err?.response?.status === 403 && /insufficient|scope/i.test(error);
+};
+
 /*
  * generateCodeVerifier
  * Given an integer (length), returns a string that represents a generated code verifier of given length
@@ -59,7 +78,13 @@ const generateCodeVerifier = (length) => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const values = crypto.getRandomValues(new Uint8Array(length));
     return values.reduce((acc, x) => acc + possible[x % possible.length], "");
- }
+};
+
+const generateRandomState = (length = 16) => {
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const values = crypto.getRandomValues(new Uint8Array(length));
+    return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+};
 
 /* 
  * generateCodeChallenge
@@ -112,18 +137,22 @@ const useSpotifyWebApi = () => {
 
         // Generate code verifier and code challenge
         const codeVerifier = generateCodeVerifier(64);
+        const state = generateRandomState(16);
         localStorage.setItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.AUTH_STATE, state);
         const codeChallenge = await generateCodeChallenge(codeVerifier);
 
         // Create a new URL object for authorization (do NOT reuse AUTH_URL globally)
         const authUrl = new URL("https://accounts.spotify.com/authorize");
+        const redirectUri = getRedirectUri();
 
         authUrl.searchParams.append("client_id", CLIENT_ID);
         authUrl.searchParams.append("response_type", "code");
-        authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
+        authUrl.searchParams.append("redirect_uri", redirectUri);
         authUrl.searchParams.append("scope", SCOPES);
         authUrl.searchParams.append("code_challenge_method", "S256");
         authUrl.searchParams.append("code_challenge", codeChallenge);
+        authUrl.searchParams.append("state", state);
 
         setAuthRedirectPending();
         console.log("Redirecting to Spotify for authorization:", authUrl.toString());
@@ -144,8 +173,19 @@ const useSpotifyWebApi = () => {
 
         // Retrieve and confirm code verifier
         const codeVerifier = localStorage.getItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
+        const expectedState = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
+        const receivedState = new URLSearchParams(window.location.search).get("state");
+
         if (!codeVerifier) {
             console.warn("No code verifier found in localStorage");
+            clearStoredSpotifyAuth(() => setAccessToken(null));
+            clearAuthExchangeInProgress();
+            clearAuthRedirectPending();
+            return initiateUserAuthorization();
+        }
+
+        if (expectedState && receivedState && expectedState !== receivedState) {
+            console.warn("Spotify auth state mismatch; restarting authorization flow.");
             clearStoredSpotifyAuth(() => setAccessToken(null));
             clearAuthExchangeInProgress();
             clearAuthRedirectPending();
@@ -158,7 +198,7 @@ const useSpotifyWebApi = () => {
                 client_id: CLIENT_ID,
                 grant_type: "authorization_code",
                 code: code,
-                redirect_uri: REDIRECT_URI,
+                redirect_uri: getRedirectUri(),
                 code_verifier: codeVerifier
             }), { headers: { "Content-Type": "application/x-www-form-urlencoded" } });
             
@@ -171,6 +211,7 @@ const useSpotifyWebApi = () => {
 
             // Remove code verifier now that it's used
             localStorage.removeItem(LOCAL_STORAGE_KEYS.CODE_VERIFIER);
+            localStorage.removeItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
             clearAuthRedirectPending();
             clearAuthExchangeInProgress();
 
@@ -213,9 +254,12 @@ const useSpotifyWebApi = () => {
             }), { headers: { "Content-Type": "application/x-www-form-urlencoded" }});
 
             // Store new access token
-            const { access_token } = response.data;
+            const { access_token, refresh_token: newRefreshToken } = response.data;
             setAccessToken(access_token);
             localStorage.setItem(LOCAL_STORAGE_KEYS.ACCESS_TOKEN, access_token);
+            if (newRefreshToken) {
+                localStorage.setItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+            }
             localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN_TIMESTAMP, Date.now().toString());
         } catch (err) {
             console.warn("Failed to refresh token, logging in again...", err);
@@ -257,13 +301,24 @@ const useSpotifyWebApi = () => {
             return;
         }
 
-        // if code exists, fetch access token. If code does not exist or the token expired
+        // If we have a callback code, exchange it for a token.
         if (code) {
             fetchAccessToken(code);
-        } else if (!accessToken || isTokenExpired()) {
+            return;
+        }
+
+        // If we already have a usable token, keep using it. Otherwise try a refresh,
+        // and fall back to a full login redirect if that is not possible.
+        if (accessToken && !isTokenExpired()) {
+            setAccessToken(accessToken);
+            return;
+        }
+
+        const refreshToken = localStorage.getItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN);
+        if (refreshToken) {
             refreshAccessToken();
         } else {
-            setAccessToken(accessToken);
+            initiateUserAuthorization();
         }
     }, [fetchAccessToken, refreshAccessToken]);
 
@@ -364,6 +419,15 @@ const useSpotifyWebApi = () => {
                     continue;
                 }
 
+                if (isInsufficientScopeError(err)) {
+                    console.warn("Spotify token is missing required scopes. Restarting authorization.");
+                    clearStoredSpotifyAuth(() => setAccessToken(null));
+                    clearAuthRedirectPending();
+                    clearAuthExchangeInProgress();
+                    await initiateUserAuthorization();
+                    return [];
+                }
+
                 if (shouldRetry && attempt < maxRetries - 1) {
                     const delayMs = 1000 * (attempt + 1);
                     console.warn(`Spotify playlist songs request failed with ${status}; retrying in ${delayMs}ms...`, err);
@@ -421,6 +485,15 @@ const useSpotifyWebApi = () => {
                     console.warn("Access token expired. Refreshing access token");
                     await refreshAccessToken();
                     continue;
+                }
+
+                if (isInsufficientScopeError(err)) {
+                    console.warn("Spotify token is missing required scopes. Restarting authorization.");
+                    clearStoredSpotifyAuth(() => setAccessToken(null));
+                    clearAuthRedirectPending();
+                    clearAuthExchangeInProgress();
+                    await initiateUserAuthorization();
+                    return [];
                 }
 
                 if (shouldRetry && attempt < maxRetries - 1) {
@@ -482,6 +555,15 @@ const useSpotifyWebApi = () => {
                     continue;
                 }
 
+                if (isInsufficientScopeError(err)) {
+                    console.warn("Spotify token is missing required scopes. Restarting authorization.");
+                    clearStoredSpotifyAuth(() => setAccessToken(null));
+                    clearAuthRedirectPending();
+                    clearAuthExchangeInProgress();
+                    await initiateUserAuthorization();
+                    return [];
+                }
+
                 if (shouldRetry && attempt < maxRetries - 1) {
                     const delayMs = 1000 * (attempt + 1);
                     console.warn(`Spotify saved-songs request failed with ${status}; retrying in ${delayMs}ms...`, err);
@@ -535,6 +617,15 @@ const useSpotifyWebApi = () => {
                     continue;
                 }
 
+                if (isInsufficientScopeError(err)) {
+                    console.warn("Spotify token is missing required scopes. Restarting authorization.");
+                    clearStoredSpotifyAuth(() => setAccessToken(null));
+                    clearAuthRedirectPending();
+                    clearAuthExchangeInProgress();
+                    await initiateUserAuthorization();
+                    return [];
+                }
+
                 if (shouldRetry && attempt < maxRetries - 1) {
                     const delayMs = 1000 * (attempt + 1);
                     console.warn(`Spotify recently-played request failed with ${status}; retrying in ${delayMs}ms...`, err);
@@ -573,6 +664,13 @@ const useSpotifyWebApi = () => {
             if (err.response && err.response.status === 401) {
                 console.warn("Access token expired. Refreshing access token");
                 await refreshAccessToken();
+            }
+            if (isInsufficientScopeError(err)) {
+                console.warn("Spotify token is missing required scopes. Restarting authorization.");
+                clearStoredSpotifyAuth(() => setAccessToken(null));
+                clearAuthRedirectPending();
+                clearAuthExchangeInProgress();
+                await initiateUserAuthorization();
             }
             return null;
         }

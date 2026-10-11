@@ -173,7 +173,7 @@ const SpotifyWebService = () => {
 
     /*
      * getRecentlyPlayedSongs
-     * Fetches all recently played songs from API
+     * Fetches the 50 most recently played songs from the API
      */
     const getRecentlyPlayedSongs = async() => {
         const recentlyPlayedSongs = await runLimited(fetchRecentlyPlayedSongs);

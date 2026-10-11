@@ -70,12 +70,12 @@ export const statMap = {
         statKey: "savedSongPercentage",
         type: percentage,
     },
-    recentlyPlayedCount: {
+    lastPlayedDate: {
         category: "userRelevance",
-        displayName: "Recent Plays",
-        description: "An estimate of how often you have listened to this playlist recently. A “play” is counted when 4 or more songs from the playlist appear consecutively in your recent listening history",
-        statKey: "recentlyPlayedCount",
-        type: number,
+        displayName: "Last Played",
+        description: "The date this playlist was most recently detected in your listening history, based on 5 consecutive songs in your 50 most recent plays",
+        statKey: "lastPlayedDate",
+        type: dateTime,
     },
     averageReleaseDate: {
         category: "generalRelevance",

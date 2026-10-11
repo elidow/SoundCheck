@@ -4,10 +4,9 @@ POC8 - List playlist song timestamps
 
 Creates two files:
  - playlistSongsWithTimestamps.txt
- - playlistSongsWithCrossfadeTimestamps.txt
 
 Each line format:
-  {Song Name} {Song Artist} {Song Length} {Playlist_Timestamp}
+  {Song Name} {Song Artist} {Song Length} {Playlist_Timestamp} {Playlist_Timestamp_With_Crossfade}
 
 Constants to set below: PLAYLIST_ID, CROSSFADE_SECONDS
 
@@ -24,7 +23,8 @@ load_dotenv()
 FILE_PATH = os.getenv("FILE_PATH", "")
 
 # ----- Edit these constants -----
-PLAYLIST_ID = "4TJxu2T8yhztGBxVXcZscc"
+# PLAYLIST_ID = "4TJxu2T8yhztGBxVXcZscc" # halloween playlist
+PLAYLIST_ID = "5U0oLbGBu1H9c8qA7fqRw6" # fam engagement party playlist
 CROSSFADE_SECONDS = 6
 # -------------------------------
 

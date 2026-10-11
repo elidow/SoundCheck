@@ -1,6 +1,6 @@
 # Eli Dow
 # January 2026
-# SoundCheck POC - List Playlist Overlaps (at least 4 common songs)
+# SoundCheck POC - List Playlist Overlaps (at least 5 common songs)
 
 import os
 from collections import Counter, defaultdict
@@ -42,8 +42,8 @@ def main():
                 pair_counter[sorted_pair] += 1
                 pair_songs[sorted_pair].add(song)
 
-    # Filter for overlaps with at least 4 common songs and sort by count descending
-    overlaps = [(pair, count) for pair, count in pair_counter.items() if count >= 4]
+    # Filter for overlaps with at least 5 common songs and sort by count descending
+    overlaps = [(pair, count) for pair, count in pair_counter.items() if count >= 5]
     overlaps.sort(key=lambda x: -x[1])
     # Human-friendly generated date for output files
     current_date = datetime.now().strftime("%m/%d/%Y")

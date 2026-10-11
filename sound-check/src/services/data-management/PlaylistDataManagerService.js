@@ -11,7 +11,7 @@ import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistSco
 const PlaylistDataManagerService = () => {
     const { retrievePlaylistsAndSongs, getPlaylistSongs } = SpotifyWebService();
     const { calculateSongTimeRangePercentage, calculateAverageSongDateAdded,
-            calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateTimesRecentlyPlayed,
+            calculateMostPlayedByTimeRangePercentage, calculateSavedSongPercentage, calculateLastPlayedDate,
             calculateAverageSongReleaseDate, calculateAverageSongPopularity,
             calculateMostFrequentArtist, calculateArtistDiversity,
             calculateAverageSongDuration,
@@ -19,10 +19,10 @@ const PlaylistDataManagerService = () => {
     const {
         // Maintenance
         calculateSongCountScore, calculateTwoYearOldPercentageScore, calculateAvgSongAddedDateScore,
-        calculateLastSongAddedDateScore, calculateTotalMaintenanceScore,
+        calculateLastSongAddedDateScore, calculateLastPlayedDateScore, calculateTotalMaintenanceScore,
         // User Relevance
         calculateShortTermMostPlayedPercentageScore, calculateMediumTermMostPlayedPercentageScore, calculateLongTermMostPlayedPercentageScore,
-        calculateSavedSongPercentageScore, calculateTimesRecentlyPlayedScore, calculateTotalUserRelevanceScore,
+        calculateSavedSongPercentageScore, calculateTotalUserRelevanceScore,
         // General Relevance
         calculateAvgSongReleaseDateScore, calculateAvgSongPopularityScore, calculateTotalGeneralRelevanceScore,
         // Artist Diversity
@@ -113,7 +113,7 @@ const PlaylistDataManagerService = () => {
                     topSongsMediumTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["medium_term"])),
                     topSongsLongTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["long_term"])),
                     savedSongPercentage: withSongs(songs, (s) => calculateSavedSongPercentage(s, savedSongs)),
-                    recentlyPlayedCount: withSongs(songs, (s) => calculateTimesRecentlyPlayed(s, recentlyPlayedSongs)),
+                    lastPlayedDate: withSongs(songs, (s) => calculateLastPlayedDate(s, recentlyPlayedSongs)),
                 },
                 generalRelevance: {
                     averageReleaseDate: withSongs(songs, calculateAverageSongReleaseDate),
@@ -178,13 +178,13 @@ const PlaylistDataManagerService = () => {
             const savedSongPercentageScore = calculateSavedSongPercentageScore(
                 playlistStats[playlistId]["userRelevance"]["savedSongPercentage"]
             );
-            const recentlyPlayedCountScore = calculateTimesRecentlyPlayedScore(
-                playlistStats[playlistId]["userRelevance"]["recentlyPlayedCount"]
+            const lastPlayedDateScore = calculateLastPlayedDateScore(
+                playlistStats[playlistId]["userRelevance"]["lastPlayedDate"]
             );
 
             const totalUserRelevanceScore = calculateTotalUserRelevanceScore(
                 topSongsShortTermPercentageScore, topSongsMediumTermPercentageScore, topSongsLongTermPercentageScore,
-                savedSongPercentageScore, recentlyPlayedCountScore
+                savedSongPercentageScore, lastPlayedDateScore
             );
 
             // --- General Relevance Scores ---
@@ -235,7 +235,7 @@ const PlaylistDataManagerService = () => {
                     topSongsMediumTermPercentageScore,
                     topSongsLongTermPercentageScore,
                     savedSongPercentageScore,
-                    recentlyPlayedCountScore,
+                    lastPlayedDateScore,
                     totalUserRelevanceScore
                 },
                 generalRelevanceScores: {
