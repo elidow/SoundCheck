@@ -153,11 +153,11 @@ const PlaylistDataManagerService = () => {
                     lastAddedDate: withSongs(songs, (s) => s[s.length - 1].added_at),
                 },
                 userRelevance: {
+                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id) || DEFAULT_LAST_PLAYED_DATE,
                     topSongsShortTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["short_term"])),
                     topSongsMediumTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["medium_term"])),
                     topSongsLongTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["long_term"])),
                     savedSongPercentage: withSongs(songs, (s) => calculateSavedSongPercentage(s, savedSongs)),
-                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id) || DEFAULT_LAST_PLAYED_DATE,
                 },
                 generalRelevance: {
                     averageReleaseDate: withSongs(songs, calculateAverageSongReleaseDate),

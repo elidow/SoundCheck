@@ -42,6 +42,13 @@ export const statMap = {
         statKey: "lastAddedDate",
         type: dateTime,
     },
+    lastPlayedDate: {
+        category: "userRelevance",
+        displayName: "Last Played",
+        description: "The date this playlist was most recently detected in your listening history, based on 5 consecutive songs in your 50 most recent plays",
+        statKey: "lastPlayedDate",
+        type: dateTime,
+    },
     topSongsShortTermPercentage: {
         category: "userRelevance",
         displayName: "Top Songs (Last 4 Weeks)",
@@ -69,13 +76,6 @@ export const statMap = {
         description: "The percentage of songs in this playlist that also appear in your saved songs",
         statKey: "savedSongPercentage",
         type: percentage,
-    },
-    lastPlayedDate: {
-        category: "userRelevance",
-        displayName: "Last Played",
-        description: "The date this playlist was most recently detected in your listening history, based on 5 consecutive songs in your 50 most recent plays",
-        statKey: "lastPlayedDate",
-        type: dateTime,
     },
     averageReleaseDate: {
         category: "generalRelevance",
