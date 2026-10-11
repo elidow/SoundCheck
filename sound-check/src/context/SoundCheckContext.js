@@ -12,7 +12,7 @@ export const SoundCheckProvider = ({ children }) => {
     const [metaStats, setMetaStats] = useState([]);
     const [topSongs, setTopSongs] = useState(null);
     const [savedSongs, setSavedSongs] = useState([]);
-    const [recentlyPlayedSongs, setRecentlyPlayedSongs] = useState([]);
+    const [lastPlayedDates, setLastPlayedDates] = useState([]);
     const [loading, setLoading] = useState('Fetching data...');
     const [error, setError] = useState(null);
     const loadedRef = useRef(false);
@@ -34,7 +34,7 @@ export const SoundCheckProvider = ({ children }) => {
                 // Store the underlying data needed for targeted refreshes
                 data.topSongs && setTopSongs(data.topSongs);
                 data.savedSongs && setSavedSongs(data.savedSongs);
-                data.recentlyPlayedSongs && setRecentlyPlayedSongs(data.recentlyPlayedSongs);
+                data.lastPlayedDates && setLastPlayedDates(data.lastPlayedDates);
                 setError(null);
                 hasLoadedOnce = true;
             } catch (err) {
@@ -53,7 +53,7 @@ export const SoundCheckProvider = ({ children }) => {
      */
     const refreshPlaylistData = async (playlistId) => {
         try {
-            const freshData = await refreshSinglePlaylist(playlistId, topSongs, savedSongs, recentlyPlayedSongs);
+            const freshData = await refreshSinglePlaylist(playlistId, topSongs, savedSongs, lastPlayedDates);
 
             // Update only the affected playlist's data
             setPlaylistSongs(prev => ({ ...prev, [playlistId]: freshData.songs }));

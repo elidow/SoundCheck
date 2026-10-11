@@ -4,6 +4,9 @@ import SpotifyWebService from '../spotify/SpotifyWebService';
 import useCalculatePlaylistStatsService from '../analytics/CalculatePlaylistStatsService';
 import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistScoresService';
 
+const LAST_PLAYED_DATES_KEY = 'spotify_last_played_dates';
+const DEFAULT_LAST_PLAYED_DATE = '2026-01-01';
+
 /*
  * PlaylistDataManagerService
  * Functional component to manage all relevant playlist data and statistics
@@ -91,12 +94,53 @@ const PlaylistDataManagerService = () => {
         return songs.length > 0 ? fn(songs) : "N/A";
     };
 
+    const updateLastPlayedDates = (playlists, playlistSongs, recentlyPlayedSongs) => {
+        let savedDates = [];
+        try {
+            const storedValue = localStorage.getItem(LAST_PLAYED_DATES_KEY);
+            const parsedValue = storedValue ? JSON.parse(storedValue) : [];
+            if (Array.isArray(parsedValue)) savedDates = parsedValue;
+        } catch (error) {
+            console.warn('Unable to read stored last played dates', error);
+        }
+
+        const savedDatesByPlaylistId = new Map(
+            savedDates
+                .filter(entry => entry?.playlistId)
+                .map(entry => [entry.playlistId, entry])
+        );
+
+        const updatedDates = playlists.map(playlist => {
+            const previousEntry = savedDatesByPlaylistId.get(playlist.id);
+            const detectedDate = calculateLastPlayedDate(
+                playlistSongs[playlist.id] || [], recentlyPlayedSongs
+            );
+
+            return {
+                playlistId: playlist.id,
+                playlistName: playlist.name,
+                dateLastPlayed: detectedDate || previousEntry?.dateLastPlayed || DEFAULT_LAST_PLAYED_DATE,
+            };
+        });
+
+        try {
+            localStorage.setItem(LAST_PLAYED_DATES_KEY, JSON.stringify(updatedDates));
+        } catch (error) {
+            console.warn('Unable to store last played dates', error);
+        }
+
+        return updatedDates;
+    };
+
     /*
      * calculatePlaylistStats
      * Calculates all necessary playlist stats
      */
-    const computePlaylistStats = (playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates) => {
+    const computePlaylistStats = (playlists, playlistSongs, topSongs, savedSongs, lastPlayedDates, dates) => {
         const stats = {};
+        const lastPlayedDatesByPlaylistId = new Map(
+            lastPlayedDates.map(entry => [entry.playlistId, entry.dateLastPlayed])
+        );
 
         playlists.forEach((playlist) => {
             const songs = playlistSongs[playlist.id] || [];
@@ -113,7 +157,7 @@ const PlaylistDataManagerService = () => {
                     topSongsMediumTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["medium_term"])),
                     topSongsLongTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["long_term"])),
                     savedSongPercentage: withSongs(songs, (s) => calculateSavedSongPercentage(s, savedSongs)),
-                    lastPlayedDate: withSongs(songs, (s) => calculateLastPlayedDate(s, recentlyPlayedSongs)),
+                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id) || DEFAULT_LAST_PLAYED_DATE,
                 },
                 generalRelevance: {
                     averageReleaseDate: withSongs(songs, calculateAverageSongReleaseDate),
@@ -384,15 +428,16 @@ const PlaylistDataManagerService = () => {
                 const { playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, userProfile } = await retrievePlaylistsAndSongs(setLoadingMessage);
                 addSavedSongs(playlistSongs, savedSongs);
                 addTopSongs(playlistSongs, topSongs);
+                const lastPlayedDates = updateLastPlayedDates(playlists, playlistSongs, recentlyPlayedSongs);
 
                 const dates = getDates();
 
                 setLoadingMessage && setLoadingMessage("Calculating playlist statistics...");
-                const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, recentlyPlayedSongs, dates);
+                const playlistStats = computePlaylistStats(playlists, playlistSongs, topSongs, savedSongs, lastPlayedDates, dates);
                 const playlistScores = computePlaylistScores(playlists, playlistStats);
                 const metaStats = computeMetaStats(playlists, playlistSongs, savedSongs, playlistScores, userProfile);
 
-            return { playlists, playlistSongs, playlistStats, playlistScores, metaStats, topSongs, savedSongs, recentlyPlayedSongs }
+            return { playlists, playlistSongs, playlistStats, playlistScores, metaStats, topSongs, savedSongs, lastPlayedDates }
         } catch (error) {
             console.error("Error in service")
             throw error;
@@ -403,7 +448,7 @@ const PlaylistDataManagerService = () => {
      * refreshSinglePlaylist
      * Refreshes songs, stats, and scores for a specific playlist only
      */
-    const refreshSinglePlaylist = async (playlistId, topSongs, savedSongs, recentlyPlayedSongs) => {
+    const refreshSinglePlaylist = async (playlistId, topSongs, savedSongs, lastPlayedDates) => {
         try {
             // getPlaylistSongs expects an array of playlist objects, so fetch just this one
             const playlistSongsResult = await getPlaylistSongs([{ id: playlistId }]);
@@ -418,7 +463,7 @@ const PlaylistDataManagerService = () => {
             }));
             
             const dates = getDates();
-            const playlistStats = computePlaylistStats([{ id: playlistId }], { [playlistId]: enrichedSongs }, topSongs, savedSongs, recentlyPlayedSongs, dates);
+            const playlistStats = computePlaylistStats([{ id: playlistId }], { [playlistId]: enrichedSongs }, topSongs, savedSongs, lastPlayedDates, dates);
             const playlistScores = computePlaylistScores([{ id: playlistId }], playlistStats);
             
             return { playlistId, songs: enrichedSongs, stats: playlistStats[playlistId], scores: playlistScores[playlistId] };
