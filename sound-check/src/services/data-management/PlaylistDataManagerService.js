@@ -5,7 +5,11 @@ import useCalculatePlaylistStatsService from '../analytics/CalculatePlaylistStat
 import useCalculatePlaylistScoresService from '../analytics/CalculatePlaylistScoresService';
 
 const LAST_PLAYED_DATES_KEY = 'spotify_last_played_dates';
-const DEFAULT_LAST_PLAYED_DATE = '2026-01-01';
+const getDefaultLastPlayedDate = () => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 1);
+    return date.toLocaleDateString('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+};
 
 /*
  * PlaylistDataManagerService
@@ -119,7 +123,7 @@ const PlaylistDataManagerService = () => {
             return {
                 playlistId: playlist.id,
                 playlistName: playlist.name,
-                dateLastPlayed: detectedDate || previousEntry?.dateLastPlayed || DEFAULT_LAST_PLAYED_DATE,
+                dateLastPlayed: detectedDate || previousEntry?.dateLastPlayed || getDefaultLastPlayedDate(),
             };
         });
 
@@ -153,7 +157,7 @@ const PlaylistDataManagerService = () => {
                     lastAddedDate: withSongs(songs, (s) => s[s.length - 1].added_at),
                 },
                 userRelevance: {
-                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id) || DEFAULT_LAST_PLAYED_DATE,
+                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id) || getDefaultLastPlayedDate(),
                     topSongsShortTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["short_term"])),
                     topSongsMediumTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["medium_term"])),
                     topSongsLongTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["long_term"])),
