@@ -103,9 +103,15 @@ const PlaylistDataManagerService = () => {
         try {
             const storedValue = localStorage.getItem(LAST_PLAYED_DATES_KEY);
             const parsedValue = storedValue ? JSON.parse(storedValue) : [];
+            if (parsedValue.length === 0) console.log("Parsed Value is null")
             if (Array.isArray(parsedValue)) savedDates = parsedValue;
         } catch (error) {
             console.warn('Unable to read stored last played dates', error);
+        }
+
+        if (playlists.length === 0 && savedDates.length > 0) {
+            console.warn('No playlists returned; preserving stored last played dates');
+            return savedDates;
         }
 
         const savedDatesByPlaylistId = new Map(
@@ -116,6 +122,11 @@ const PlaylistDataManagerService = () => {
 
         const updatedDates = playlists.map(playlist => {
             const previousEntry = savedDatesByPlaylistId.get(playlist.id);
+            console.log('Last-played lookup', {
+                origin: window.location.origin,
+                playlistId: playlist.id,
+                previousEntry,
+            });
             const detectedDate = calculateLastPlayedDate(
                 playlistSongs[playlist.id] || [], recentlyPlayedSongs
             );
@@ -123,7 +134,9 @@ const PlaylistDataManagerService = () => {
             return {
                 playlistId: playlist.id,
                 playlistName: playlist.name,
-                dateLastPlayed: detectedDate || previousEntry?.dateLastPlayed || getDefaultLastPlayedDate(),
+                dateLastPlayed: detectedDate || (previousEntry
+                    ? previousEntry.dateLastPlayed
+                    : getDefaultLastPlayedDate()),
             };
         });
 
@@ -157,7 +170,7 @@ const PlaylistDataManagerService = () => {
                     lastAddedDate: withSongs(songs, (s) => s[s.length - 1].added_at),
                 },
                 userRelevance: {
-                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id) || getDefaultLastPlayedDate(),
+                    lastPlayedDate: lastPlayedDatesByPlaylistId.get(playlist.id),
                     topSongsShortTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["short_term"])),
                     topSongsMediumTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["medium_term"])),
                     topSongsLongTermPercentage: withSongs(songs, (s) => calculateMostPlayedByTimeRangePercentage(s, topSongs["long_term"])),

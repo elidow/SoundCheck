@@ -261,6 +261,7 @@ const useSpotifyWebApi = () => {
                 localStorage.setItem(LOCAL_STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
             }
             localStorage.setItem(LOCAL_STORAGE_KEYS.TOKEN_TIMESTAMP, Date.now().toString());
+            return access_token;
         } catch (err) {
             console.warn("Failed to refresh token, logging in again...", err);
             clearStoredSpotifyAuth(() => setAccessToken(null));
@@ -334,6 +335,7 @@ const useSpotifyWebApi = () => {
         }
 
         const maxRetries = 3;
+        let requestAccessToken = accessToken;
 
         for (let attempt = 0; attempt < maxRetries; attempt += 1) {
             try {
@@ -343,7 +345,7 @@ const useSpotifyWebApi = () => {
 
                 while (nextUrl) {
                     const response = await axios.get(nextUrl, {
-                        headers: { Authorization: `Bearer ${accessToken}` },
+                        headers: { Authorization: `Bearer ${requestAccessToken}` },
                         params: { limit: "50", offset: "0" }
                     });
 
@@ -360,7 +362,8 @@ const useSpotifyWebApi = () => {
 
                 if (status === 401) {
                     console.warn("Access token expired. Refreshing access token");
-                    await refreshAccessToken();
+                    const refreshedAccessToken = await refreshAccessToken();
+                    if (refreshedAccessToken) requestAccessToken = refreshedAccessToken;
                     continue;
                 }
 
