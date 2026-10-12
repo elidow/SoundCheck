@@ -8,7 +8,9 @@ const LAST_PLAYED_DATES_KEY = 'spotify_last_played_dates';
 const getDefaultLastPlayedDate = () => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 1);
-    return date.toLocaleDateString('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    date.toLocaleDateString('fr-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    date.setHours(12, 0, 0, 0);
+    return date.toISOString();
 };
 
 /*
