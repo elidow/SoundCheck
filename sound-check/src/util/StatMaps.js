@@ -44,7 +44,7 @@ export const statMap = {
     },
     lastPlayedDate: {
         category: "userRelevance",
-        displayName: "Last Played",
+        displayName: "Last Played Date",
         description: "The date this playlist was most recently detected in your listening history, based on 5 consecutive songs in your 50 most recent plays",
         statKey: "lastPlayedDate",
         type: dateTime,

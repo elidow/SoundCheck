@@ -22,10 +22,10 @@ const PlaylistDataManagerService = () => {
     const {
         // Maintenance
         calculateSongCountScore, calculateTwoYearOldPercentageScore, calculateAvgSongAddedDateScore,
-        calculateLastSongAddedDateScore, calculateLastPlayedDateScore, calculateTotalMaintenanceScore,
+        calculateLastSongAddedDateScore, calculateTotalMaintenanceScore,
         // User Relevance
-        calculateShortTermMostPlayedPercentageScore, calculateMediumTermMostPlayedPercentageScore, calculateLongTermMostPlayedPercentageScore,
-        calculateSavedSongPercentageScore, calculateTotalUserRelevanceScore,
+        calculateLastPlayedDateScore, calculateShortTermMostPlayedPercentageScore, calculateMediumTermMostPlayedPercentageScore,
+        calculateLongTermMostPlayedPercentageScore, calculateSavedSongPercentageScore, calculateTotalUserRelevanceScore,
         // General Relevance
         calculateAvgSongReleaseDateScore, calculateAvgSongPopularityScore, calculateTotalGeneralRelevanceScore,
         // Artist Diversity
@@ -210,6 +210,9 @@ const PlaylistDataManagerService = () => {
             );
 
             // --- User Relevance Scores ---
+            const lastPlayedDateScore = calculateLastPlayedDateScore(
+                playlistStats[playlistId]["userRelevance"]["lastPlayedDate"]
+            );
             const topSongsShortTermPercentageScore = calculateShortTermMostPlayedPercentageScore(
                 playlistStats[playlistId]["userRelevance"]["topSongsShortTermPercentage"]
             );
@@ -221,9 +224,6 @@ const PlaylistDataManagerService = () => {
             );
             const savedSongPercentageScore = calculateSavedSongPercentageScore(
                 playlistStats[playlistId]["userRelevance"]["savedSongPercentage"]
-            );
-            const lastPlayedDateScore = calculateLastPlayedDateScore(
-                playlistStats[playlistId]["userRelevance"]["lastPlayedDate"]
             );
 
             const totalUserRelevanceScore = calculateTotalUserRelevanceScore(

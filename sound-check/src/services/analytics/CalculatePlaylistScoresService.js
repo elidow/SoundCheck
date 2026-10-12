@@ -126,29 +126,8 @@ const useCalculatePlaylistScoresService = () => {
         
         const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24)); // difference in days
         const x = Math.max(daysDiff, 0);
-        const midpoint = Math.round(0.5 * 365);
-        const zeroClamp = 9 * 30;
-        const k = 0.03;
-
-        if (x >= zeroClamp) return 0;
-
-        return applyLogisticDecay(x, k, midpoint);
-    }, []);
-
-    /*
-     * calculateLastPlayedDateScore
-     * Calculates score 0-100 based on the last played date
-     */
-    const calculateLastPlayedDateScore = useCallback((date) => {
-        if (!date || !Number.isFinite(new Date(date).getTime())) return 0;
-
-        const inputDate = new Date(date);
-        const today = new Date();
-
-        const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24));
-        const x = Math.max(daysDiff, 0);
-        const midpoint = Math.round(0.5 * 365);
-        const zeroClamp = 9 * 30;
+        const midpoint = 183;
+        const zeroClamp = 270;
         const k = 0.03;
 
         if (x >= zeroClamp) return 0;
@@ -171,6 +150,27 @@ const useCalculatePlaylistScoresService = () => {
     }, []);
 
     // --- User Relevance ---
+
+    /*
+     * calculateLastPlayedDateScore
+     * Calculates score 0-100 based on the last played date
+     */
+    const calculateLastPlayedDateScore = useCallback((date) => {
+        if (!date || !Number.isFinite(new Date(date).getTime())) return 0;
+
+        const inputDate = new Date(date);
+        const today = new Date();
+
+        const daysDiff = Math.floor((today - inputDate) / (1000 * 60 * 60 * 24));
+        const x = Math.max(daysDiff, 0);
+        const midpoint = 120
+        const zeroClamp = 180;
+        const k = 0.04;
+
+        if (x >= zeroClamp) return 0;
+
+        return applyLogisticDecay(x, k, midpoint);
+    }, []);
 
     /*
      * calculateShortTermMostPlayedPercentageScore
@@ -215,11 +215,11 @@ const useCalculatePlaylistScoresService = () => {
      */
     const calculateTotalUserRelevanceScore = useCallback((topSongsShortTermPercentageScore, topSongsMediumTermPercentageScore,
                                             topSongsLongTermPercentageScore, savedSongPercentageScore, lastPlayedDateScore) => {
-        let temp = (topSongsShortTermPercentageScore * (7.5/35)) 
+        let temp = (lastPlayedDateScore * (10/35))
+            + (topSongsShortTermPercentageScore * (7.5/35)) 
             + (topSongsMediumTermPercentageScore * (7.5/35)) 
             + (topSongsLongTermPercentageScore * (5/35))
-            + (savedSongPercentageScore * (5/35))
-            + (lastPlayedDateScore * (10/35));
+            + (savedSongPercentageScore * (5/35));
         
         return Number(temp).toFixed(1);
     }, []);
@@ -330,10 +330,10 @@ const useCalculatePlaylistScoresService = () => {
     return {
         // Maintenance
         calculateSongCountScore, calculateTwoYearOldPercentageScore, calculateAvgSongAddedDateScore,
-        calculateLastSongAddedDateScore, calculateLastPlayedDateScore, calculateTotalMaintenanceScore,
+        calculateLastSongAddedDateScore, calculateTotalMaintenanceScore,
         // User Relevance
-        calculateShortTermMostPlayedPercentageScore, calculateMediumTermMostPlayedPercentageScore, calculateLongTermMostPlayedPercentageScore,
-        calculateSavedSongPercentageScore, calculateTotalUserRelevanceScore,
+        calculateLastPlayedDateScore, calculateShortTermMostPlayedPercentageScore, calculateMediumTermMostPlayedPercentageScore,
+        calculateLongTermMostPlayedPercentageScore, calculateSavedSongPercentageScore, calculateTotalUserRelevanceScore,
         // General Relevance
         calculateAvgSongReleaseDateScore, calculateAvgSongPopularityScore, calculateTotalGeneralRelevanceScore,
         // Artist Diversity
